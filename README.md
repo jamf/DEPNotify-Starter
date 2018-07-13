@@ -1,6 +1,8 @@
 # DEP Notify
 Bash script to start DEP Notify and run Policies during enrollment with Jamf
 
+![](https://github.com/jamfprofessionalservices/DEP-Notify/blob/master/example-gif/fullscreen.gif)
+
 ## Change Log
 
 7/13/18 - Major updates to script logic and error correction by Kyle Bareis
