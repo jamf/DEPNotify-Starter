@@ -25,20 +25,29 @@
 # Change Log
 #########################################################################################
 
+# 9/24/18 - Updated loop for verifying Apple Setup Complete by Arek Dryer and Kyle Bareis
+#   * Changed loop to look for the Setup Assistant process rather than files and users
+#   * Changed /dev/console lookup to stat per shellcheck.net recommendation
+#   * Verified with 10.13.6, 10.14 and Jamf Pro 10.7.1
+#   * Removed double \\ in the new line escapes. Has changed in a recent update.
+#   * Added a troubleshooting and debugging log for helping out with DEP related issues.
+#   * Debug log focused on what happens prior to DEP Notify creation.
+#   * Changed default image to Self Service icon.
+#
 # 7/13/18 - Major updates to script logic and error correction by Kyle Bareis
-#           * updated if statements to use true/false over yes/no
-#           * added FileVault deferred enablement check and modified to logout or continue
-#           * added tested versions comment
-#           * additional cleanup and error checking
+#   * updated if statements to use true/false over yes/no
+#   * added FileVault deferred enablement check and modified to logout or continue
+#   * added tested versions comment
+#   * additional cleanup and error checking
 # 6/28/18 - Initial commit by Kyle Bareis
 
 #########################################################################################
 # Tested Software Versions
 #########################################################################################
 
-# macOS 10.13.5
+# macOS 10.13.6 and macOS 10.4.0
 # DEPNotify 1.1.0
-# Jamf Pro 10.5
+# Jamf Pro 10.7.1
 
 #########################################################################################
 # How to Use
@@ -48,6 +57,12 @@
 # scripting knowledge. The section below has variables that may be modified to customize
 # the end user experience. DO NOT modify things in or below the CORE LOGIC area unless
 # major testing and validation is performed.
+
+# The script is set to testing mode by default. Having testing mode on will cause sleep
+# commands to be run instead of Policies from Jamf. Also, removal of BOM files that are
+# created happen as well to reduce in troubleshooting issues. Finally, Command + Control
+# + x is set to quit or interrupt DEP Notify for testing purposes. The script will need
+# to be changed from `TESTING_MODE=true` to `TESTING_MODE=false` for polices to run.
 
 # Overview of Jamf Pro Setup
 # 1. Create policies to install core software during first setup. Set the frequency to
@@ -79,23 +94,24 @@
   TESTING_MODE=true # Set variable to true or false
 
 # Flag the app to open fullscreen or as a window
-  FULLSCREEN=false # Set variable to true or false
+  FULLSCREEN=true # Set variable to true or false
 
 # Banner image can be 600px wide by 100px high. Images will be scaled to fit
 # If this variable is left blank, the generic image will appear
-  BANNER_IMAGE_PATH="/System/Library/CoreServices/Setup Assistant.app/Contents/Resources/remote_management.tiff"
+  BANNER_IMAGE_PATH="/Applications/Self Service.app/Contents/Resources/AppIcon.icns"
 
 # Main heading that will be displayed under the image
 # If this variable is left blank, the generic banner will appear
   BANNER_TITLE="Welcome to Organization"
 
-# Paragraph text that will display under the main heading. For a new line, use \\n
-# If this variable is left blank, the generic message will appear. Leave single
+# Paragraph text that will display under the main heading. For a new line, use \n
+# this variable is left blank, the generic message will appear. Leave single
 # quotes below as double quotes will break the new line.
-  MAIN_TEXT='Thanks for choosing a Mac at Organization! We want you to have a few applications and settings configured before you get started with your new Mac. This process should take 10 to 20 minutes to complete. \\n \\n If you need addtional software or help, please visit the Self Service app in your Applications folder or on your Dock.'
+  MAIN_TEXT='Thanks for choosing a Mac at Organization! We want you to have a few applications and settings configured before you get started with your new Mac. This process should take 10 to 20 minutes to complete. \n \n If you need addtional software or help, please visit the Self Service app in your Applications folder or on your Dock.'
 
 # URL for support or help that will open when the ? is clicked
 # If this variable is left blank, the ? will not appear
+# If using fullscreen mode, Safari will be launched behind the DEP Notify window
   SUPPORT_URL="https://support.apple.com"
 
 # Initial Start Status text that shows as things are firing up
@@ -104,13 +120,13 @@
 # EULA configuration
 # CURRENTLY BROKEN - seeing issues with the EULA and contiune buttons
   EULA_ENABLED=false # Set variable to true or false
-  EULA_TXT_FILE="/var/tmp/eula.txt"
 
 # The policy array must be formatted "Progress Bar text,customTrigger". These will be
 # run in order as they appear below.
   POLICY_ARRAY=(
-    "Installing Chrome,depNotifyChrome"
-    "Installing Firefox,depNotifyFirefox"
+    "Installing Chrome,chrome"
+    "Installing Firefox,firefox"
+    "Installing XYZ,xyzCustomTrigger"
   )
 
 # Text that will display in the progress bar
@@ -118,7 +134,7 @@
 
 # Script designed to automatically logout user to start FileVault process if
 # deferred enablement is detected. Text displayed if deferred status is on.
-  FV_LOGOUT_TEXT="Your Mac must logout to start the disk encryption process. After reboot, you may use your Mac normally."
+  FV_LOGOUT_TEXT="Your Mac must logout to start the encryption process. You will be asked to enter your password and click OK or Contiune a few times. Your Mac will be usable while encryption takes place."
 
 # Text that will display inside the alert once policies have finished
   COMPLETE_ALERT_TEXT="Your Mac is now finished with initial setup and configuration. Press Quit to get started!"
@@ -128,9 +144,9 @@
 #########################################################################################
 
 # Variables for File Paths
+  TMP_DEBUG_LOG="/tmp/depNotifyDebug.log"
   JAMF_BINARY="/usr/local/bin/jamf"
   FDE_SETUP_BINARY="/usr/bin/fdesetup"
-  APPLE_SETUP_DONE="/var/db/.AppleSetupDone"
   DEP_NOTIFY_APP="/Applications/Utilities/DEPNotify.app"
   DEP_NOTIFY_CONFIG="/var/tmp/depnotify.log"
   DEP_NOTIFY_DONE="/var/tmp/com.depnotify.provisioning.done"
@@ -138,24 +154,29 @@
 
 # Validating true/false flags
   if [ "$TESTING_MODE" != true ] && [ "$TESTING_MODE" != false ]; then
-    echo "Testing configuration not set properly. Currently set to '$TESTING_MODE'. Please update to true or false."
+    echo "$(date "+%a %h %d %H:%M:%S"): Testing configuration not set properly. Currently set to '$TESTING_MODE'. Please update to true or false." >> "$TMP_DEBUG_LOG"
     exit 1
   fi
   if [ "$FULLSCREEN" != true ] && [ "$FULLSCREEN" != false ]; then
-    echo "Fullscreen configuration not set properly. Currently set to '$FULLSCREEN'. Please update to true or false."
+    echo "$(date "+%a %h %d %H:%M:%S"): Fullscreen configuration not set properly. Currently set to '$FULLSCREEN'. Please update to true or false." >> "$TMP_DEBUG_LOG"
     exit 1
   fi
   if [ "$EULA_ENABLED" != true ] && [ "$EULA_ENABLED" != false ]; then
-    echo "EULA configuration not set properly. Currently set to '$EULA_ENABLED'. Please update to true or false."
+    echo "$(date "+%a %h %d %H:%M:%S"): EULA configuration not set properly. Currently set to '$EULA_ENABLED'. Please update to true or false." >> "$TMP_DEBUG_LOG"
     exit 1
   fi
 
-# Run DEP Notify as the current logged in user. If there is none, it will exit
-   CURRENT_USER=$(ls -la /dev/console | cut -d " " -f 4)
-   while [ "$CURRENT_USER" = "" ] || [ "$CURRENT_USER" = "root" ] || [ ! -f "$APPLE_SETUP_DONE" ]; do
-     echo "Cannot run without a user at the desktop or has not finished Setup Assistant. Sleeping 5 seconds"
-     sleep 5
-   done
+# Run DEP Notify will run after Apple Setup Assistant and must be run as the end user.
+    SETUP_ASSISTANT_PROCESS=$(pgrep -l "Setup Assistant")
+    until [ "$SETUP_ASSISTANT_PROCESS" = "" ]; do
+      echo "$(date "+%a %h %d %H:%M:%S"): Setup Assistant Still Running. PID $SETUP_ASSISTANT_PROCESS." >> "$TMP_DEBUG_LOG"
+      sleep 1
+      SETUP_ASSISTANT_PROCESS=$(pgrep -l "Setup Assistant")
+    done
+
+  # After the Apple Setup completed. Now safe to grab the current user.
+    CURRENT_USER=$(stat -f "%Su" "/dev/console")
+    echo "$(date "+%a %h %d %H:%M:%S"): Current user set to $CURRENT_USER." >> "$TMP_DEBUG_LOG"
 
 # Testing Mode Enhancements
   if [ "$TESTING_MODE" = true ]; then
