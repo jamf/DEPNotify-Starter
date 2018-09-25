@@ -22,35 +22,7 @@
 # DEALINGS IN THE SOFTWARE.
 
 #########################################################################################
-# Change Log
-#########################################################################################
-
-# 9/24/18 - Updated loop for verifying Apple Setup Complete by Arek Dryer and Kyle Bareis
-#   * Changed loop to look for the Setup Assistant process rather than files and users
-#   * Changed /dev/console lookup to stat per shellcheck.net recommendation
-#   * Verified with 10.13.6, 10.14 and Jamf Pro 10.7.1
-#   * Removed double \\ in the new line escapes. Has changed in a recent update.
-#   * Added a troubleshooting and debugging log for helping out with DEP related issues.
-#   * Debug log focused on what happens prior to DEP Notify creation.
-#   * Changed default image to Self Service icon.
-#
-# 7/13/18 - Major updates to script logic and error correction by Kyle Bareis
-#   * updated if statements to use true/false over yes/no
-#   * added FileVault deferred enablement check and modified to logout or continue
-#   * added tested versions comment
-#   * additional cleanup and error checking
-# 6/28/18 - Initial commit by Kyle Bareis
-
-#########################################################################################
-# Tested Software Versions
-#########################################################################################
-
-# macOS 10.13.6 and macOS 10.4.0
-# DEPNotify 1.1.0
-# Jamf Pro 10.7.1
-
-#########################################################################################
-# How to Use
+# General Information
 #########################################################################################
 
 # This script is designed to make implementation of DEPNotify very easy with limited
@@ -58,31 +30,7 @@
 # the end user experience. DO NOT modify things in or below the CORE LOGIC area unless
 # major testing and validation is performed.
 
-# The script is set to testing mode by default. Having testing mode on will cause sleep
-# commands to be run instead of Policies from Jamf. Also, removal of BOM files that are
-# created happen as well to reduce in troubleshooting issues. Finally, Command + Control
-# + x is set to quit or interrupt DEP Notify for testing purposes. The script will need
-# to be changed from `TESTING_MODE=true` to `TESTING_MODE=false` for polices to run.
-
-# Overview of Jamf Pro Setup
-# 1. Create policies to install core software during first setup. Set the frequency to
-#    ongoing and the trigger to custom and type in a trigger. Ex: depNotifyFirefox
-# 2. Once software policies are created, customize this script with changes to verbiage
-#    as well as updating the POLICY_ARRAY with appropriate information
-# 3. Upload DEP Notify.pkg and this script to Jamf Pro. Create a policy to install the
-#    PKG and this script using the Enrollment Complete trigger. Also set the
-#    execution frequency to ongoing.
-# 4. Once a computer is finished enrolling, the DEP Notify policy will start and then
-#    call the other policies in order based on the array.
-
-# DEP Notify PKG and Documentation can be found at: https://gitlab.com/Mactroll/DEPNotify
-
-#########################################################################################
-# To Do List
-#########################################################################################
-
-# Finalize EULA process - Open issue: https://gitlab.com/Mactroll/DEPNotify/issues/19
-# Create generic registration module
+# More information at: https://github.com/jamfprofessionalservices/DEP-Notify
 
 #########################################################################################
 # Variables to Modify
@@ -99,6 +47,10 @@
 # Banner image can be 600px wide by 100px high. Images will be scaled to fit
 # If this variable is left blank, the generic image will appear
   BANNER_IMAGE_PATH="/Applications/Self Service.app/Contents/Resources/AppIcon.icns"
+
+# Flag for using the custom branding icon from Self Service and Jamf Pro
+# This will override the banner image specified above
+  SELF_SERVICE_CUSTOM_BRANDING=false # Set variable to true or false
 
 # Main heading that will be displayed under the image
 # If this variable is left blank, the generic banner will appear
@@ -144,13 +96,13 @@
 #########################################################################################
 
 # Variables for File Paths
-  TMP_DEBUG_LOG="/tmp/depNotifyDebug.log"
   JAMF_BINARY="/usr/local/bin/jamf"
   FDE_SETUP_BINARY="/usr/bin/fdesetup"
   DEP_NOTIFY_APP="/Applications/Utilities/DEPNotify.app"
   DEP_NOTIFY_CONFIG="/var/tmp/depnotify.log"
   DEP_NOTIFY_DONE="/var/tmp/com.depnotify.provisioning.done"
   DEP_NOTIFY_EULA="/var/tmp/com.depnotify.agreement.done"
+  TMP_DEBUG_LOG="/var/tmp/depNotifyDebug.log"
 
 # Validating true/false flags
   if [ "$TESTING_MODE" != true ] && [ "$TESTING_MODE" != false ]; then
@@ -177,6 +129,21 @@
   # After the Apple Setup completed. Now safe to grab the current user.
     CURRENT_USER=$(stat -f "%Su" "/dev/console")
     echo "$(date "+%a %h %d %H:%M:%S"): Current user set to $CURRENT_USER." >> "$TMP_DEBUG_LOG"
+
+# If SELF_SERVICE_CUSTOM_BRANDING is set to true. Loading the updated icon
+  if [ "$SELF_SERVICE_CUSTOM_BRANDING" = true ]; then
+    open -a "/Applications/Self Service.app" --hide
+
+  # Loop waiting on the branding image to properly show in the users library
+  CUSTOM_BRANDING_PNG="/Users/$CURRENT_USER/Library/Application Support/com.jamfsoftware.selfservice.mac/Documents/Images/brandingimage.png"
+    until [ -f "$CUSTOM_BRANDING_PNG" ]; do
+      echo "$(date "+%a %h %d %H:%M:%S"): Waiting for branding image from Jamf Pro." >> "$TMP_DEBUG_LOG"
+      sleep 1
+    done
+
+  # Setting Banner Image for DEP Notify to Self Service Custom Branding
+    BANNER_IMAGE_PATH="$CUSTOM_BRANDING_PNG"
+  fi
 
 # Testing Mode Enhancements
   if [ "$TESTING_MODE" = true ]; then
