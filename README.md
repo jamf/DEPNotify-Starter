@@ -24,7 +24,9 @@ While each organization will use a setup tool like DEP Notify differently, here 
 2. Once software policies are created, customize this script with changes to verbiage as well as updating the POLICY_ARRAY with appropriate information. Double check the testing flag once you are ready to proceed.
 3. Upload DEP Notify.pkg (downloaded from https://gitlab.com/Mactroll/DEPNotify) and this script to Jamf Pro. Create a policy to install the PKG and this script using the Enrollment Complete trigger. Also set the execution frequency to ongoing.
 4. Once a computer is finished enrolling, the DEP Notify policy will start and then call the other policies in order based on the array.
-5. (Optional) If you are requiring FileVault encryption, the script will automatically check at the end of running policies if deferred enablement is on. This will trigger a logout instead of a quit of DEP Notify.
+5. (Optional) If using the EULA window, there must be a .txt file saved somewhere locally prior to DEPNotify running. A by default, the script is looking in /Users/Shared for eula.txt.
+6. (Optional) If using the registration window, you must have the departments and buildings in Jamf prior to running DEP Notify on the client.
+7. (Optional) If you are requiring FileVault encryption, the script will automatically check at the end of running policies if deferred enablement is on. This will trigger a logout instead of a quit of DEP Notify.
 
 DEP Notify PKG and additional documentation can be found at: https://gitlab.com/Mactroll/DEPNotify
 
@@ -37,13 +39,43 @@ DEP Notify PKG and additional documentation can be found at: https://gitlab.com/
 
 ## Change Log
 
-9/25/18 - Added variable and check for custom Self Service branding by Kyle Bareis
+xx/xx/xx - Release v1.2.0: Major enhancements and additions across the board by Kyle Bareis
+* Fixed several comments and made descriptions clearer
+* Brought SELF_SERVICE_APP_NAME variable into the variables area for easier modification
+* Added configuration for the DEPNotify plist that saves EULA and Registration window info
+  * DEP_NOTIFY_INFO_PLIST has been added as a configurable option
+* Added EULA logic and variables
+  * Currently turned off as it causes issues with the app exiting gracefully
+  * EULA_FILE_PATH has been added as a configurable option
+* Added registration window logic
+  * Currently turned off as it causes issues with the app exiting gracefully
+  * REGISTER_TITLE has been added as a configurable option
+  * REGISTER_BUTTON has been added as a configurable option
+  * REGISTER_BEGIN_STATUS has been added as a configurable option
+  * REGISTER_MIDDLE_STATUS has been added as a configurable option
+  * TEXT_UPPER_DISPLAY has been added as a configurable option
+  * TEXT_UPPER_PLACEHOLDER has been added as a configurable option
+  * TEXT_UPPER_LOGIC has been added as a configurable option
+  * TEXT_LOWER_DISPLAY has been added as a configurable option
+  * TEXT_LOWER_PLACEHOLDER has been added as a configurable option
+  * TEXT_LOWER_LOGIC has been added as a configurable option
+  * PICK_UPPER_DISPLAY has been added as a configurable option
+  * PICK_UPPER_OPTIONS has been added as a configurable option
+  * PICK_UPPER_LOGIC has been added as a configurable option
+  * PICK_LOWER_DISPLAY has been added as a configurable option
+  * PICK_LOWER_OPTIONS has been added as a configurable option
+  * PICK_LOWER_LOGIC has been added as a configurable option
+* Added a kill command for exiting Self Service if SELF_SERVICE_CUSTOM_BRANDING is set to true
+* Added an alert window that lets the admin know if the script is in TESTING_MODE when set to true
+* Added TESTING_MODE logic to FileVault logout to make it easier to test without having to logout
+
+9/25/18 - Release v1.1.1: Added variable and check for custom Self Service branding by Kyle Bareis
 * Added true/false variable for custom Self Service branding
 * Added loop for waiting for the custom branding to be downloaded
 * Removed To Do list, how to use, and tested versions from bash script
 * Updated GitHub Readme file with additional information
 
-9/24/18 - Updated loop for verifying Apple Setup Complete by Arek Dryer and Kyle Bareis
+9/24/18 - Release v1.1.0: Updated loop for verifying Apple Setup Complete by Arek Dryer and Kyle Bareis
 * Changed loop to look for the Setup Assistant process rather than files and users
 * Changed /dev/console lookup to stat per shellcheck.net recommendation
 * Verified with 10.13.6, 10.14 and Jamf Pro 10.7.1
@@ -52,16 +84,10 @@ DEP Notify PKG and additional documentation can be found at: https://gitlab.com/
 * Debug log focused on what happens prior to DEP Notify creation.
 * Changed default image to Self Service icon.
 
-7/13/18 - Major updates to script logic and error correction by Kyle Bareis
+7/13/18 - Release v1.0.0: Major updates to script logic and error correction by Kyle Bareis
 * updated if statements to use true/false over yes/no
 * added FileVault deferred enablement check and modified to logout or continue
 * added tested versions comment
 * additional cleanup and error checking
 
 6/28/18 - Initial commit by Kyle Bareis
-
-## To Do List
-
-* Add ability to have policy script parameters fill in variables
-* Finalize EULA process - Open issue: https://gitlab.com/Mactroll/DEPNotify/issues/19
-* Create generic registration module
