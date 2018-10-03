@@ -117,7 +117,7 @@
         TEXT_UPPER_VALUE=$(defaults read "$DEP_NOTIFY_INFO_PLIST" "$TEXT_UPPER_DISPLAY")
         echo "Status: $REGISTER_BEGIN_STATUS $TEXT_UPPER_DISPLAY $REGISTER_MIDDLE_STATUS $TEXT_UPPER_VALUE" >> "$DEP_NOTIFY_LOG"
         if [ "$TESTING_MODE" = true ]; then
-           5
+           sleep 10
         else
           "$JAMF_BINARY" setComputerName -name "$TEXT_UPPER_VALUE"
         fi
@@ -133,7 +133,7 @@
         TEXT_LOWER_VALUE=$(defaults read "$DEP_NOTIFY_INFO_PLIST" "$TEXT_LOWER_DISPLAY")
         echo "Status: $REGISTER_BEGIN_STATUS $TEXT_LOWER_DISPLAY $REGISTER_MIDDLE_STATUS $TEXT_LOWER_VALUE" >> "$DEP_NOTIFY_LOG"
         if [ "$TESTING_MODE" = true ]; then
-           5
+           sleep 10
         else
           "$JAMF_BINARY" recon -assetTag "$TEXT_LOWER_VALUE"
         fi
@@ -155,7 +155,7 @@
         PICK_UPPER_VALUE=$(defaults read "$DEP_NOTIFY_INFO_PLIST" "$PICK_UPPER_DISPLAY")
         echo "Status: $REGISTER_BEGIN_STATUS $PICK_UPPER_DISPLAY $REGISTER_MIDDLE_STATUS $PICK_UPPER_VALUE" >> "$DEP_NOTIFY_LOG"
         if [ "$TESTING_MODE" = true ]; then
-           5
+           sleep 10
         else
           "$JAMF_BINARY" recon -building "$PICK_UPPER_VALUE"
         fi
@@ -175,7 +175,7 @@
         PICK_LOWER_VALUE=$(defaults read "$DEP_NOTIFY_INFO_PLIST" "$PICK_LOWER_DISPLAY")
         echo "Status: $REGISTER_BEGIN_STATUS $PICK_LOWER_DISPLAY $REGISTER_MIDDLE_STATUS $PICK_LOWER_VALUE" >> "$DEP_NOTIFY_LOG"
         if [ "$TESTING_MODE" = true ]; then
-           5
+           sleep 10
         else
           "$JAMF_BINARY" recon -department "$PICK_LOWER_VALUE"
         fi
@@ -211,25 +211,42 @@
   DEP_NOTIFY_DEBUG="/var/tmp/depnotifyDebug.log"
   DEP_NOTIFY_DONE="/var/tmp/com.depnotify.provisioning.done"
 
+# Standard Testing Mode Enahcements
+  if [ "$TESTING_MODE" = true ]; then
+    # Removing old config file if present (Testing Mode Only)
+      if [ -f "$DEP_NOTIFY_LOG" ]; then
+        rm "$DEP_NOTIFY_LOG"
+      fi
+      if [ -f "$DEP_NOTIFY_DONE" ]; then
+        rm "$DEP_NOTIFY_DONE"
+      fi
+      if [ -f "$DEP_NOTIFY_DEBUG" ]; then
+        rm "$DEP_NOTIFY_DEBUG"
+      fi
+
+    # Setting Quit Key set to command + control + x (Testing Mode Only)
+      echo "Command: QuitKey: x" >> "$DEP_NOTIFY_LOG"
+  fi
+
 # Validating true/false flags
   if [ "$TESTING_MODE" != true ] && [ "$TESTING_MODE" != false ]; then
-    echo "$(date "+%a %h %d %H:%M:%S"): Testing configuration not set properly. Currently set to '$TESTING_MODE'. Please update to true or false." >> "$DEP_NOTIFY_DEBUG"
+    echo "$(date "+%a %h %d %H:%M:%S"): Testing configuration not set properly. Currently set to $TESTING_MODE. Please update to true or false." >> "$DEP_NOTIFY_DEBUG"
     exit 1
   fi
   if [ "$FULLSCREEN" != true ] && [ "$FULLSCREEN" != false ]; then
-    echo "$(date "+%a %h %d %H:%M:%S"): Fullscreen configuration not set properly. Currently set to '$FULLSCREEN'. Please update to true or false." >> "$DEP_NOTIFY_DEBUG"
+    echo "$(date "+%a %h %d %H:%M:%S"): Fullscreen configuration not set properly. Currently set to $FULLSCREEN. Please update to true or false." >> "$DEP_NOTIFY_DEBUG"
     exit 1
   fi
   if [ "$SELF_SERVICE_CUSTOM_BRANDING" != true ] && [ "$SELF_SERVICE_CUSTOM_BRANDING" != false ]; then
-    echo "$(date "+%a %h %d %H:%M:%S"): Self Service Custom Branding configuration not set properly. Currently set to '$SELF_SERVICE_CUSTOM_BRANDING'. Please update to true or false." >> "$DEP_NOTIFY_DEBUG"
+    echo "$(date "+%a %h %d %H:%M:%S"): Self Service Custom Branding configuration not set properly. Currently set to $SELF_SERVICE_CUSTOM_BRANDING. Please update to true or false." >> "$DEP_NOTIFY_DEBUG"
     exit 1
   fi
   if [ "$EULA_ENABLED" != true ] && [ "$EULA_ENABLED" != false ]; then
-    echo "$(date "+%a %h %d %H:%M:%S"): EULA configuration not set properly. Currently set to '$EULA_ENABLED'. Please update to true or false." >> "$DEP_NOTIFY_DEBUG"
+    echo "$(date "+%a %h %d %H:%M:%S"): EULA configuration not set properly. Currently set to $EULA_ENABLED. Please update to true or false." >> "$DEP_NOTIFY_DEBUG"
     exit 1
   fi
   if [ "$REGISTER_ENABLED" != true ] && [ "$REGISTER_ENABLED" != false ]; then
-    echo "$(date "+%a %h %d %H:%M:%S"): Registeration configuration not set properly. Currently set to '$REGISTER_ENABLED'. Please update to true or false." >> "$DEP_NOTIFY_DEBUG"
+    echo "$(date "+%a %h %d %H:%M:%S"): Registeration configuration not set properly. Currently set to $REGISTER_ENABLED. Please update to true or false." >> "$DEP_NOTIFY_DEBUG"
     exit 1
   fi
 
@@ -237,7 +254,7 @@
   SETUP_ASSISTANT_PROCESS=$(pgrep -l "Setup Assistant")
   until [ "$SETUP_ASSISTANT_PROCESS" = "" ]; do
     echo "$(date "+%a %h %d %H:%M:%S"): Setup Assistant Still Running. PID $SETUP_ASSISTANT_PROCESS." >> "$DEP_NOTIFY_DEBUG"
-    sleep 5
+    sleep 10
     SETUP_ASSISTANT_PROCESS=$(pgrep -l "Setup Assistant")
   done
 
@@ -253,7 +270,7 @@
   CUSTOM_BRANDING_PNG="/Users/$CURRENT_USER/Library/Application Support/com.jamfsoftware.selfservice.mac/Documents/Images/brandingimage.png"
     until [ -f "$CUSTOM_BRANDING_PNG" ]; do
       echo "$(date "+%a %h %d %H:%M:%S"): Waiting for branding image from Jamf Pro." >> "$DEP_NOTIFY_DEBUG"
-       1
+       sleep 1
     done
 
   # Setting Banner Image for DEP Notify to Self Service Custom Branding
@@ -264,23 +281,6 @@
       echo "$(date "+%a %h %d %H:%M:%S"): Self Service custom branding icon has been loaded. Killing DEPNotify PID $SELF_SERVICE_PID." >> "$DEP_NOTIFY_DEBUG"
       kill "$SELF_SERVICE_PID"
     done
-  fi
-
-# Standard Testing Mode Enahcements
-  if [ "$TESTING_MODE" = true ]; then
-    # Setting Quit Key set to command + control + x (Testing Mode Only)
-      echo "Command: QuitKey: x" >> "$DEP_NOTIFY_LOG"
-
-    # Removing old config file if present (Testing Mode Only)
-      if [ -f "$DEP_NOTIFY_LOG" ]; then
-        rm "$DEP_NOTIFY_LOG"
-      fi
-      if [ -f "$DEP_NOTIFY_DONE" ]; then
-        rm "$DEP_NOTIFY_DONE"
-      fi
-      if [ -f "$DEP_NOTIFY_DEBUG" ]; then
-        rm "$DEP_NOTIFY_DEBUG"
-      fi
   fi
 
 # Setting custom image if specified
@@ -392,7 +392,7 @@
 
 # Adding nice text and a brief pause for prettiness
   echo "Status: $INITAL_START_STATUS" >> "$DEP_NOTIFY_LOG"
-   5
+  sleep 5
 
 # Setting the status bar
   # Counter is for making the determinate look nice. Starts at one and adds
@@ -426,7 +426,7 @@
     echo "Status: Waiting on EULA Acceptance" >> "$DEP_NOTIFY_LOG"
     echo "Command: ContinueButtonEULA: EULA" >> "$DEP_NOTIFY_LOG"
     while [ ! -f "$DEP_NOTIFY_EULA_DONE" ]; do
-       1
+      sleep 1
     done
   fi
 
@@ -435,7 +435,7 @@
     echo "Status: $REGISTER_TITLE" >> "$DEP_NOTIFY_LOG"
     echo "Command: ContinueButtonRegister: Register" >> "$DEP_NOTIFY_LOG"
     while [ ! -f "$DEP_NOTIFY_REGISTER_DONE" ]; do
-       1
+      sleep 1
     done
     # Running Logic For Each Registeration Box
       if [ "$TEXT_UPPER_DISPLAY" != "" ]; then
@@ -456,7 +456,7 @@
   for POLICY in "${POLICY_ARRAY[@]}"; do
     echo "Status: $(echo "$POLICY" | cut -d ',' -f1)" >> "$DEP_NOTIFY_LOG"
     if [ "$TESTING_MODE" = true ]; then
-       10
+      sleep 10
     elif [ "$TESTING_MODE" = false ]; then
       "$JAMF_BINARY" policy -event "$(echo "$POLICY" | cut -d ',' -f2)"
     fi
