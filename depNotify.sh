@@ -119,16 +119,25 @@
   fi
 
 # Run DEP Notify will run after Apple Setup Assistant and must be run as the end user.
+  SETUP_ASSISTANT_PROCESS=$(pgrep -l "Setup Assistant")
+  until [ "$SETUP_ASSISTANT_PROCESS" = "" ]; do
+    echo "$(date "+%a %h %d %H:%M:%S"): Setup Assistant Still Running. PID $SETUP_ASSISTANT_PROCESS." >> "$TMP_DEBUG_LOG"
+    sleep 1
     SETUP_ASSISTANT_PROCESS=$(pgrep -l "Setup Assistant")
-    until [ "$SETUP_ASSISTANT_PROCESS" = "" ]; do
-      echo "$(date "+%a %h %d %H:%M:%S"): Setup Assistant Still Running. PID $SETUP_ASSISTANT_PROCESS." >> "$TMP_DEBUG_LOG"
-      sleep 1
-      SETUP_ASSISTANT_PROCESS=$(pgrep -l "Setup Assistant")
-    done
+  done
 
-  # After the Apple Setup completed. Now safe to grab the current user.
-    CURRENT_USER=$(stat -f "%Su" "/dev/console")
-    echo "$(date "+%a %h %d %H:%M:%S"): Current user set to $CURRENT_USER." >> "$TMP_DEBUG_LOG"
+# Checking to see if the Finder is running now before continuing. This can help
+# in scenarios where an end user is not configuring the device.
+  FINDER_PROCESS=$(pgrep -l "Finder")
+  until [ "$FINDER_PROCESS" != "" ]; do
+    echo "$(date "+%a %h %d %H:%M:%S"): Finder process not found. Assuming device is at login screen." >> "$TMP_DEBUG_LOG"
+    sleep 1
+    FINDER_PROCESS=$(pgrep -l "Finder")
+  done
+
+# After the Apple Setup completed. Now safe to grab the current user.
+  CURRENT_USER=$(stat -f "%Su" "/dev/console")
+  echo "$(date "+%a %h %d %H:%M:%S"): Current user set to $CURRENT_USER." >> "$TMP_DEBUG_LOG"
 
 # If SELF_SERVICE_CUSTOM_BRANDING is set to true. Loading the updated icon
   if [ "$SELF_SERVICE_CUSTOM_BRANDING" = true ]; then
