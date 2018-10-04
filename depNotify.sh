@@ -37,7 +37,7 @@
 #########################################################################################
 # Testing flag will enable the following things to change:
   # - Auto removal of BOM files to reduce errors
-  # - Sleep commands instead of polcies or other changes being called
+  # - Sleep commands instead of policies or other changes being called
   # - Quit Key set to command + control + x
   TESTING_MODE=true # Set variable to true or false
 
@@ -65,7 +65,7 @@
 # Paragraph text that will display under the main heading. For a new line, use \n
 # If this variable is left blank, the generic message will appear. Leave single
 # quotes below as double quotes will break the new lines.
-  MAIN_TEXT='Thanks for choosing a Mac at Organization! We want you to have a few applications and settings configured before you get started with your new Mac. This process should take 10 to 20 minutes to complete. \n \n If you need addtional software or help, please visit the Self Service app in your Applications folder or on your Dock.'
+  MAIN_TEXT='Thanks for choosing a Mac at Organization! We want you to have a few applications and settings configured before you get started with your new Mac. This process should take 10 to 20 minutes to complete. \n \n If you need additional software or help, please visit the Self Service app in your Applications folder or on your Dock.'
 
 # URL for support or help that will open when the ? is clicked
 # If this variable is left blank, the ? will not appear
@@ -76,7 +76,7 @@
   INITAL_START_STATUS="Initial Configuration Starting..."
 
 # If using EULA or Registration Window below, this will configure where the file
-# is saved. You may want to save the file for puropses like verifying EULA accpetance
+# is saved. You may want to save the file for purposes like verifying EULA acceptance
   DEP_NOTIFY_INFO_PLIST_PATH="/var/tmp/"
 
 # EULA configuration
@@ -95,11 +95,11 @@
   # Registration window title
     REGISTER_TITLE="Register Your Mac"
 
-  # Registraiton window submit or finish button text
+  # Registration window submit or finish button text
     REGISTER_BUTTON="Register"
 
-  # The text and pick list sections below will right the folling lines out for
-  # end users. Use the variables below to configure what the sentance says
+  # The text and pick list sections below will write the following lines out for
+  # end users. Use the variables below to configure what the sentence says
   # Ex: Setting Computer Name to macBook0132
     REGISTER_BEGIN_STATUS="Setting"
     REGISTER_MIDDLE_STATUS="to"
@@ -111,7 +111,7 @@
     TEXT_UPPER_PLACEHOLDER="mac0128371"
 
     # Logic below was put in this section rather than in core code as folks may
-    # want to chnage what the field does. This is a function that gets called
+    # want to change what the field does. This is a function that gets called
     # when needed later on. BE VERY CAREFUL IN CHANGING THE FUNCTION!
       TEXT_UPPER_LOGIC (){
         TEXT_UPPER_VALUE=$(defaults read "$DEP_NOTIFY_INFO_PLIST" "$TEXT_UPPER_DISPLAY")
@@ -127,7 +127,7 @@
     TEXT_LOWER_PLACEHOLDER="1234567890"
 
     # Logic below was put in this section rather than in core code as folks may
-    # want to chnage what the field does. This is a function that gets called
+    # want to change what the field does. This is a function that gets called
     # when needed later on. BE VERY CAREFUL IN CHANGING THE FUNCTION!
       TEXT_LOWER_LOGIC (){
         TEXT_LOWER_VALUE=$(defaults read "$DEP_NOTIFY_INFO_PLIST" "$TEXT_LOWER_DISPLAY")
@@ -149,7 +149,7 @@
     )
 
     # Logic below was put in this section rather than in core code as folks may
-    # want to chnage what the field does. This is a function that gets called
+    # want to change what the field does. This is a function that gets called
     # when needed later on. BE VERY CAREFUL IN CHANGING THE FUNCTION!
       PICK_UPPER_LOGIC (){
         PICK_UPPER_VALUE=$(defaults read "$DEP_NOTIFY_INFO_PLIST" "$PICK_UPPER_DISPLAY")
@@ -169,7 +169,7 @@
     )
 
     # Logic below was put in this section rather than in core code as folks may
-    # want to chnage what the field does. This is a function that gets called
+    # want to change what the field does. This is a function that gets called
     # when needed later on. BE VERY CAREFUL IN CHANGING THE FUNCTION!
       PICK_LOWER_LOGIC (){
         PICK_LOWER_VALUE=$(defaults read "$DEP_NOTIFY_INFO_PLIST" "$PICK_LOWER_DISPLAY")
@@ -194,7 +194,7 @@
 
 # Script designed to automatically logout user to start FileVault process if
 # deferred enablement is detected. Text displayed if deferred status is on.
-  FV_LOGOUT_TEXT="Your Mac must logout to start the encryption process. You will be asked to enter your password and click OK or Contiune a few times. Your Mac will be usable while encryption takes place."
+  FV_LOGOUT_TEXT="Your Mac must logout to start the encryption process. You will be asked to enter your password and click OK or Continue a few times. Your Mac will be usable while encryption takes place."
 
 # Text that will display inside the alert once policies have finished
   COMPLETE_ALERT_TEXT="Your Mac is now finished with initial setup and configuration. Press Quit to get started!"
@@ -211,7 +211,7 @@
   DEP_NOTIFY_DEBUG="/var/tmp/depnotifyDebug.log"
   DEP_NOTIFY_DONE="/var/tmp/com.depnotify.provisioning.done"
 
-# Standard Testing Mode Enahcements
+# Standard Testing Mode Enhancements
   if [ "$TESTING_MODE" = true ]; then
     # Removing old config file if present (Testing Mode Only)
       if [ -f "$DEP_NOTIFY_LOG" ]; then
@@ -246,7 +246,7 @@
     exit 1
   fi
   if [ "$REGISTER_ENABLED" != true ] && [ "$REGISTER_ENABLED" != false ]; then
-    echo "$(date "+%a %h %d %H:%M:%S"): Registeration configuration not set properly. Currently set to $REGISTER_ENABLED. Please update to true or false." >> "$DEP_NOTIFY_DEBUG"
+    echo "$(date "+%a %h %d %H:%M:%S"): Registration configuration not set properly. Currently set to $REGISTER_ENABLED. Please update to true or false." >> "$DEP_NOTIFY_DEBUG"
     exit 1
   fi
 
@@ -304,7 +304,7 @@
   fi
 
 # Plist Location configuration
-# The plist information below is used by EULA and Regisration windows
+# The plist information below is used by EULA and Registration windows
   DEP_NOTIFY_CONFIG_PLIST="/Users/$CURRENT_USER/Library/Preferences/menu.nomad.DEPNotify.plist"
   DEP_NOTIFY_INFO_PLIST="$DEP_NOTIFY_INFO_PLIST_PATH/DEPNotify.plist"
 
@@ -437,7 +437,7 @@
     while [ ! -f "$DEP_NOTIFY_REGISTER_DONE" ]; do
       sleep 1
     done
-    # Running Logic For Each Registeration Box
+    # Running Logic For Each Registration Box
       if [ "$TEXT_UPPER_DISPLAY" != "" ]; then
         TEXT_UPPER_LOGIC
       fi
