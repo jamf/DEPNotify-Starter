@@ -33,7 +33,7 @@
 # More information at: https://github.com/jamfprofessionalservices/DEP-Notify
 
 #########################################################################################
-# Variables to Modify
+# Visual Appearance and General Functionality Variables to Modify
 #########################################################################################
 # Testing flag will enable the following things to change:
   # - Auto removal of BOM files to reduce errors
@@ -44,6 +44,12 @@
 # Flag the app to open fullscreen or as a window
   FULLSCREEN=true # Set variable to true or false
 
+# Flag script to keep the computer from sleeping. BE VERY CAREFUL WITH THIS FLAG!
+# This flag could expose your data to risk by leaving an unlocked computer wide open.
+# Only recommended if you are using fullscreen mode and have a logout taking place at
+# the end of configuration.
+  NO_SLEEP=true
+
 # Banner image can be 600px wide by 100px high. Images will be scaled to fit
 # If this variable is left blank, the generic image will appear
   BANNER_IMAGE_PATH="/Applications/Self Service.app/Contents/Resources/AppIcon.icns"
@@ -52,7 +58,7 @@
   # This will override the banner image specified above. If you have changed the
   # name of Self Service, make sure to modify the Self Service path in the Core
   # Logic area under the heading Variables for File Paths
-    SELF_SERVICE_CUSTOM_BRANDING=false # Set variable to true or false
+    SELF_SERVICE_CUSTOM_BRANDING=true # Set variable to true or false
 
     # If using a name other than Self Service with Custom branding. Change the
     # name with the SELF_SERVICE_APP_NAME variable below
@@ -75,22 +81,59 @@
 # Initial Start Status text that shows as things are firing up
   INITAL_START_STATUS="Initial Configuration Starting..."
 
+# Text that will display in the progress bar
+  INSTALL_COMPLETE_TEXT="Configuration Complete!"
+
+# Script designed to automatically logout user to start FileVault process if
+# deferred enablement is detected. Text displayed if deferred status is on.
+  FV_LOGOUT_TEXT="Your Mac must logout to start the encryption process. You will be asked to enter your password and click OK or Continue a few times. Your Mac will be usable while encryption takes place."
+
+# Text that will display inside the alert once policies have finished
+  COMPLETE_ALERT_TEXT="Your Mac is now finished with initial setup and configuration. Press Quit to get started!"
+
 # If using EULA or Registration Window below, this will configure where the file
 # is saved. You may want to save the file for purposes like verifying EULA acceptance
   DEP_NOTIFY_INFO_PLIST_PATH="/var/tmp/"
 
+#########################################################################################
+# Policy Variable to Modify
+#########################################################################################
+
+# The policy array must be formatted "Progress Bar text,customTrigger". These will be
+# run in order as they appear below.
+  POLICY_ARRAY=(
+    "Installing Adobe Creative Cloud,adobeCC"
+    "Installing Adobe Reader,adobeReader"
+    "Installing Chrome,chrome"
+    "Installing CrashPlan,crashplan"
+    "Installing Firefox,firefox"
+    "Installing Java,java"
+    "Installing NoMAD,nomad"
+    "Installing Office,msOffice"
+    "Installing Webex,webex"
+    "Installing Critical Updates,updateSoftware"
+  )
+
+#########################################################################################
+# EULA Variables to Modify
+#########################################################################################
+
 # EULA configuration
 # CURRENTLY BROKEN - seeing issues with the EULA and continue buttons
-  EULA_ENABLED=false # Set variable to true or false
+  EULA_ENABLED=true # Set variable to true or false
 
   # Path to the EULA file you would like the user to read and agree to. It is
   # best to package this up with Composer or another tool and deliver it to a
   # shared area like /Users/Shared/
     EULA_FILE_PATH="/Users/Shared/eula.txt"
 
+#########################################################################################
+# Registration Variables to Modify
+#########################################################################################
+
 # Registration window configuration
 # CURRENTLY BROKEN - seeing issues with the registration and continue buttons
-  REGISTER_ENABLED=false # Set variable to true or false
+  REGISTER_ENABLED=true # Set variable to true or false
 
   # Registration window title
     REGISTER_TITLE="Register Your Mac"
@@ -181,24 +224,6 @@
         fi
       }
 
-# The policy array must be formatted "Progress Bar text,customTrigger". These will be
-# run in order as they appear below.
-  POLICY_ARRAY=(
-    "Installing Chrome,chrome"
-    "Installing Firefox,firefox"
-    "Installing XYZ,xyzCustomTrigger"
-  )
-
-# Text that will display in the progress bar
-  INSTALL_COMPLETE_TEXT="Configuration Complete!"
-
-# Script designed to automatically logout user to start FileVault process if
-# deferred enablement is detected. Text displayed if deferred status is on.
-  FV_LOGOUT_TEXT="Your Mac must logout to start the encryption process. You will be asked to enter your password and click OK or Continue a few times. Your Mac will be usable while encryption takes place."
-
-# Text that will display inside the alert once policies have finished
-  COMPLETE_ALERT_TEXT="Your Mac is now finished with initial setup and configuration. Press Quit to get started!"
-
 #########################################################################################
 # Core Script Logic - Don't Change Without Major Testing
 #########################################################################################
@@ -235,6 +260,10 @@
   fi
   if [ "$FULLSCREEN" != true ] && [ "$FULLSCREEN" != false ]; then
     echo "$(date "+%a %h %d %H:%M:%S"): Fullscreen configuration not set properly. Currently set to $FULLSCREEN. Please update to true or false." >> "$DEP_NOTIFY_DEBUG"
+    exit 1
+  fi
+  if [ "$NO_SLEEP" != true ] && [ "$NO_SLEEP" != false ]; then
+    echo "$(date "+%a %h %d %H:%M:%S"): Sleep configuration not set properly. Currently set to $NO_SLEEP. Please update to true or false." >> "$DEP_NOTIFY_DEBUG"
     exit 1
   fi
   if [ "$SELF_SERVICE_CUSTOM_BRANDING" != true ] && [ "$SELF_SERVICE_CUSTOM_BRANDING" != false ]; then
@@ -286,10 +315,9 @@
     BANNER_IMAGE_PATH="$CUSTOM_BRANDING_PNG"
 
   # Closing Self Service
-    for SELF_SERVICE_PID in $(pgrep -f "$SELF_SERVICE_APP_NAME"); do
-      echo "$(date "+%a %h %d %H:%M:%S"): Self Service custom branding icon has been loaded. Killing DEPNotify PID $SELF_SERVICE_PID." >> "$DEP_NOTIFY_DEBUG"
-      kill "$SELF_SERVICE_PID"
-    done
+    SELF_SERVICE_PID=$(pgrep -l "$(echo "$SELF_SERVICE_APP_NAME" | cut -d "." -f1)" | cut -d " " -f1)
+    echo "$(date "+%a %h %d %H:%M:%S"): Self Service custom branding icon has been loaded. Killing Self Service PID $SELF_SERVICE_PID." >> "$DEP_NOTIFY_DEBUG"
+    kill "$SELF_SERVICE_PID"
   fi
 
 # Setting custom image if specified
@@ -394,6 +422,18 @@
     sudo -u "$CURRENT_USER" "$DEP_NOTIFY_APP"/Contents/MacOS/DEPNotify -path "$DEP_NOTIFY_LOG"&
   fi
 
+# Pulling DEP Notify PID and using Caffeinate Binary to keep the computer awake
+  if [ "$NO_SLEEP" = true ]; then
+    DEP_NOTIFY_PROCESS=$(pgrep -l "DEPNotify" | cut -d " " -f1)
+    until [ "$DEP_NOTIFY_PROCESS" != "" ]; do
+      echo "$(date "+%a %h %d %H:%M:%S"): Waiting for DEPNotify to start to gather the process ID." >> "$DEP_NOTIFY_DEBUG"
+      sleep 1
+      DEP_NOTIFY_PROCESS=$(pgrep -l "DEPNotify" | cut -d " " -f1)
+    done
+    echo "$(date "+%a %h %d %H:%M:%S"): Caffeinating DEP Notify process. Process ID: $DEP_NOTIFY_PROCESS" >> "$DEP_NOTIFY_DEBUG"
+    caffeinate -disu -w "$DEP_NOTIFY_PROCESS"&
+  fi
+
 # Adding an alert prompt to let admins know that the script is in testing mode
   if [ "$TESTING_MODE" = true ]; then
     echo "Command: Alert: DEP Notify is in TESTING_MODE. Script will not run Policies or other commands that make change to this computer."  >> "$DEP_NOTIFY_LOG"
@@ -486,4 +526,12 @@
       echo "Command: Quit: $COMPLETE_ALERT_TEXT" >> "$DEP_NOTIFY_LOG"
     fi
 
-  exit 0
+# Forcing Exit of DEP Notify if EULA or Registration Window are on
+# This is a brute force method until I can get a better fix in place
+  if [ "$EULA_ENABLED" = true ] || [ "$REGISTER_ENABLED" = true ]; then
+    sleep 15
+    echo "$(date "+%a %h %d %H:%M:%S"): DEP Notify Window still running. Killing DEPNotify PID $DEP_NOTIFY_PROCESS." >> "$DEP_NOTIFY_DEBUG"
+    kill "$DEP_NOTIFY_PROCESS"
+  fi
+
+exit 0
