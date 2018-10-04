@@ -37,6 +37,11 @@ DEP Notify PKG and additional documentation can be found at: https://gitlab.com/
 
 ## Change Log
 
+10/4/18 - Added check for Finder process by Kyle Bareis
+* Thanks @remusache for finding a workflow that need to be addressed
+* Script now should handle workflows which do not have an end user configure the device
+* After checking to see if Setup Assistant is finished, script will now check to see if Finder is running
+
 9/25/18 - Added variable and check for custom Self Service branding by Kyle Bareis
 * Added true/false variable for custom Self Service branding
 * Added loop for waiting for the custom branding to be downloaded
