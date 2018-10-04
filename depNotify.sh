@@ -254,8 +254,17 @@
   SETUP_ASSISTANT_PROCESS=$(pgrep -l "Setup Assistant")
   until [ "$SETUP_ASSISTANT_PROCESS" = "" ]; do
     echo "$(date "+%a %h %d %H:%M:%S"): Setup Assistant Still Running. PID $SETUP_ASSISTANT_PROCESS." >> "$DEP_NOTIFY_DEBUG"
-    sleep 10
+    sleep 1
     SETUP_ASSISTANT_PROCESS=$(pgrep -l "Setup Assistant")
+  done
+
+# Checking to see if the Finder is running now before continuing. This can help
+# in scenarios where an end user is not configuring the device.
+  FINDER_PROCESS=$(pgrep -l "Finder")
+  until [ "$FINDER_PROCESS" != "" ]; do
+    echo "$(date "+%a %h %d %H:%M:%S"): Finder process not found. Assuming device is at login screen." >> "$DEP_NOTIFY_DEBUG"
+    sleep 1
+    FINDER_PROCESS=$(pgrep -l "Finder")
   done
 
 # After the Apple Setup completed. Now safe to grab the current user.
