@@ -41,4 +41,4 @@ DEP Notify PKG and additional documentation can be found at: https://gitlab.com/
 
 ## Change Log
 
-The change log was getting a bit long and now has moved to its own page. Please visit the [change-log.md](change-log.md) for more information.
+The change log was getting a bit long and now has moved to its own page. Please visit the [CHANGELOG.md](CHANGELOG.md) for more information.
