@@ -1,6 +1,6 @@
 # Change Log
 
-## [1.2.0] - xxxx/xx/xx
+## [x.x.x] - xxxx/xx/xx
 
 Major enhancements and additions across the board by Kyle Bareis
 
@@ -32,6 +32,8 @@ Major enhancements and additions across the board by Kyle Bareis
 * Added a kill command for exiting Self Service if SELF_SERVICE_CUSTOM_BRANDING is set to true
 * Added an alert window that lets the admin know if the script is in TESTING_MODE when set to true
 * Added TESTING_MODE logic to FileVault logout to make it easier to test without having to logout
+* Added NO_SLEEP mode for longer installs. Be careful using this option as it may expose sensitive data
+* Added additional screenshots to the [example-img](example-img) folder
 
 ## [1.1.2] - 2018/10/04
 
