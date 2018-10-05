@@ -36,9 +36,9 @@
 # Visual Appearance and General Functionality Variables to Modify
 #########################################################################################
 # Testing flag will enable the following things to change:
-  # - Auto removal of BOM files to reduce errors
-  # - Sleep commands instead of policies or other changes being called
-  # - Quit Key set to command + control + x
+  # Auto removal of BOM files to reduce errors
+  # Sleep commands instead of policies or other changes being called
+  # Quit Key set to command + control + x
   TESTING_MODE=true # Set variable to true or false
 
 # Flag the app to open fullscreen or as a window
@@ -47,8 +47,9 @@
 # Flag script to keep the computer from sleeping. BE VERY CAREFUL WITH THIS FLAG!
 # This flag could expose your data to risk by leaving an unlocked computer wide open.
 # Only recommended if you are using fullscreen mode and have a logout taking place at
-# the end of configuration.
-  NO_SLEEP=true
+# the end of configuration (like for FileVault). Some folks may use this in workflows
+# where end users are not the primary people setting up the device.
+  NO_SLEEP=false
 
 # Banner image can be 600px wide by 100px high. Images will be scaled to fit
 # If this variable is left blank, the generic image will appear
@@ -58,10 +59,10 @@
   # This will override the banner image specified above. If you have changed the
   # name of Self Service, make sure to modify the Self Service path in the Core
   # Logic area under the heading Variables for File Paths
-    SELF_SERVICE_CUSTOM_BRANDING=true # Set variable to true or false
+    SELF_SERVICE_CUSTOM_BRANDING=false # Set variable to true or false
 
     # If using a name other than Self Service with Custom branding. Change the
-    # name with the SELF_SERVICE_APP_NAME variable below
+    # name with the SELF_SERVICE_APP_NAME variable below. Keep .app on the end
       SELF_SERVICE_APP_NAME="Self Service.app"
 
 # Main heading that will be displayed under the image
@@ -91,9 +92,12 @@
 # Text that will display inside the alert once policies have finished
   COMPLETE_ALERT_TEXT="Your Mac is now finished with initial setup and configuration. Press Quit to get started!"
 
-# If using EULA or Registration Window below, this will configure where the file
-# is saved. You may want to save the file for purposes like verifying EULA acceptance
-  DEP_NOTIFY_INFO_PLIST_PATH="/var/tmp/"
+# If using EULA or Registration Window below, this will configure where the file is saved.
+# You may want to save the file for purposes like verifying EULA acceptance. This variable
+# is in a function so that $CURRENT_USER can be used. Variable must end with a slash.
+  INFO_PLIST_WRAPPER (){
+    DEP_NOTIFY_INFO_PLIST_PATH="/Users/$CURRENT_USER/Library/Preferences/"
+  }
 
 #########################################################################################
 # Policy Variable to Modify
@@ -120,7 +124,7 @@
 
 # EULA configuration
 # CURRENTLY BROKEN - seeing issues with the EULA and continue buttons
-  EULA_ENABLED=true # Set variable to true or false
+  EULA_ENABLED=false # Set variable to true or false
 
   # Path to the EULA file you would like the user to read and agree to. It is
   # best to package this up with Composer or another tool and deliver it to a
@@ -133,7 +137,7 @@
 
 # Registration window configuration
 # CURRENTLY BROKEN - seeing issues with the registration and continue buttons
-  REGISTER_ENABLED=true # Set variable to true or false
+  REGISTER_ENABLED=false # Set variable to true or false
 
   # Registration window title
     REGISTER_TITLE="Register Your Mac"
@@ -248,7 +252,6 @@
       if [ -f "$DEP_NOTIFY_DEBUG" ]; then
         rm "$DEP_NOTIFY_DEBUG"
       fi
-
     # Setting Quit Key set to command + control + x (Testing Mode Only)
       echo "Command: QuitKey: x" >> "$DEP_NOTIFY_LOG"
   fi
@@ -341,17 +344,20 @@
   fi
 
 # Plist Location configuration
-# The plist information below is used by EULA and Registration windows
-  DEP_NOTIFY_CONFIG_PLIST="/Users/$CURRENT_USER/Library/Preferences/menu.nomad.DEPNotify.plist"
-  DEP_NOTIFY_INFO_PLIST="$DEP_NOTIFY_INFO_PLIST_PATH/DEPNotify.plist"
+  # Calling function to set the INFO_PLIST_PATH
+    INFO_PLIST_WRAPPER
 
-  # If testing mode is on, this will remove some old configuration files
-    if [ "$TESTING_MODE" = true ] && [ -f "$DEP_NOTIFY_CONFIG_PLIST" ]; then
-        rm "$DEP_NOTIFY_CONFIG_PLIST"
-    fi
-    if [ "$TESTING_MODE" = true ] && [ -f "$DEP_NOTIFY_INFO_PLIST" ]; then
-        rm "$DEP_NOTIFY_INFO_PLIST"
-    fi
+  # The plist information below is used by EULA and Registration windows
+    DEP_NOTIFY_CONFIG_PLIST="/Users/$CURRENT_USER/Library/Preferences/menu.nomad.DEPNotify.plist"
+    DEP_NOTIFY_INFO_PLIST="$DEP_NOTIFY_INFO_PLIST_PATH/DEPNotify.plist"
+
+    # If testing mode is on, this will remove some old configuration files
+      if [ "$TESTING_MODE" = true ] && [ -f "$DEP_NOTIFY_CONFIG_PLIST" ]; then
+          rm "$DEP_NOTIFY_CONFIG_PLIST"
+      fi
+      if [ "$TESTING_MODE" = true ] && [ -f "$DEP_NOTIFY_INFO_PLIST" ]; then
+          rm "$DEP_NOTIFY_INFO_PLIST"
+      fi
 
   # Setting default path to the plist which stores all the user completed info
     defaults write "$DEP_NOTIFY_CONFIG_PLIST" PathToPlistFile "$DEP_NOTIFY_INFO_PLIST_PATH"
@@ -422,14 +428,16 @@
     sudo -u "$CURRENT_USER" "$DEP_NOTIFY_APP"/Contents/MacOS/DEPNotify -path "$DEP_NOTIFY_LOG"&
   fi
 
+# Grabbing the DEP Notify Process ID for possible use later
+  DEP_NOTIFY_PROCESS=$(pgrep -l "DEPNotify" | cut -d " " -f1)
+  until [ "$DEP_NOTIFY_PROCESS" != "" ]; do
+    echo "$(date "+%a %h %d %H:%M:%S"): Waiting for DEPNotify to start to gather the process ID." >> "$DEP_NOTIFY_DEBUG"
+    sleep 1
+    DEP_NOTIFY_PROCESS=$(pgrep -l "DEPNotify" | cut -d " " -f1)
+  done
+
 # Pulling DEP Notify PID and using Caffeinate Binary to keep the computer awake
   if [ "$NO_SLEEP" = true ]; then
-    DEP_NOTIFY_PROCESS=$(pgrep -l "DEPNotify" | cut -d " " -f1)
-    until [ "$DEP_NOTIFY_PROCESS" != "" ]; do
-      echo "$(date "+%a %h %d %H:%M:%S"): Waiting for DEPNotify to start to gather the process ID." >> "$DEP_NOTIFY_DEBUG"
-      sleep 1
-      DEP_NOTIFY_PROCESS=$(pgrep -l "DEPNotify" | cut -d " " -f1)
-    done
     echo "$(date "+%a %h %d %H:%M:%S"): Caffeinating DEP Notify process. Process ID: $DEP_NOTIFY_PROCESS" >> "$DEP_NOTIFY_DEBUG"
     caffeinate -disu -w "$DEP_NOTIFY_PROCESS"&
   fi
