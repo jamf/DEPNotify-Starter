@@ -48,7 +48,9 @@
 # This flag could expose your data to risk by leaving an unlocked computer wide open.
 # Only recommended if you are using fullscreen mode and have a logout taking place at
 # the end of configuration (like for FileVault). Some folks may use this in workflows
-# where end users are not the primary people setting up the device.
+# where IT staff are the primary people setting up the device. The device will be
+# allowed to sleep again once the DEPNotify app is quit as caffeinate is looking
+# at DEPNotify's process ID.
   NO_SLEEP=false
 
 # Banner image can be 600px wide by 100px high. Images will be scaled to fit
@@ -57,8 +59,7 @@
 
   # Flag for using the custom branding icon from Self Service and Jamf Pro
   # This will override the banner image specified above. If you have changed the
-  # name of Self Service, make sure to modify the Self Service path in the Core
-  # Logic area under the heading Variables for File Paths
+  # name of Self Service, make sure to modify the Self Service name below.
     SELF_SERVICE_CUSTOM_BRANDING=false # Set variable to true or false
 
     # If using a name other than Self Service with Custom branding. Change the
@@ -154,6 +155,12 @@
   # Registration window can have up to two text fields. Leaving the text display
   # variable empty will hide the input box. Display text is to the side of the
   # input and placeholder text is they grey text inside the input box.
+  
+  # Registration window can have up to two dropdown / pick list inputs. Leaving
+  # the pick display variable empty will hide the dropdown / pick list.
+
+  # Upper Text Field
+  #######################################################################################
     TEXT_UPPER_DISPLAY="Computer Name"
     TEXT_UPPER_PLACEHOLDER="mac0128371"
 
@@ -170,6 +177,8 @@
         fi
       }
 
+  # Lower Text Field
+  #######################################################################################
     TEXT_LOWER_DISPLAY="Asset Tag"
     TEXT_LOWER_PLACEHOLDER="1234567890"
 
@@ -186,8 +195,8 @@
         fi
       }
 
-  # Registration window can have up to two dropdown / pick list inputs. Leaving
-  # the pick display variable empty will hide the dropdown / pick list.
+  # Upper Dropdown
+  #######################################################################################
     PICK_UPPER_DISPLAY="Building"
     PICK_UPPER_OPTIONS=(
       "Amsterdam"
@@ -208,6 +217,8 @@
         fi
       }
 
+  # Lower Dropdown
+  #######################################################################################
     PICK_LOWER_DISPLAY="Department"
     PICK_LOWER_OPTIONS=(
       "Customer Onboarding"
@@ -282,7 +293,7 @@
     exit 1
   fi
 
-# Run DEP Notify will run after Apple Setup Assistant and must be run as the end user.
+# Run DEP Notify will run after Apple Setup Assistant
   SETUP_ASSISTANT_PROCESS=$(pgrep -l "Setup Assistant")
   until [ "$SETUP_ASSISTANT_PROCESS" = "" ]; do
     echo "$(date "+%a %h %d %H:%M:%S"): Setup Assistant Still Running. PID $SETUP_ASSISTANT_PROCESS." >> "$DEP_NOTIFY_DEBUG"
@@ -428,7 +439,7 @@
     sudo -u "$CURRENT_USER" "$DEP_NOTIFY_APP"/Contents/MacOS/DEPNotify -path "$DEP_NOTIFY_LOG"&
   fi
 
-# Grabbing the DEP Notify Process ID for possible use later
+# Grabbing the DEP Notify Process ID for use later
   DEP_NOTIFY_PROCESS=$(pgrep -l "DEPNotify" | cut -d " " -f1)
   until [ "$DEP_NOTIFY_PROCESS" != "" ]; do
     echo "$(date "+%a %h %d %H:%M:%S"): Waiting for DEPNotify to start to gather the process ID." >> "$DEP_NOTIFY_DEBUG"
@@ -436,7 +447,7 @@
     DEP_NOTIFY_PROCESS=$(pgrep -l "DEPNotify" | cut -d " " -f1)
   done
 
-# Pulling DEP Notify PID and using Caffeinate Binary to keep the computer awake
+# Using Caffeinate binary to keep the computer awake if enabled
   if [ "$NO_SLEEP" = true ]; then
     echo "$(date "+%a %h %d %H:%M:%S"): Caffeinating DEP Notify process. Process ID: $DEP_NOTIFY_PROCESS" >> "$DEP_NOTIFY_DEBUG"
     caffeinate -disu -w "$DEP_NOTIFY_PROCESS"&
@@ -453,7 +464,7 @@
 
 # Setting the status bar
   # Counter is for making the determinate look nice. Starts at one and adds
-  # more based on EULA or register options.
+  # more based on EULA, register, or other options.
     ADDITIONAL_OPTIONS_COUNTER=1
     if [ "$EULA_ENABLED" = true ]; then
       ((ADDITIONAL_OPTIONS_COUNTER++))
