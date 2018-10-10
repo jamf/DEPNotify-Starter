@@ -100,6 +100,24 @@
     DEP_NOTIFY_INFO_PLIST_PATH="/Users/$CURRENT_USER/Library/Preferences/"
   }
 
+# Error Screen Text
+#########################################################################################
+# If testing mode if false and configuration files are present, this text will appear to
+# the end user and asking them to contact IT. Limited window options here as the
+# assumption is that they need to call IT. No continue or exit buttons will show for
+# DEP Notify window and it will not show in fullscreen.
+
+# Main heading that will be displayed under the image
+  ERROR_BANNER_TITLE="Uh oh, Something Needs Fixing!"
+
+# Paragraph text that will display under the main heading. For a new line, use \n
+# If this variable is left blank, the generic message will appear. Leave single
+# quotes below as double quotes will break the new lines.
+  ERROR_MAIN_TEXT='We are sorry that you are experiencing this inconvenience with your new Mac. However, we have the nerds to get you back up and running in no time! \n \n Please contact IT right away and we will take a look at your computer ASAP. \n \n Phone: 123-456-7890'
+
+# Error status message that is displayed under the progress bar
+  ERROR_STATUS="Setup Failed"
+
 #########################################################################################
 # Policy Variable to Modify
 #########################################################################################
@@ -155,7 +173,7 @@
   # Registration window can have up to two text fields. Leaving the text display
   # variable empty will hide the input box. Display text is to the side of the
   # input and placeholder text is they grey text inside the input box.
-  
+
   # Registration window can have up to two dropdown / pick list inputs. Leaving
   # the pick display variable empty will hide the dropdown / pick list.
 
@@ -314,6 +332,18 @@
   CURRENT_USER=$(stat -f "%Su" "/dev/console")
   echo "$(date "+%a %h %d %H:%M:%S"): Current user set to $CURRENT_USER." >> "$DEP_NOTIFY_DEBUG"
 
+# Adding Check and Warning if Testing Mode is off and BOM files exist
+  if [[ ( -f "$DEP_NOTIFY_LOG" || -f "$DEP_NOTIFY_DONE" ) && "$TESTING_MODE" = false ]]; then
+    echo "$(date "+%a %h %d %H:%M:%S"): TESTING_MODE set to false but config files were found in /var/tmp. Letting user know and exiting." >> "$DEP_NOTIFY_DEBUG"
+    mv "$DEP_NOTIFY_LOG" "/var/tmp/depnotify_old.log"
+    echo "Command: MainTitle: $ERROR_BANNER_TITLE" >> "$DEP_NOTIFY_LOG"
+    echo "Command: MainText: $ERROR_MAIN_TEXT" >> "$DEP_NOTIFY_LOG"
+    echo "Status: $ERROR_STATUS" >> "$DEP_NOTIFY_LOG"
+    sudo -u "$CURRENT_USER" "$DEP_NOTIFY_APP"/Contents/MacOS/DEPNotify -path "$DEP_NOTIFY_LOG"&
+    sleep 5
+    exit 1
+  fi
+
 # If SELF_SERVICE_CUSTOM_BRANDING is set to true. Loading the updated icon
   if [ "$SELF_SERVICE_CUSTOM_BRANDING" = true ]; then
     open -a "/Applications/$SELF_SERVICE_APP_NAME" --hide
@@ -471,18 +501,19 @@
     fi
     if [ "$REGISTER_ENABLED" = true ]; then
       ((ADDITIONAL_OPTIONS_COUNTER++))
-    fi
-    if [ "$TEXT_UPPER_DISPLAY" != "" ]; then
-      ((ADDITIONAL_OPTIONS_COUNTER++))
-    fi
-    if [ "$TEXT_LOWER_DISPLAY" != "" ]; then
-      ((ADDITIONAL_OPTIONS_COUNTER++))
-    fi
-    if [ "$PICK_UPPER_DISPLAY" != "" ]; then
-      ((ADDITIONAL_OPTIONS_COUNTER++))
-    fi
-    if [ "$PICK_LOWER_DISPLAY" != "" ]; then
-      ((ADDITIONAL_OPTIONS_COUNTER++))
+
+      if [ "$TEXT_UPPER_DISPLAY" != "" ]; then
+        ((ADDITIONAL_OPTIONS_COUNTER++))
+      fi
+      if [ "$TEXT_LOWER_DISPLAY" != "" ]; then
+        ((ADDITIONAL_OPTIONS_COUNTER++))
+      fi
+      if [ "$PICK_UPPER_DISPLAY" != "" ]; then
+        ((ADDITIONAL_OPTIONS_COUNTER++))
+      fi
+      if [ "$PICK_LOWER_DISPLAY" != "" ]; then
+        ((ADDITIONAL_OPTIONS_COUNTER++))
+      fi
     fi
 
   # Checking policy array and adding the count from the additional options above.
