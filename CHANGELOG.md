@@ -5,35 +5,39 @@
 Major enhancements and additions across the board by Kyle Bareis
 
 * Fixed several comments and made descriptions clearer
-* Brought SELF_SERVICE_APP_NAME variable into the variables area for easier modification
+* Added `NO_SLEEP` mode for longer installs. Be careful using this option as it may expose sensitive data
+* Brought `SELF_SERVICE_APP_NAME` variable into the variables area for easier modification
 * Added configuration for the DEPNotify plist that saves EULA and Registration window info
-  * DEP_NOTIFY_INFO_PLIST has been added as a configurable option
+  * `DEP_NOTIFY_INFO_PLIST` has been added as a configurable option
 * Added EULA logic and variables
   * Currently turned off as it causes issues with the app exiting gracefully
-  * EULA_FILE_PATH has been added as a configurable option
+  * `EULA_FILE_PATH` has been added as a configurable option
 * Added registration window logic
   * Currently turned off as it causes issues with the app exiting gracefully
-  * REGISTER_TITLE has been added as a configurable option
-  * REGISTER_BUTTON has been added as a configurable option
-  * REGISTER_BEGIN_STATUS has been added as a configurable option
-  * REGISTER_MIDDLE_STATUS has been added as a configurable option
-  * TEXT_UPPER_DISPLAY has been added as a configurable option
-  * TEXT_UPPER_PLACEHOLDER has been added as a configurable option
-  * TEXT_UPPER_LOGIC has been added as a configurable option
-  * TEXT_LOWER_DISPLAY has been added as a configurable option
-  * TEXT_LOWER_PLACEHOLDER has been added as a configurable option
-  * TEXT_LOWER_LOGIC has been added as a configurable option
-  * PICK_UPPER_DISPLAY has been added as a configurable option
-  * PICK_UPPER_OPTIONS has been added as a configurable option
-  * PICK_UPPER_LOGIC has been added as a configurable option
-  * PICK_LOWER_DISPLAY has been added as a configurable option
-  * PICK_LOWER_OPTIONS has been added as a configurable option
-  * PICK_LOWER_LOGIC has been added as a configurable option
-* Added a kill command for exiting Self Service if SELF_SERVICE_CUSTOM_BRANDING is set to true
-* Added an alert window that lets the admin know if the script is in TESTING_MODE when set to true
-* Added TESTING_MODE logic to FileVault logout to make it easier to test without having to logout
-* Added NO_SLEEP mode for longer installs. Be careful using this option as it may expose sensitive data
+  * `REGISTER_TITLE` has been added as a configurable option
+  * `REGISTER_BUTTON` has been added as a configurable option
+  * `REGISTER_BEGIN_STATUS` has been added as a configurable option
+  * `REGISTER_MIDDLE_STATUS` has been added as a configurable option
+  * `TEXT_UPPER_DISPLAY` has been added as a configurable option
+  * `TEXT_UPPER_PLACEHOLDER` has been added as a configurable option
+  * `TEXT_UPPER_LOGIC` has been added as a configurable option
+  * `TEXT_LOWER_DISPLAY` has been added as a configurable option
+  * `TEXT_LOWER_PLACEHOLDER` has been added as a configurable option
+  * `TEXT_LOWER_LOGIC` has been added as a configurable option
+  * `PICK_UPPER_DISPLAY` has been added as a configurable option
+  * `PICK_UPPER_OPTIONS` has been added as a configurable option
+  * `PICK_UPPER_LOGIC` has been added as a configurable option
+  * `PICK_LOWER_DISPLAY` has been added as a configurable option
+  * `PICK_LOWER_OPTIONS` has been added as a configurable option
+  * `PICK_LOWER_LOGIC` has been added as a configurable option
+* Added error main screen if BOM files or key logs are found
+* Added a kill command for exiting Self Service if `SELF_SERVICE_CUSTOM_BRANDING` is set to true
+* Added an alert window that lets the admin know if the script is in `TESTING_MOD`E when set to true
+* Added `TESTING_MODE` logic to FileVault logout to make it easier to test without having to logout
 * Added additional screenshots to the [example-img](example-img) folder
+* Changed `CURRENT_USER` from stat method to Python method per community feedback
+* Changed DEP Notify app calls from binary open to app open per community feedback
+* Changed `DEP_NOTIFY_CONFIG` to `DEP_NOTIFY_LOG`
 
 ## [1.1.2] - 2018/10/04
 

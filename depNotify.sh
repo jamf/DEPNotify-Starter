@@ -36,9 +36,9 @@
 # Visual Appearance and General Functionality Variables to Modify
 #########################################################################################
 # Testing flag will enable the following things to change:
-  # Auto removal of BOM files to reduce errors
-  # Sleep commands instead of policies or other changes being called
-  # Quit Key set to command + control + x
+# Auto removal of BOM files to reduce errors
+# Sleep commands instead of policies or other changes being called
+# Quit Key set to command + control + x
   TESTING_MODE=true # Set variable to true or false
 
 # Flag the app to open fullscreen or as a window
@@ -329,7 +329,7 @@
   done
 
 # After the Apple Setup completed. Now safe to grab the current user.
-  CURRENT_USER=$(stat -f "%Su" "/dev/console")
+  CURRENT_USER=$(/usr/bin/python -c 'from SystemConfiguration import SCDynamicStoreCopyConsoleUser; import sys; username = (SCDynamicStoreCopyConsoleUser(None, None, None) or [None])[0]; username = [username,""][username in [u"loginwindow", None, u""]]; sys.stdout.write(username + "\n");')
   echo "$(date "+%a %h %d %H:%M:%S"): Current user set to $CURRENT_USER." >> "$DEP_NOTIFY_DEBUG"
 
 # Adding Check and Warning if Testing Mode is off and BOM files exist
@@ -339,7 +339,7 @@
     echo "Command: MainTitle: $ERROR_BANNER_TITLE" >> "$DEP_NOTIFY_LOG"
     echo "Command: MainText: $ERROR_MAIN_TEXT" >> "$DEP_NOTIFY_LOG"
     echo "Status: $ERROR_STATUS" >> "$DEP_NOTIFY_LOG"
-    sudo -u "$CURRENT_USER" "$DEP_NOTIFY_APP"/Contents/MacOS/DEPNotify -path "$DEP_NOTIFY_LOG"&
+    sudo -u "$CURRENT_USER" open -a "$DEP_NOTIFY_APP" --args -path "$DEP_NOTIFY_LOG"
     sleep 5
     exit 1
   fi
@@ -464,9 +464,9 @@
 
 # Opening the app after initial configuration
   if [ "$FULLSCREEN" = true ]; then
-    sudo -u "$CURRENT_USER" "$DEP_NOTIFY_APP"/Contents/MacOS/DEPNotify -path "$DEP_NOTIFY_LOG" -fullScreen&
+    sudo -u "$CURRENT_USER" open -a "$DEP_NOTIFY_APP" --args -path "$DEP_NOTIFY_LOG" -fullScreen
   elif [ "$FULLSCREEN" = false ]; then
-    sudo -u "$CURRENT_USER" "$DEP_NOTIFY_APP"/Contents/MacOS/DEPNotify -path "$DEP_NOTIFY_LOG"&
+    sudo -u "$CURRENT_USER" open -a "$DEP_NOTIFY_APP" --args -path "$DEP_NOTIFY_LOG"
   fi
 
 # Grabbing the DEP Notify Process ID for use later
@@ -575,13 +575,5 @@
     else
       echo "Command: Quit: $COMPLETE_ALERT_TEXT" >> "$DEP_NOTIFY_LOG"
     fi
-
-# Forcing Exit of DEP Notify if EULA or Registration Window are on
-# This is a brute force method until I can get a better fix in place
-  if [ "$EULA_ENABLED" = true ] || [ "$REGISTER_ENABLED" = true ]; then
-    sleep 15
-    echo "$(date "+%a %h %d %H:%M:%S"): DEP Notify Window still running. Killing DEPNotify PID $DEP_NOTIFY_PROCESS." >> "$DEP_NOTIFY_DEBUG"
-    kill "$DEP_NOTIFY_PROCESS"
-  fi
 
 exit 0
