@@ -18,7 +18,7 @@ The script will need to be changed from `TESTING_MODE=true` to `TESTING_MODE=fal
 
 ## Overview of Jamf Pro Setup
 
-While each organization will use a setup tool like DEP Notify differently, here is the most common way that it is delivered as well as how the script was designed to function. Changing the workflow should result in testing prior to production release.
+While each organization will use a setup tool like DEP Notify differently, this script is designed with an end user provisioning model in mind. Changing the workflow should result in testing prior to production release.
 
 1. Create policies in Jamf Pro to install core software during first setup. Set the frequency to ongoing and the trigger to custom and type in a manual trigger. Ex: depNotifyFirefox or installOffice201x
 2. Once software policies are created, customize this script with changes to verbiage as well as updating the POLICY_ARRAY with appropriate information. Double check the testing flag once you are ready to proceed.

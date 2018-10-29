@@ -1,19 +1,22 @@
 # Change Log
 
-## [x.x.x] - xxxx/xx/xx
+## [1.2.0] - 2018/10/29
 
 Major enhancements and additions across the board by Kyle Bareis
 
+* Started versioning the script's name to make it easier for folks to know what version of the script they have
 * Fixed several comments and made descriptions clearer
-* Added `NO_SLEEP` mode for longer installs. Be careful using this option as it may expose sensitive data
+* Fixed several spelling issues and learned how to use the spell checker in Atom
+* Added `NO_SLEEP` mode uses the caffeinate binary for longer installs. Be careful using this option as it may expose sensitive data!
 * Brought `SELF_SERVICE_APP_NAME` variable into the variables area for easier modification
+* Added ability to choose between dropdown alert boxes and changing the main text and having a button on the main screen via `COMPLETE_METHOD_DROPDOWN_ALERT`. It is recommended that that you leave this set to `false` as there are issues with logout and continue drop down boxes and DEPNotify in the current shipping version
 * Added configuration for the DEPNotify plist that saves EULA and Registration window info
-  * `DEP_NOTIFY_INFO_PLIST` has been added as a configurable option
+  * `DEP_NOTIFY_INFO_PLIST_PATH` has been added as a configurable option
+* Added error main screen if BOM files or key logs are found
 * Added EULA logic and variables
-  * Currently turned off as it causes issues with the app exiting gracefully
   * `EULA_FILE_PATH` has been added as a configurable option
-* Added registration window logic
-  * Currently turned off as it causes issues with the app exiting gracefully
+  * Recommended that the EULA file is packaged up and delivered via package for easiest deployment method
+* Added registration window logic and variables
   * `REGISTER_TITLE` has been added as a configurable option
   * `REGISTER_BUTTON` has been added as a configurable option
   * `REGISTER_BEGIN_STATUS` has been added as a configurable option
@@ -30,16 +33,14 @@ Major enhancements and additions across the board by Kyle Bareis
   * `PICK_LOWER_DISPLAY` has been added as a configurable option
   * `PICK_LOWER_OPTIONS` has been added as a configurable option
   * `PICK_LOWER_LOGIC` has been added as a configurable option
-* Added ability to choose between dropdown alert boxes and changing the main text and having a button on the main screen via `COMPLETE_METHOD_DROPDOWN_ALERT`
-* Added error main screen if BOM files or key logs are found
-* Added a kill command for exiting Self Service if `SELF_SERVICE_CUSTOM_BRANDING` is set to true
-* Added an alert window that lets the admin know if the script is in `TESTING_MODE` when set to true
+* Changed `DEP_NOTIFY_CONFIG` to `DEP_NOTIFY_LOG`
 * Added policy parameter support for the `true/false` flag items. Screenshot added to [example-img](example-img) folder
+* Changed `CURRENT_USER` from stat method to Python method per community feedback
+* Added a kill command for exiting Self Service if `SELF_SERVICE_CUSTOM_BRANDING` is set to true
+* Changed DEP Notify app calls from binary open to app open per community feedback
+* Added an alert window that lets the admin know if the script is in `TESTING_MODE` when set to true
 * Added `TESTING_MODE` logic to FileVault logout to make it easier to test without having to logout
 * Added additional screenshots to the [example-img](example-img) folder
-* Changed `CURRENT_USER` from stat method to Python method per community feedback
-* Changed DEP Notify app calls from binary open to app open per community feedback
-* Changed `DEP_NOTIFY_CONFIG` to `DEP_NOTIFY_LOG`
 
 ## [1.1.2] - 2018/10/04
 
