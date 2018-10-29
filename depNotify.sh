@@ -35,6 +35,7 @@
 #########################################################################################
 # Visual Appearance and General Functionality Variables to Modify
 #########################################################################################
+
 # Testing flag will enable the following things to change:
 # Auto removal of BOM files to reduce errors
 # Sleep commands instead of policies or other changes being called
@@ -86,12 +87,25 @@
 # Text that will display in the progress bar
   INSTALL_COMPLETE_TEXT="Configuration Complete!"
 
+# Complete message method can be ether dropdown or a modification to the main
+# text and having a button at the bottom of the page. This flag will change it
+# back and forth between the two options.
+  COMPLETE_METHOD_DROPDOWN_ALERT=false # Set variable to true or false
+
 # Script designed to automatically logout user to start FileVault process if
 # deferred enablement is detected. Text displayed if deferred status is on.
-  FV_LOGOUT_TEXT="Your Mac must logout to start the encryption process. You will be asked to enter your password and click OK or Continue a few times. Your Mac will be usable while encryption takes place."
+  # Option for dropdown alert box
+    FV_ALERT_TEXT="Your Mac must logout to start the encryption process. You will be asked to enter your password and click OK or Continue a few times. Your Mac will be usable while encryption takes place."
+  # Options if not using dropdown alert box
+    FV_COMPLETE_MAIN_TEXT='Your Mac must logout to start the encryption process. You will be asked to enter your password and click OK or Continue a few times. Your Mac will be usable while encryption takes place.'
+    FV_COMPLETE_BUTTON_TEXT="Logout"
 
 # Text that will display inside the alert once policies have finished
-  COMPLETE_ALERT_TEXT="Your Mac is now finished with initial setup and configuration. Press Quit to get started!"
+  # Option for dropdown alert box
+    COMPLETE_ALERT_TEXT="Your Mac is now finished with initial setup and configuration. Press Quit to get started!"
+  # Options if not using dropdown alert box
+    COMPLETE_MAIN_TEXT='Your Mac is now finished with initial setup and configuration.'
+    COMPLETE_BUTTON_TEXT="Get Started"
 
 # If using EULA or Registration Window below, this will configure where the file is saved.
 # You may want to save the file for purposes like verifying EULA acceptance. This variable
@@ -105,7 +119,8 @@
 # If testing mode if false and configuration files are present, this text will appear to
 # the end user and asking them to contact IT. Limited window options here as the
 # assumption is that they need to call IT. No continue or exit buttons will show for
-# DEP Notify window and it will not show in fullscreen.
+# DEP Notify window and it will not show in fullscreen. IT staff will need to use Terminal
+# or Activity Monitor to kill DEP Notify.
 
 # Main heading that will be displayed under the image
   ERROR_BANNER_TITLE="Uh oh, Something Needs Fixing!"
@@ -142,7 +157,6 @@
 #########################################################################################
 
 # EULA configuration
-# CURRENTLY BROKEN - seeing issues with the EULA and continue buttons
   EULA_ENABLED=false # Set variable to true or false
 
   # Path to the EULA file you would like the user to read and agree to. It is
@@ -155,7 +169,6 @@
 #########################################################################################
 
 # Registration window configuration
-# CURRENTLY BROKEN - seeing issues with the registration and continue buttons
   REGISTER_ENABLED=false # Set variable to true or false
 
   # Registration window title
@@ -192,6 +205,7 @@
            sleep 10
         else
           "$JAMF_BINARY" setComputerName -name "$TEXT_UPPER_VALUE"
+          sleep 5
         fi
       }
 
@@ -269,18 +283,30 @@
   DEP_NOTIFY_DEBUG="/var/tmp/depnotifyDebug.log"
   DEP_NOTIFY_DONE="/var/tmp/com.depnotify.provisioning.done"
 
+# Pulling from Policy parameters to allow true/false flags to be set. More info
+# can be found on https://www.jamf.com/jamf-nation/articles/146/script-parameters
+# These will override what is specified in the script above.
+  # Testing Mode
+    if [ "$4" != "" ]; then TESTING_MODE="$4"; fi
+  # Fullscreen Mode
+    if [ "$5" != "" ]; then FULLSCREEN="$5"; fi
+  # No Sleep / Caffeinate Mode
+    if [ "$6" != "" ]; then NO_SLEEP="$6"; fi
+  # Self Service Custom Branding
+    if [ "$7" != "" ]; then SELF_SERVICE_CUSTOM_BRANDING="$7"; fi
+  # Complete method dropdown or main screen
+    if [ "$8" != "" ]; then COMPLETE_METHOD_DROPDOWN_ALERT="$8"; fi
+  # EULA Mode
+    if [ "$9" != "" ]; then EULA_ENABLED="$9"; fi
+  # Registration Mode
+    if [ "${10}" != "" ]; then REGISTER_ENABLED="${10}"; fi
+
 # Standard Testing Mode Enhancements
   if [ "$TESTING_MODE" = true ]; then
     # Removing old config file if present (Testing Mode Only)
-      if [ -f "$DEP_NOTIFY_LOG" ]; then
-        rm "$DEP_NOTIFY_LOG"
-      fi
-      if [ -f "$DEP_NOTIFY_DONE" ]; then
-        rm "$DEP_NOTIFY_DONE"
-      fi
-      if [ -f "$DEP_NOTIFY_DEBUG" ]; then
-        rm "$DEP_NOTIFY_DEBUG"
-      fi
+      if [ -f "$DEP_NOTIFY_LOG" ]; then rm "$DEP_NOTIFY_LOG"; fi
+      if [ -f "$DEP_NOTIFY_DONE" ]; then rm "$DEP_NOTIFY_DONE"; fi
+      if [ -f "$DEP_NOTIFY_DEBUG" ]; then rm "$DEP_NOTIFY_DEBUG"; fi
     # Setting Quit Key set to command + control + x (Testing Mode Only)
       echo "Command: QuitKey: x" >> "$DEP_NOTIFY_LOG"
   fi
@@ -300,6 +326,10 @@
   fi
   if [ "$SELF_SERVICE_CUSTOM_BRANDING" != true ] && [ "$SELF_SERVICE_CUSTOM_BRANDING" != false ]; then
     echo "$(date "+%a %h %d %H:%M:%S"): Self Service Custom Branding configuration not set properly. Currently set to $SELF_SERVICE_CUSTOM_BRANDING. Please update to true or false." >> "$DEP_NOTIFY_DEBUG"
+    exit 1
+  fi
+  if [ "$COMPLETE_METHOD_DROPDOWN_ALERT" != true ] && [ "$COMPLETE_METHOD_DROPDOWN_ALERT" != false ]; then
+    echo "$(date "+%a %h %d %H:%M:%S"): Completion alert method not set properly. Currently set to $COMPLETE_METHOD_DROPDOWN_ALERT. Please update to true or false." >> "$DEP_NOTIFY_DEBUG"
     exit 1
   fi
   if [ "$EULA_ENABLED" != true ] && [ "$EULA_ENABLED" != false ]; then
@@ -365,24 +395,16 @@
   fi
 
 # Setting custom image if specified
-  if [ "$BANNER_IMAGE_PATH" != "" ]; then
-    echo "Command: Image: $BANNER_IMAGE_PATH" >> "$DEP_NOTIFY_LOG"
-  fi
+  if [ "$BANNER_IMAGE_PATH" != "" ]; then  echo "Command: Image: $BANNER_IMAGE_PATH" >> "$DEP_NOTIFY_LOG"; fi
 
 # Setting custom title if specified
-  if [ "$BANNER_TITLE" != "" ]; then
-    echo "Command: MainTitle: $BANNER_TITLE" >> "$DEP_NOTIFY_LOG"
-  fi
+  if [ "$BANNER_TITLE" != "" ]; then echo "Command: MainTitle: $BANNER_TITLE" >> "$DEP_NOTIFY_LOG"; fi
 
 # Setting custom main text if specified
-  if [ "$MAIN_TEXT" != "" ]; then
-    echo "Command: MainText: $MAIN_TEXT" >> "$DEP_NOTIFY_LOG"
-  fi
+  if [ "$MAIN_TEXT" != "" ]; then echo "Command: MainText: $MAIN_TEXT" >> "$DEP_NOTIFY_LOG"; fi
 
 # Adding help url and button if specified
-  if [ "$SUPPORT_URL" != "" ]; then
-    echo "Command: Help: $SUPPORT_URL" >> "$DEP_NOTIFY_LOG"
-  fi
+  if [ "$SUPPORT_URL" != "" ]; then echo "Command: Help: $SUPPORT_URL" >> "$DEP_NOTIFY_LOG"; fi
 
 # Plist Location configuration
   # Calling function to set the INFO_PLIST_PATH
@@ -392,13 +414,9 @@
     DEP_NOTIFY_CONFIG_PLIST="/Users/$CURRENT_USER/Library/Preferences/menu.nomad.DEPNotify.plist"
     DEP_NOTIFY_INFO_PLIST="$DEP_NOTIFY_INFO_PLIST_PATH/DEPNotify.plist"
 
-    # If testing mode is on, this will remove some old configuration files
-      if [ "$TESTING_MODE" = true ] && [ -f "$DEP_NOTIFY_CONFIG_PLIST" ]; then
-          rm "$DEP_NOTIFY_CONFIG_PLIST"
-      fi
-      if [ "$TESTING_MODE" = true ] && [ -f "$DEP_NOTIFY_INFO_PLIST" ]; then
-          rm "$DEP_NOTIFY_INFO_PLIST"
-      fi
+  # If testing mode is on, this will remove some old configuration files
+    if [ "$TESTING_MODE" = true ] && [ -f "$DEP_NOTIFY_CONFIG_PLIST" ]; then rm "$DEP_NOTIFY_CONFIG_PLIST"; fi
+    if [ "$TESTING_MODE" = true ] && [ -f "$DEP_NOTIFY_INFO_PLIST" ]; then rm "$DEP_NOTIFY_INFO_PLIST"; fi
 
   # Setting default path to the plist which stores all the user completed info
     defaults write "$DEP_NOTIFY_CONFIG_PLIST" PathToPlistFile "$DEP_NOTIFY_INFO_PLIST_PATH"
@@ -408,9 +426,7 @@
     DEP_NOTIFY_EULA_DONE="/var/tmp/com.depnotify.agreement.done"
 
     # If testing mode is on, this will remove EULA specific configuration files
-      if [ "$TESTING_MODE" = true ] && [ -f "$DEP_NOTIFY_EULA_DONE" ]; then
-          rm "$DEP_NOTIFY_EULA_DONE"
-      fi
+      if [ "$TESTING_MODE" = true ] && [ -f "$DEP_NOTIFY_EULA_DONE" ]; then rm "$DEP_NOTIFY_EULA_DONE"; fi
 
     # Writing the location of the EULA file and changing ownership of the file
       defaults write "$DEP_NOTIFY_CONFIG_PLIST" pathToEULA "$EULA_FILE_PATH"
@@ -423,9 +439,7 @@
     DEP_NOTIFY_REGISTER_DONE="/var/tmp/com.depnotify.registration.done"
 
     # If testing mode is on, this will remove registration specific configuration files
-      if [ "$TESTING_MODE" = true ] && [ -f "$DEP_NOTIFY_REGISTER_DONE" ]; then
-          rm "$DEP_NOTIFY_REGISTER_DONE"
-      fi
+      if [ "$TESTING_MODE" = true ] && [ -f "$DEP_NOTIFY_REGISTER_DONE" ]; then rm "$DEP_NOTIFY_REGISTER_DONE"; fi
 
     # Main Window Text Configuration
       defaults write "$DEP_NOTIFY_CONFIG_PLIST" RegisterMainTitle "$REGISTER_TITLE"
@@ -496,24 +510,12 @@
   # Counter is for making the determinate look nice. Starts at one and adds
   # more based on EULA, register, or other options.
     ADDITIONAL_OPTIONS_COUNTER=1
-    if [ "$EULA_ENABLED" = true ]; then
-      ((ADDITIONAL_OPTIONS_COUNTER++))
-    fi
-    if [ "$REGISTER_ENABLED" = true ]; then
-      ((ADDITIONAL_OPTIONS_COUNTER++))
-
-      if [ "$TEXT_UPPER_DISPLAY" != "" ]; then
-        ((ADDITIONAL_OPTIONS_COUNTER++))
-      fi
-      if [ "$TEXT_LOWER_DISPLAY" != "" ]; then
-        ((ADDITIONAL_OPTIONS_COUNTER++))
-      fi
-      if [ "$PICK_UPPER_DISPLAY" != "" ]; then
-        ((ADDITIONAL_OPTIONS_COUNTER++))
-      fi
-      if [ "$PICK_LOWER_DISPLAY" != "" ]; then
-        ((ADDITIONAL_OPTIONS_COUNTER++))
-      fi
+    if [ "$EULA_ENABLED" = true ]; then ((ADDITIONAL_OPTIONS_COUNTER++)); fi
+    if [ "$REGISTER_ENABLED" = true ]; then ((ADDITIONAL_OPTIONS_COUNTER++))
+      if [ "$TEXT_UPPER_DISPLAY" != "" ]; then ((ADDITIONAL_OPTIONS_COUNTER++)); fi
+      if [ "$TEXT_LOWER_DISPLAY" != "" ]; then ((ADDITIONAL_OPTIONS_COUNTER++)); fi
+      if [ "$PICK_UPPER_DISPLAY" != "" ]; then ((ADDITIONAL_OPTIONS_COUNTER++)); fi
+      if [ "$PICK_LOWER_DISPLAY" != "" ]; then ((ADDITIONAL_OPTIONS_COUNTER++)); fi
     fi
 
   # Checking policy array and adding the count from the additional options above.
@@ -537,18 +539,10 @@
       sleep 1
     done
     # Running Logic For Each Registration Box
-      if [ "$TEXT_UPPER_DISPLAY" != "" ]; then
-        TEXT_UPPER_LOGIC
-      fi
-      if [ "$TEXT_LOWER_DISPLAY" != "" ]; then
-        TEXT_LOWER_LOGIC
-      fi
-      if [ "$PICK_UPPER_DISPLAY" != "" ]; then
-        PICK_UPPER_LOGIC
-      fi
-      if [ "$PICK_LOWER_DISPLAY" != "" ]; then
-        PICK_LOWER_LOGIC
-      fi
+      if [ "$TEXT_UPPER_DISPLAY" != "" ]; then TEXT_UPPER_LOGIC; fi
+      if [ "$TEXT_LOWER_DISPLAY" != "" ]; then TEXT_LOWER_LOGIC; fi
+      if [ "$PICK_UPPER_DISPLAY" != "" ]; then PICK_UPPER_LOGIC; fi
+      if [ "$PICK_LOWER_DISPLAY" != "" ]; then PICK_LOWER_LOGIC; fi
   fi
 
 # Loop to run policies
@@ -569,11 +563,26 @@
 
   # Logic to log user out if FileVault is detected. Otherwise, app will close.
     if [ "$FV_DEFERRED_STATUS" = "active" ] && [ "$TESTING_MODE" = true ]; then
-      echo "Command: Quit: This is typically where your FV_LOGOUT_TEXT would be displayed. However, TESTING_MODE is set to true and FileVault deferred status is on." >> "$DEP_NOTIFY_LOG"
+      if [ "$COMPLETE_METHOD_DROPDOWN_ALERT" = true ]; then
+        echo "Command: Quit: This is typically where your FV_LOGOUT_TEXT would be displayed. However, TESTING_MODE is set to true and FileVault deferred status is on." >> "$DEP_NOTIFY_LOG"
+      else
+        echo "Command: MainText: TESTING_MODE is set to true and FileVault deferred status is on. Button effect is quit instead of logout. \n \n $FV_COMPLETE_MAIN_TEXT" >> "$DEP_NOTIFY_LOG"
+        echo "Command: ContinueButton: Test $FV_COMPLETE_BUTTON_TEXT" >> "$DEP_NOTIFY_LOG"
+      fi
     elif [ "$FV_DEFERRED_STATUS" = "active" ] && [ "$TESTING_MODE" = false ]; then
-      echo "Command: Logout: $FV_LOGOUT_TEXT" >> "$DEP_NOTIFY_LOG"
+      if [ "$COMPLETE_METHOD_DROPDOWN_ALERT" = true ]; then
+        echo "Command: Logout: $FV_ALERT_TEXT" >> "$DEP_NOTIFY_LOG"
+      else
+        echo "Command: MainText: $FV_COMPLETE_MAIN_TEXT" >> "$DEP_NOTIFY_LOG"
+        echo "Command: ContinueButtonLogout: $FV_COMPLETE_BUTTON_TEXT" >> "$DEP_NOTIFY_LOG"
+      fi
     else
-      echo "Command: Quit: $COMPLETE_ALERT_TEXT" >> "$DEP_NOTIFY_LOG"
+      if [ "$COMPLETE_METHOD_DROPDOWN_ALERT" = true ]; then
+        echo "Command: Quit: $COMPLETE_ALERT_TEXT" >> "$DEP_NOTIFY_LOG"
+      else
+        echo "Command: MainText: $COMPLETE_MAIN_TEXT" >> "$DEP_NOTIFY_LOG"
+        echo "Command: ContinueButton: $COMPLETE_BUTTON_TEXT" >> "$DEP_NOTIFY_LOG"
+      fi
     fi
 
 exit 0

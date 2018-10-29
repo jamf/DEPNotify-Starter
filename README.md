@@ -37,7 +37,7 @@ DEP Notify PKG and additional documentation can be found at: https://gitlab.com/
 * macOS 10.4.0
 * macOS 10.13.6
 * DEPNotify 1.1.0
-* Jamf Pro 10.7.1
+* Jamf Pro 10.8
 
 ## Change Log
 

@@ -30,9 +30,11 @@ Major enhancements and additions across the board by Kyle Bareis
   * `PICK_LOWER_DISPLAY` has been added as a configurable option
   * `PICK_LOWER_OPTIONS` has been added as a configurable option
   * `PICK_LOWER_LOGIC` has been added as a configurable option
+* Added ability to choose between dropdown alert boxes and changing the main text and having a button on the main screen via `COMPLETE_METHOD_DROPDOWN_ALERT`
 * Added error main screen if BOM files or key logs are found
 * Added a kill command for exiting Self Service if `SELF_SERVICE_CUSTOM_BRANDING` is set to true
-* Added an alert window that lets the admin know if the script is in `TESTING_MOD`E when set to true
+* Added an alert window that lets the admin know if the script is in `TESTING_MODE` when set to true
+* Added policy parameter support for the `true/false` flag items. Screenshot added to [example-img](example-img) folder
 * Added `TESTING_MODE` logic to FileVault logout to make it easier to test without having to logout
 * Added additional screenshots to the [example-img](example-img) folder
 * Changed `CURRENT_USER` from stat method to Python method per community feedback
