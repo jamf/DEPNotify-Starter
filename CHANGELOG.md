@@ -4,7 +4,7 @@
 
 Major enhancements and additions across the board by Kyle Bareis
 
-* Started versioning the script's name to make it easier for folks to know what version of the script they have
+* Added a version at the top of the script to allow admins to easier know what version they were running
 * Fixed several comments and made descriptions clearer
 * Fixed several spelling issues and learned how to use the spell checker in Atom
 * Added `NO_SLEEP` mode uses the caffeinate binary for longer installs. Be careful using this option as it may expose sensitive data!
