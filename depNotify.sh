@@ -70,8 +70,10 @@
   INITAL_START_STATUS="Initial Configuration Starting..."
 
 # EULA configuration
-# CURRENTLY BROKEN - seeing issues with the EULA and contiune buttons
   EULA_ENABLED=false # Set variable to true or false
+  
+# Registration configuration
+  REG_ENABLED=true # Set variable to true or false
 
 # The policy array must be formatted "Progress Bar text,customTrigger". These will be
 # run in order as they appear below.
@@ -79,6 +81,16 @@
     "Installing Chrome,chrome"
     "Installing Firefox,firefox"
     "Installing XYZ,xyzCustomTrigger"
+  )
+
+# The Registration preferences array must be formatted "Preference Key 'value".
+# Remove any un-wanted prefs
+  REG_PREFS_ARRAY=(
+    "RegisterMainTitle,ComputerName"
+    "RegisterButtonLabel,Submit"
+    "UITextFieldUpperLabel,ComputerName"
+    "UITextFieldUpperPlaceholder,Type 'SERIAL' for auto name"
+    "pathToEULA,/var/tmp/DEPNotifyEULA.txt"
   )
 
 # Text that will display in the progress bar
@@ -102,7 +114,10 @@
   DEP_NOTIFY_CONFIG="/var/tmp/depnotify.log"
   DEP_NOTIFY_DONE="/var/tmp/com.depnotify.provisioning.done"
   DEP_NOTIFY_EULA="/var/tmp/com.depnotify.agreement.done"
+  DEP_NOTIFY_REG="/var/tmp/com.depnotify.registration.done"
+  DEP_NOTIFY_REG_PLIST_PATH="/var/tmp/"
   TMP_DEBUG_LOG="/var/tmp/depNotifyDebug.log"
+  DEP_NOTIFY_FILES=$(find /private/var/tmp | grep "depnotify" && find /private/var/tmp | grep "depNotify" && find /private/var/tmp | grep "DEPNotify")
 
 # Validating true/false flags
   if [ "$TESTING_MODE" != true ] && [ "$TESTING_MODE" != false ]; then
@@ -115,6 +130,10 @@
   fi
   if [ "$EULA_ENABLED" != true ] && [ "$EULA_ENABLED" != false ]; then
     echo "$(date "+%a %h %d %H:%M:%S"): EULA configuration not set properly. Currently set to '$EULA_ENABLED'. Please update to true or false." >> "$TMP_DEBUG_LOG"
+    exit 1
+  fi
+  if [ "$REG_ENABLED" != true ] && [ "$REG_ENABLED" != false ]; then
+    echo "$(date "+%a %h %d %H:%M:%S"): Registation configuration not set properly. Currently set to '$REG_ENABLED'. Please update to true or false." >> "$TMP_DEBUG_LOG"
     exit 1
   fi
 
@@ -169,6 +188,14 @@
       if [ -f "$DEP_NOTIFY_EULA" ]; then
         rm "$DEP_NOTIFY_EULA"
       fi
+      
+      # Removing old config file if present
+      for i in $DEP_NOTIFY_FILES; do
+      	rm $i
+      done
+      
+      sudo -u "$CURRENT_USER" defaults delete menu.nomad.DEPNotify
+      
   fi
 
 # Setting custom image if specified
@@ -209,6 +236,10 @@
     if [ "$EULA_ENABLED" = true ]; then
       ((ADDITIONAL_OPTIONS_COUNTER++))
     fi
+    
+    if [ "$REG_ENABLED" = true ]; then
+      ((ADDITIONAL_OPTIONS_COUNTER++))
+    fi
 
   # Checking policy array and adding the count from the additional options above.
     ARRAY_LENGTH="$((${#POLICY_ARRAY[@]}+ADDITIONAL_OPTIONS_COUNTER))"
@@ -219,6 +250,23 @@
     echo "Status: Waiting on EULA Acceptance" >> "$DEP_NOTIFY_CONFIG"
     echo "Command: ContinueButtonEULA: EULA" >> "$DEP_NOTIFY_CONFIG"
     while [ ! -f "$DEP_NOTIFY_EULA" ]; do
+      sleep 1
+    done
+  fi
+  
+# REG prompt prior to configuration
+  if [ "$REG_ENABLED" = true ]; then
+
+	sudo -u "$CURRENT_USER" defaults write menu.nomad.DEPNotify PathToPlistFile "$DEP_NOTIFY_REG_PLIST_PATH"
+	for PREF_SET in "${REG_PREFS_ARRAY[@]}"; do
+		KEY=$(echo "$PREF_SET" | cut -d ',' -f1)
+		PREF=$(echo "$PREF_SET" | cut -d ',' -f2)
+		sudo -u "$CURRENT_USER" defaults write menu.nomad.DEPNotify $KEY "$PREF"
+	done
+	sleep 2
+    echo "Status: Waiting on Registration Information" >> "$DEP_NOTIFY_CONFIG"
+    echo "Command: ContinueButtonRegister: Continue" >> "$DEP_NOTIFY_CONFIG"
+    while [ ! -f "$DEP_NOTIFY_REG" ]; do
       sleep 1
     done
   fi
@@ -239,8 +287,17 @@
 # Exit gracefully after things are finished
   echo "Status: $INSTALL_COMPLETE_TEXT" >> "$DEP_NOTIFY_CONFIG"
   if [ "$FV_DEFERRED_STATUS" = "active" ]; then
-    echo "Command: Logout: $FV_LOGOUT_TEXT" >> "$DEP_NOTIFY_CONFIG"
-  else
-    echo "Command: Quit: $COMPLETE_ALERT_TEXT" >> "$DEP_NOTIFY_CONFIG"
+    echo "Command: LogoutNow:" >> "$DEP_NOTIFY_CONFIG"
+  else	
+	if [ "$REG_ENABLED" = true ] || [ "$EULA_ENABLED" = true ]; then
+		echo "Command: Quit" >> "$DEP_NOTIFY_CONFIG"
+    	killall DEPNotify
+		"$JAMF_BINARY" displayMessage -message "$COMPLETE_ALERT_TEXT"
+	else
+		echo "Command: Quit: $COMPLETE_ALERT_TEXT" >> "$DEP_NOTIFY_CONFIG"
+		sleep 60
+    	echo "Command: Quit" >> "$DEP_NOTIFY_CONFIG"
+    	killall DEPNotify
+    fi
   fi
   exit 0
