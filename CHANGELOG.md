@@ -1,6 +1,6 @@
 # Change Log
 
-## [1.2.0] - 2018/10/29
+## [1.2.0] - 2018/11/01
 
 Major enhancements and additions across the board by Kyle Bareis
 

@@ -92,9 +92,9 @@
 # Text that will display in the progress bar
   INSTALL_COMPLETE_TEXT="Configuration Complete!"
 
-# Complete message method can be ether dropdown or a modification to the main
-# text and having a button at the bottom of the page. This flag will change it
-# back and forth between the two options.
+# Complete messaging to the end use can ether be a button at the bottom of the
+# app with a modification to the main window text or a dropdown alert box. Default
+# value set to false and will use buttons instead of dropdown messages.
   COMPLETE_METHOD_DROPDOWN_ALERT=false # Set variable to true or false
 
 # Script designed to automatically logout user to start FileVault process if

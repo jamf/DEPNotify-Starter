@@ -36,8 +36,11 @@ DEP Notify PKG and additional documentation can be found at: https://gitlab.com/
 
 * macOS 10.4.0
 * macOS 10.13.6
-* DEPNotify 1.1.0
+* DEPNotify 1.1.0*
+* DEPNotify 1.1.1 fork (used to fix EULA and Registration window buttons https://gitlab.com/Mactroll/DEPNotify/merge_requests/29)
 * Jamf Pro 10.8
+
+\* EULA and Registration Windows will show twice with the 1.1.0 build without a minor fix to the Continue button within the Xcode project.
 
 ## Change Log
 
