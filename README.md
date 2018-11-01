@@ -18,13 +18,17 @@ The script will need to be changed from `TESTING_MODE=true` to `TESTING_MODE=fal
 
 ## Overview of Jamf Pro Setup
 
-While each organization will use a setup tool like DEP Notify differently, here is the most common way that it is delivered as well as how the script was designed to function. Changing the workflow should result in testing prior to production release.
+While each organization will use a setup tool like DEP Notify differently, this script is designed with an end user provisioning model in mind. Changing the workflow should result in testing prior to production release.
 
 1. Create policies in Jamf Pro to install core software during first setup. Set the frequency to ongoing and the trigger to custom and type in a manual trigger. Ex: depNotifyFirefox or installOffice201x
 2. Once software policies are created, customize this script with changes to verbiage as well as updating the POLICY_ARRAY with appropriate information. Double check the testing flag once you are ready to proceed.
 3. Upload DEP Notify.pkg (downloaded from https://gitlab.com/Mactroll/DEPNotify) and this script to Jamf Pro. Create a policy to install the PKG and this script using the Enrollment Complete trigger. Also set the execution frequency to ongoing.
 4. Once a computer is finished enrolling, the DEP Notify policy will start and then call the other policies in order based on the array.
-5. (Optional) If you are requiring FileVault encryption, the script will automatically check at the end of running policies if deferred enablement is on. This will trigger a logout instead of a quit of DEP Notify.
+5. (Optional) If using the EULA window, there must be a .txt file saved somewhere locally prior to DEPNotify running. A by default, the script is looking in /Users/Shared for eula.txt.
+6. (Optional) If using the registration window, you must have the departments and buildings in Jamf prior to running DEP Notify on the client. Each text box or drop down has its own code so that it can be modified to suit individual needs. Make sure to test a bunch if the logic sections are changed
+7. (Optional) If you are requiring FileVault encryption, the script will automatically check at the end of running policies if deferred enablement is on. This will trigger a logout instead of a quit of DEP Notify.
+
+More information about specific variables and options can be found in the script with comments for each item.
 
 DEP Notify PKG and additional documentation can be found at: https://gitlab.com/Mactroll/DEPNotify
 
@@ -32,41 +36,12 @@ DEP Notify PKG and additional documentation can be found at: https://gitlab.com/
 
 * macOS 10.4.0
 * macOS 10.13.6
-* DEPNotify 1.1.0
-* Jamf Pro 10.7.1
+* DEPNotify 1.1.0*
+* DEPNotify 1.1.1 fork (used to fix EULA and Registration window buttons https://gitlab.com/Mactroll/DEPNotify/merge_requests/29)
+* Jamf Pro 10.8
+
+\* EULA and Registration Windows will show twice with the 1.1.0 build without a minor fix to the Continue button within the Xcode project.
 
 ## Change Log
 
-10/4/18 - Added check for Finder process by Kyle Bareis
-* Thanks @remusache for finding a workflow that need to be addressed
-* Script now should handle workflows which do not have an end user configure the device
-* After checking to see if Setup Assistant is finished, script will now check to see if Finder is running
-
-9/25/18 - Added variable and check for custom Self Service branding by Kyle Bareis
-* Added true/false variable for custom Self Service branding
-* Added loop for waiting for the custom branding to be downloaded
-* Removed To Do list, how to use, and tested versions from bash script
-* Updated GitHub Readme file with additional information
-
-9/24/18 - Updated loop for verifying Apple Setup Complete by Arek Dryer and Kyle Bareis
-* Changed loop to look for the Setup Assistant process rather than files and users
-* Changed /dev/console lookup to stat per shellcheck.net recommendation
-* Verified with 10.13.6, 10.14 and Jamf Pro 10.7.1
-* Removed double \\ in the new line escapes. Has changed in a recent update.
-* Added a troubleshooting and debugging log for helping out with DEP related issues.
-* Debug log focused on what happens prior to DEP Notify creation.
-* Changed default image to Self Service icon.
-
-7/13/18 - Major updates to script logic and error correction by Kyle Bareis
-* updated if statements to use true/false over yes/no
-* added FileVault deferred enablement check and modified to logout or continue
-* added tested versions comment
-* additional cleanup and error checking
-
-6/28/18 - Initial commit by Kyle Bareis
-
-## To Do List
-
-* Add ability to have policy script parameters fill in variables
-* Finalize EULA process - Open issue: https://gitlab.com/Mactroll/DEPNotify/issues/19
-* Create generic registration module
+The change log was getting a bit long and now has moved to its own page. Please visit the [CHANGELOG.md](CHANGELOG.md) for more information.
