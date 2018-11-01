@@ -1,6 +1,6 @@
 ---
 name: Issue and Bug report
-about: Create a report to help with an issue  us improve
+about: Create a ticket to get help or report a bug
 
 ---
 
