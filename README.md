@@ -23,7 +23,7 @@ The script will need to be changed from `TESTING_MODE=true` to `TESTING_MODE=fal
 
 While each organization will use a setup tool like DEPNotify differently, this script is designed with an end user provisioning model in mind. Changing the workflow should result in testing prior to production release.
 
-1. Create policies in Jamf Pro to install core software during first setup. Set the frequency to ongoing and the trigger to custom and type in a manual trigger. Screenshot below showing how a single policy is configured ![](https://github.com/jamfprofessionalservices/DEP-Notify/blob/master/example-img/jamfpro_policy_configuration.png)
+1. [Create policies](https://github.com/jamfprofessionalservices/DEP-Notify/blob/master/example-img/jamfpro_policy_configuration.png) in Jamf Pro to install core software during first setup. Set the frequency to ongoing and the trigger to custom and type in a manual trigger. Screenshot below showing how a single policy is configured
 
 2. Once software policies are created, customize this script with changes to verbiage as well as updating the POLICY_ARRAY with appropriate information. Double check the testing flag once you are ready to proceed
 
@@ -35,7 +35,7 @@ While each organization will use a setup tool like DEPNotify differently, this s
 
   * (Optional) If using the EULA, add the EULA.pkg built in step 2 to this policy as well
 
-  * (Optional) Policy parameters can be used to configure true/false flags to make testing features easier ![](https://github.com/jamfprofessionalservices/DEP-Notify/blob/master/example-img/jamfpro_policy_parameter_values.png)
+  * (Optional) [Policy parameters](https://github.com/jamfprofessionalservices/DEP-Notify/blob/master/example-img/jamfpro_policy_parameter_values.png) can be used to configure true/false flags to make testing features easier
 
 4. Once a computer is finished enrolling, the DEPNotify policy will start and then call the other policies in order based on the array.
 
