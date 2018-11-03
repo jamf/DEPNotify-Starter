@@ -9,7 +9,7 @@ This script is designed to make implementation of DEPNotify very easy with limit
 
 **This script is set to `TESTING_MODE` by default.**
 
-There is a (warning alert box)[https://github.com/jamfprofessionalservices/DEP-Notify/blob/master/example-img/fullscreen_testing_mode.png] that will show if `TESTING_MODE` is set to `true` in version 1.2.0 and newer. Having testing mode on will cause the following things to occur:
+There is a [warning alert box](https://github.com/jamfprofessionalservices/DEP-Notify/blob/master/example-img/fullscreen_testing_mode.png) that will show if `TESTING_MODE` is set to `true` in version 1.2.0 and newer. Having testing mode on will cause the following things to occur:
 
 * Sleep commands in place of running Policies or other things that may effect the device configuration
 * Removal of BOM and configuration files
@@ -27,9 +27,9 @@ While each organization will use a setup tool like DEPNotify differently, this s
 
 2. Once software policies are created, customize this script with changes to verbiage as well as updating the POLICY_ARRAY with appropriate information. Double check the testing flag once you are ready to proceed
 
-  * (Optional) If using the (EULA window)[https://github.com/jamfprofessionalservices/DEP-Notify/blob/master/example-img/fullscreen_eula_user_input.png], there must be a .txt file saved somewhere locally prior to DEPNotify running. A by default, the script is looking in /Users/Shared for eula.txt
+  * (Optional) If using the [EULA window](https://github.com/jamfprofessionalservices/DEP-Notify/blob/master/example-img/fullscreen_eula_user_input.png), there must be a .txt file saved somewhere locally prior to DEPNotify running. A by default, the script is looking in /Users/Shared for eula.txt
 
-  * (Optional) If using the (registration window)[https://github.com/jamfprofessionalservices/DEP-Notify/blob/master/example-img/fullscreen_register_user_input.png], you must have the departments and buildings in Jamf prior to running DEPNotify on the client. Each text box or drop down has its own code so that it can be modified to suit individual needs. Make sure to test a bunch if the logic sections are changed
+  * (Optional) If using the [registration window](https://github.com/jamfprofessionalservices/DEP-Notify/blob/master/example-img/fullscreen_register_user_input.png), you must have the departments and buildings in Jamf prior to running DEPNotify on the client. Each text box or drop down has its own code so that it can be modified to suit individual needs. Make sure to test a bunch if the logic sections are changed
 
 3. Upload DEPNotify.pkg (downloaded from https://gitlab.com/Mactroll/DEPNotify/tags) and this script to Jamf Pro. Create a policy to install the PKG and this script using the Enrollment Complete trigger. Also set the execution frequency to ongoing
 
