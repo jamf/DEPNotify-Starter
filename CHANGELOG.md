@@ -1,5 +1,13 @@
 # Change Log
 
+## [2.0.0] - xxxx/xx/xx
+
+Moved to new version release as this release does not have backwards compatibility for older versions of DEPNotify. Please review the new [RELEASES.md](RELEASES.md) page for more information.
+
+* Added [RELEASES.md](RELEASES.md) page to track versions of script app and macOS that have been tested together
+* Made small modifications to the [README.md](README.md) page to alert admins to new page
+* Added resources folder with [plistPreferenceKeys spreadsheet](resources/plistPreferenceKeys.xlsx) for quick reference
+
 ## [1.2.0] - 2018/11/01
 
 Major enhancements and additions across the board by Kyle Bareis
