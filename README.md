@@ -5,7 +5,7 @@ Template bash script to start DEPNotify and run Policies during enrollment with 
 
 ## General Information
 
-##### Please review [RELEASES.md](RELEASES.md) to ensure proper version pairing of the script and DEPNotify app.
+**Please review [RELEASES.md](RELEASES.md) to ensure proper version pairing of the script and DEPNotify app.**
 
 This script is designed to make implementation of DEPNotify very easy with limited scripting knowledge. The script has variables that may be modified to customize the end user experience. DO NOT modify things in or below the CORE LOGIC areas unless major testing and validation is performed.
 
@@ -26,19 +26,12 @@ The script will need to be changed from `TESTING_MODE=true` to `TESTING_MODE=fal
 While each organization will use a setup tool like DEPNotify differently, this script is designed with an end user provisioning model in mind. Changing the workflow should result in testing prior to production release.
 
 1. [Create policies](example-img/jamfpro_policy_configuration.png) in Jamf Pro to install core software during first setup. Set the frequency to ongoing and the trigger to custom and type in a manual trigger. Screenshot below showing how a single policy is configured
-
 2. Once software policies are created, customize this script with changes to verbiage as well as updating the POLICY_ARRAY with appropriate information. Double check the testing flag once you are ready to proceed
-
   * (Optional) If using the [EULA window](example-img/fullscreen_eula_user_input.png), there must be a .txt file saved somewhere locally prior to DEPNotify running. A by default, the script is looking in /Users/Shared for eula.txt
-
   * (Optional) If using the [registration window](example-img/fullscreen_register_user_input.png), you must have the departments and buildings in Jamf prior to running DEPNotify on the client. Each text box or drop down has its own code so that it can be modified to suit individual needs. Make sure to test a bunch if the logic sections are changed
-
 3. Upload DEPNotify.pkg (downloaded from https://gitlab.com/Mactroll/DEPNotify/tags) and this script to Jamf Pro. Create a policy to install the PKG and this script using the Enrollment Complete trigger. Also set the execution frequency to ongoing
-
   * (Optional) If using the EULA, add the EULA.pkg built in step 2 to this policy as well
-
   * (Optional) [Policy parameters](example-img/jamfpro_policy_parameter_values.png) can be used to configure true/false flags to make testing features easier
-
 4. Once a computer is finished enrolling, the DEPNotify policy will start and then call the other policies in order based on the array.
 
 #### FileVault Support

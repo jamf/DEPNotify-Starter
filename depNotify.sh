@@ -193,7 +193,7 @@
 # Registration Variables to Modify
 #########################################################################################
 # Registration window configuration
-  REGISTER_ENABLED=false # Set variable to true or false
+  REGISTRATION_ENABLED=false # Set variable to true or false
 
   # Registration window title
     REGISTRATION_TITLE="Register Your Mac"
@@ -413,7 +413,7 @@
   # EULA Mode
     if [ "$9" != "" ]; then EULA_ENABLED="$9"; fi
   # Registration Mode
-    if [ "${10}" != "" ]; then REGISTER_ENABLED="${10}"; fi
+    if [ "${10}" != "" ]; then REGISTRATION_ENABLED="${10}"; fi
 
 # Standard Testing Mode Enhancements
   if [ "$TESTING_MODE" = true ]; then
@@ -450,8 +450,8 @@
     echo "$(date "+%a %h %d %H:%M:%S"): EULA configuration not set properly. Currently set to $EULA_ENABLED. Please update to true or false." >> "$DEP_NOTIFY_DEBUG"
     exit 1
   fi
-  if [ "$REGISTER_ENABLED" != true ] && [ "$REGISTER_ENABLED" != false ]; then
-    echo "$(date "+%a %h %d %H:%M:%S"): Registration configuration not set properly. Currently set to $REGISTER_ENABLED. Please update to true or false." >> "$DEP_NOTIFY_DEBUG"
+  if [ "$REGISTRATION_ENABLED" != true ] && [ "$REGISTRATION_ENABLED" != false ]; then
+    echo "$(date "+%a %h %d %H:%M:%S"): Registration configuration not set properly. Currently set to $REGISTRATION_ENABLED. Please update to true or false." >> "$DEP_NOTIFY_DEBUG"
     exit 1
   fi
 
@@ -559,7 +559,7 @@
   fi
 
 # Registration Plist Configuration
-  if [ "$REGISTER_ENABLED" = true ]; then
+  if [ "$REGISTRATION_ENABLED" = true ]; then
     DEP_NOTIFY_REGISTER_DONE="/var/tmp/com.depnotify.registration.done"
 
     # If testing mode is on, this will remove registration specific configuration files
@@ -689,7 +689,7 @@
   # more based on EULA, register, or other options.
     ADDITIONAL_OPTIONS_COUNTER=1
     if [ "$EULA_ENABLED" = true ]; then ((ADDITIONAL_OPTIONS_COUNTER++)); fi
-    if [ "$REGISTER_ENABLED" = true ]; then ((ADDITIONAL_OPTIONS_COUNTER++))
+    if [ "$REGISTRATION_ENABLED" = true ]; then ((ADDITIONAL_OPTIONS_COUNTER++))
       if [ "$REG_TEXT_LABEL_1" != "" ]; then ((ADDITIONAL_OPTIONS_COUNTER++)); fi
       if [ "$REG_TEXT_LABEL_2" != "" ]; then ((ADDITIONAL_OPTIONS_COUNTER++)); fi
       if [ "$REG_POPUP_LABEL_1" != "" ]; then ((ADDITIONAL_OPTIONS_COUNTER++)); fi
@@ -712,7 +712,7 @@
   fi
 
 # Registration Window Display Logic
-  if [ "$REGISTER_ENABLED" = true ]; then
+  if [ "$REGISTRATION_ENABLED" = true ]; then
     echo "Status: $REGISTRATION_TITLE" >> "$DEP_NOTIFY_LOG"
     echo "Command: ContinueButtonRegister: Register" >> "$DEP_NOTIFY_LOG"
     while [ ! -f "$DEP_NOTIFY_REGISTER_DONE" ]; do
