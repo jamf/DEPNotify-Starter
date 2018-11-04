@@ -98,7 +98,7 @@
   # This wrapper allows variables that are created later to be used but also allow for
   # configuration of where the plist is stored
     INFO_PLIST_WRAPPER (){
-      DEP_NOTIFY_INFO_PLIST_PATH="/Users/$CURRENT_USER/Library/Preferences/"
+      DEP_NOTIFY_USER_INPUT_PLIST_PATH="/Users/$CURRENT_USER/Library/Preferences/"
     }
 
 # Status Text Alignment
@@ -201,8 +201,8 @@
   # Registration window submit or finish button text
     REGISTRATION_BUTTON="Register"
 
-  # Registration banner image. If left blank, default will appear
-    REGISTRATION_IMAGE_PATH=""
+  # Registration banner image. If left blank, no image will appear
+    REGISTRATION_IMAGE_PATH="/Applications/Self Service.app/Contents/Resources/AppIcon.icns"
 
   # The text and pick list sections below will write the following lines out for
   # end users. Use the variables below to configure what the sentence says
@@ -218,7 +218,7 @@
 
   # First Text Field
   #######################################################################################
-    # First Text Field Label
+    # Text Field Label
       REG_TEXT_LABEL_1="Computer Name"
 
     # Optional flag for making the field an optional input for end user
@@ -232,7 +232,7 @@
     # want to change what the field does. This is a function that gets called
     # when needed later on. BE VERY CAREFUL IN CHANGING THE FUNCTION!
       REG_TEXT_LABEL_1_LOGIC (){
-        REG_TEXT_LABEL_1_VALUE=$(defaults read "$DEP_NOTIFY_INFO_PLIST" "$REG_TEXT_LABEL_1")
+        REG_TEXT_LABEL_1_VALUE=$(defaults read "$DEP_NOTIFY_USER_INPUT_PLIST" "$REG_TEXT_LABEL_1")
         echo "Status: $REGISTRATION_BEGIN_WORD $REG_TEXT_LABEL_1 $REGISTRATION_MIDDLE_WORD $REG_TEXT_LABEL_1_VALUE" >> "$DEP_NOTIFY_LOG"
         if [ "$TESTING_MODE" = true ]; then
            sleep 10
@@ -244,7 +244,7 @@
 
   # Second Text Field
   #######################################################################################
-    # First Text Field Label
+    # Text Field Label
       REG_TEXT_LABEL_2="Asset Tag"
 
     # Optional flag for making the field an optional input for end user
@@ -258,7 +258,7 @@
     # want to change what the field does. This is a function that gets called
     # when needed later on. BE VERY CAREFUL IN CHANGING THE FUNCTION!
       REG_TEXT_LABEL_2_LOGIC (){
-        REG_TEXT_LABEL_2_VALUE=$(defaults read "$DEP_NOTIFY_INFO_PLIST" "$REG_TEXT_LABEL_2")
+        REG_TEXT_LABEL_2_VALUE=$(defaults read "$DEP_NOTIFY_USER_INPUT_PLIST" "$REG_TEXT_LABEL_2")
         echo "Status: $REGISTRATION_BEGIN_WORD $REG_TEXT_LABEL_2 $REGISTRATION_MIDDLE_WORD $REG_TEXT_LABEL_2_VALUE" >> "$DEP_NOTIFY_LOG"
         if [ "$TESTING_MODE" = true ]; then
            sleep 10
@@ -267,49 +267,121 @@
         fi
       }
 
-  # Upper Dropdown
+  # Popup 1
   #######################################################################################
-    # PICK_UPPER_DISPLAY="Building"
-    # PICK_UPPER_OPTIONS=(
-    #   "Amsterdam"
-    #   "Eau Claire"
-    #   "Minneapolis"
-    # )
-    #
-    # # Logic below was put in this section rather than in core code as folks may
-    # # want to change what the field does. This is a function that gets called
-    # # when needed later on. BE VERY CAREFUL IN CHANGING THE FUNCTION!
-    #   PICK_UPPER_LOGIC (){
-    #     PICK_UPPER_VALUE=$(defaults read "$DEP_NOTIFY_INFO_PLIST" "$PICK_UPPER_DISPLAY")
-    #     echo "Status: $REGISTRATION_BEGIN_WORD $PICK_UPPER_DISPLAY $REGISTRATION_MIDDLE_WORD $PICK_UPPER_VALUE" >> "$DEP_NOTIFY_LOG"
-    #     if [ "$TESTING_MODE" = true ]; then
-    #        sleep 10
-    #     else
-    #       "$JAMF_BINARY" recon -building "$PICK_UPPER_VALUE"
-    #     fi
-    #   }
+    # Label for the popup
+      REG_POPUP_LABEL_1="Building"
 
-  # Lower Dropdown
+    # Array of options for the user to select
+      REG_POPUP_LABEL_1_OPTIONS=(
+        "Amsterdam"
+        "Eau Claire"
+        "Minneapolis"
+      )
+
+    # Help Bubble for Input. If title left blank, this will not appear
+      REG_POPUP_LABEL_1_HELP_TITLE="Building Dropdown"
+      REG_POPUP_LABEL_1_HELP_TEXT="Pick something from the list!"
+
+    # Logic below was put in this section rather than in core code as folks may
+    # want to change what the field does. This is a function that gets called
+    # when needed later on. BE VERY CAREFUL IN CHANGING THE FUNCTION!
+      REG_POPUP_LABEL_1_LOGIC (){
+        REG_POPUP_LABEL_1_VALUE=$(defaults read "$DEP_NOTIFY_USER_INPUT_PLIST" "$REG_POPUP_LABEL_1")
+        echo "Status: $REGISTRATION_BEGIN_WORD $REG_POPUP_LABEL_1 $REGISTRATION_MIDDLE_WORD $REG_POPUP_LABEL_1_VALUE" >> "$DEP_NOTIFY_LOG"
+        if [ "$TESTING_MODE" = true ]; then
+           sleep 10
+        else
+          "$JAMF_BINARY" recon -building "$REG_POPUP_LABEL_1_VALUE"
+        fi
+      }
+
+  # Popup 2
   #######################################################################################
-    # PICK_LOWER_DISPLAY="Department"
-    # PICK_LOWER_OPTIONS=(
-    #   "Customer Onboarding"
-    #   "Professional Services"
-    #   "Sales Engineering"
-    # )
-    #
-    # # Logic below was put in this section rather than in core code as folks may
-    # # want to change what the field does. This is a function that gets called
-    # # when needed later on. BE VERY CAREFUL IN CHANGING THE FUNCTION!
-    #   PICK_LOWER_LOGIC (){
-    #     PICK_LOWER_VALUE=$(defaults read "$DEP_NOTIFY_INFO_PLIST" "$PICK_LOWER_DISPLAY")
-    #     echo "Status: $REGISTRATION_BEGIN_WORD $PICK_LOWER_DISPLAY $REGISTRATION_MIDDLE_WORD $PICK_LOWER_VALUE" >> "$DEP_NOTIFY_LOG"
-    #     if [ "$TESTING_MODE" = true ]; then
-    #        sleep 10
-    #     else
-    #       "$JAMF_BINARY" recon -department "$PICK_LOWER_VALUE"
-    #     fi
-    #   }
+    # Label for the popup
+      REG_POPUP_LABEL_2="Department"
+
+    # Array of options for the user to select
+      REG_POPUP_LABEL_2_OPTIONS=(
+        "Customer Onboarding"
+        "Professional Services"
+        "Sales Engineering"
+      )
+
+    # Help Bubble for Input. If title left blank, this will not appear
+      REG_POPUP_LABEL_2_HELP_TITLE="Department Dropdown"
+      REG_POPUP_LABEL_2_HELP_TEXT="Pick something from the list!"
+
+    # Logic below was put in this section rather than in core code as folks may
+    # want to change what the field does. This is a function that gets called
+    # when needed later on. BE VERY CAREFUL IN CHANGING THE FUNCTION!
+      REG_POPUP_LABEL_2_LOGIC (){
+        REG_POPUP_LABEL_2_VALUE=$(defaults read "$DEP_NOTIFY_USER_INPUT_PLIST" "$REG_POPUP_LABEL_2")
+        echo "Status: $REGISTRATION_BEGIN_WORD $REG_POPUP_LABEL_2 $REGISTRATION_MIDDLE_WORD $REG_POPUP_LABEL_2_VALUE" >> "$DEP_NOTIFY_LOG"
+        if [ "$TESTING_MODE" = true ]; then
+           sleep 10
+        else
+          "$JAMF_BINARY" recon -department "$REG_POPUP_LABEL_2_VALUE"
+        fi
+      }
+
+  # Popup 3 - Code is here but currently unused
+  #######################################################################################
+    # Label for the popup
+      REG_POPUP_LABEL_3=""
+
+    # Array of options for the user to select
+      REG_POPUP_LABEL_3_OPTIONS=(
+        "Option 1"
+        "Option 2"
+        "Option 3"
+      )
+
+    # Help Bubble for Input. If title left blank, this will not appear
+      REG_POPUP_LABEL_3_HELP_TITLE=""
+      REG_POPUP_LABEL_3_HELP_TEXT=""
+
+    # Logic below was put in this section rather than in core code as folks may
+    # want to change what the field does. This is a function that gets called
+    # when needed later on. BE VERY CAREFUL IN CHANGING THE FUNCTION!
+      REG_POPUP_LABEL_3_LOGIC (){
+        REG_POPUP_LABEL_3_VALUE=$(defaults read "$DEP_NOTIFY_USER_INPUT_PLIST" "$REG_POPUP_LABEL_3")
+        echo "Status: $REGISTRATION_BEGIN_WORD $REG_POPUP_LABEL_3 $REGISTRATION_MIDDLE_WORD $REG_POPUP_LABEL_3_VALUE" >> "$DEP_NOTIFY_LOG"
+        if [ "$TESTING_MODE" = true ]; then
+          sleep 10
+        else
+          sleep 10
+        fi
+      }
+
+  # Popup 4 - Code is here but currently unused
+  #######################################################################################
+    # Label for the popup
+      REG_POPUP_LABEL_4=""
+
+    # Array of options for the user to select
+      REG_POPUP_LABEL_4_OPTIONS=(
+        "Option 1"
+        "Option 2"
+        "Option 3"
+      )
+
+    # Help Bubble for Input. If title left blank, this will not appear
+      REG_POPUP_LABEL_4_HELP_TITLE=""
+      REG_POPUP_LABEL_4_HELP_TEXT=""
+
+    # Logic below was put in this section rather than in core code as folks may
+    # want to change what the field does. This is a function that gets called
+    # when needed later on. BE VERY CAREFUL IN CHANGING THE FUNCTION!
+      REG_POPUP_LABEL_4_LOGIC (){
+        REG_POPUP_LABEL_4_VALUE=$(defaults read "$DEP_NOTIFY_USER_INPUT_PLIST" "$REG_POPUP_LABEL_4")
+        echo "Status: $REGISTRATION_BEGIN_WORD $REG_POPUP_LABEL_4 $REGISTRATION_MIDDLE_WORD $REG_POPUP_LABEL_4_VALUE" >> "$DEP_NOTIFY_LOG"
+        if [ "$TESTING_MODE" = true ]; then
+          sleep 10
+        else
+          sleep 10
+        fi
+      }
 
 #########################################################################################
 #########################################################################################
@@ -449,16 +521,16 @@
   # Calling function to set the INFO_PLIST_PATH
     INFO_PLIST_WRAPPER
 
-  # The plist information below is used by EULA and Registration windows
+  # The plist information below
     DEP_NOTIFY_CONFIG_PLIST="/Users/$CURRENT_USER/Library/Preferences/menu.nomad.DEPNotify.plist"
-    DEP_NOTIFY_INFO_PLIST="$DEP_NOTIFY_INFO_PLIST_PATH/DEPNotify.plist"
+    DEP_NOTIFY_USER_INPUT_PLIST="$DEP_NOTIFY_USER_INPUT_PLIST_PATH/UserInput.plist"
 
   # If testing mode is on, this will remove some old configuration files
     if [ "$TESTING_MODE" = true ] && [ -f "$DEP_NOTIFY_CONFIG_PLIST" ]; then rm "$DEP_NOTIFY_CONFIG_PLIST"; fi
-    if [ "$TESTING_MODE" = true ] && [ -f "$DEP_NOTIFY_INFO_PLIST" ]; then rm "$DEP_NOTIFY_INFO_PLIST"; fi
+    if [ "$TESTING_MODE" = true ] && [ -f "$DEP_NOTIFY_USER_INPUT_PLIST" ]; then rm "$DEP_NOTIFY_USER_INPUT_PLIST"; fi
 
   # Setting default path to the plist which stores all the user completed info
-    defaults write "$DEP_NOTIFY_CONFIG_PLIST" PathToPlistFile "$DEP_NOTIFY_INFO_PLIST_PATH"
+    defaults write "$DEP_NOTIFY_CONFIG_PLIST" PathToPlistFile "$DEP_NOTIFY_USER_INPUT_PLIST_PATH"
 
   # Setting status text alignment
     defaults write "$DEP_NOTIFY_CONFIG_PLIST" statusTextAlignment "$STATUS_TEXT_ALIGN"
@@ -495,46 +567,89 @@
 
     # Main Window Text Configuration
       defaults write "$DEP_NOTIFY_CONFIG_PLIST" registrationMainTitle "$REGISTRATION_TITLE"
-      defaults write "$DEP_NOTIFY_CONFIG_PLIST" registrationPicturePath "$REGISTRATION_IMAGE_PATH"
+      defaults write "$DEP_NOTIFY_CONFIG_PLIST" registrationButtonLabel "$REGISTRATION_BUTTON"
       if [ "$REGISTRATION_IMAGE_PATH" != "" ]; then
-        defaults write "$DEP_NOTIFY_CONFIG_PLIST" registrationButtonLabel "$REGISTRATION_BUTTON"
+        defaults write "$DEP_NOTIFY_CONFIG_PLIST" registrationPicturePath "$REGISTRATION_IMAGE_PATH"
       fi
 
     # First Text Box Configuration
       if [ "$REG_TEXT_LABEL_1" != "" ]; then
         defaults write "$DEP_NOTIFY_CONFIG_PLIST" textField1Label "$REG_TEXT_LABEL_1"
         defaults write "$DEP_NOTIFY_CONFIG_PLIST" textField1IsOptional "$REG_TEXT_LABEL_1_OPTIONAL"
-        if [ "$REG_TEXT_LABEL_1_HELP_TITLE" != "" ]; then
-            defaults write "$DEP_NOTIFY_CONFIG_PLIST" textFIeld1Bubble -array-add "$REG_TEXT_LABEL_1_HELP_TITLE"
-            defaults write "$DEP_NOTIFY_CONFIG_PLIST" textFIeld1Bubble -array-add "$REG_TEXT_LABEL_1_HELP_TEXT"
-        fi
+        # Code for showing the help box if configured
+          if [ "$REG_TEXT_LABEL_1_HELP_TITLE" != "" ]; then
+              defaults write "$DEP_NOTIFY_CONFIG_PLIST" textField1Bubble -array-add "$REG_TEXT_LABEL_1_HELP_TITLE"
+              defaults write "$DEP_NOTIFY_CONFIG_PLIST" textField1Bubble -array-add "$REG_TEXT_LABEL_1_HELP_TEXT"
+          fi
       fi
 
     # Second Text Box Configuration
       if [ "$REG_TEXT_LABEL_2" != "" ]; then
         defaults write "$DEP_NOTIFY_CONFIG_PLIST" textField2Label "$REG_TEXT_LABEL_2"
         defaults write "$DEP_NOTIFY_CONFIG_PLIST" textField2IsOptional "$REG_TEXT_LABEL_2_OPTIONAL"
-        if [ "$REG_TEXT_LABEL_2_HELP_TITLE" != "" ]; then
-            defaults write "$DEP_NOTIFY_CONFIG_PLIST" textFIeld2Bubble -array-add "$REG_TEXT_LABEL_2_HELP_TITLE"
-            defaults write "$DEP_NOTIFY_CONFIG_PLIST" textFIeld2Bubble -array-add "$REG_TEXT_LABEL_2_HELP_TEXT"
-        fi
+        # Code for showing the help box if configured
+          if [ "$REG_TEXT_LABEL_2_HELP_TITLE" != "" ]; then
+              defaults write "$DEP_NOTIFY_CONFIG_PLIST" textField2Bubble -array-add "$REG_TEXT_LABEL_2_HELP_TITLE"
+              defaults write "$DEP_NOTIFY_CONFIG_PLIST" textField2Bubble -array-add "$REG_TEXT_LABEL_2_HELP_TEXT"
+          fi
       fi
 
-    # # Upper Pick List / Dropdown Configuration
-    #   if [ "$PICK_UPPER_DISPLAY" != "" ]; then
-    #     defaults write "$DEP_NOTIFY_CONFIG_PLIST" UIPopUpMenuUpperLabel "$PICK_UPPER_DISPLAY"
-    #     for PICK_UPPER_OPTION in "${PICK_UPPER_OPTIONS[@]}"; do
-    #        defaults write "$DEP_NOTIFY_CONFIG_PLIST" UIPopUpMenuUpper -array-add "$PICK_UPPER_OPTION"
-    #     done
-    #   fi
-    #
-    # # Lower Pick List / Dropdown Configuration
-    #   if [ "$PICK_LOWER_DISPLAY" != "" ]; then
-    #     defaults write "$DEP_NOTIFY_CONFIG_PLIST" UIPopUpMenuLowerLabel "$PICK_LOWER_DISPLAY"
-    #     for PICK_LOWER_OPTION in "${PICK_LOWER_OPTIONS[@]}"; do
-    #        defaults write "$DEP_NOTIFY_CONFIG_PLIST" UIPopUpMenuLower -array-add "$PICK_LOWER_OPTION"
-    #     done
-    #   fi
+    # Popup 1
+      if [ "$REG_POPUP_LABEL_1" != "" ]; then
+        defaults write "$DEP_NOTIFY_CONFIG_PLIST" popupButton1Label "$REG_POPUP_LABEL_1"
+        # Code for showing the help box if configured
+          if [ "$REG_POPUP_LABEL_1_HELP_TITLE" != "" ]; then
+            defaults write "$DEP_NOTIFY_CONFIG_PLIST" popupMenu1Bubble "$REG_POPUP_LABEL_1_HELP_TITLE"
+            defaults write "$DEP_NOTIFY_CONFIG_PLIST" popupMenu1Bubble "$REG_POPUP_LABEL_1_HELP_TEXT"
+          fi
+        # Code for adding the items from the array above into the plist
+          for REG_POPUP_LABEL_1_OPTION in "${REG_POPUP_LABEL_1_OPTIONS[@]}"; do
+             defaults write "$DEP_NOTIFY_CONFIG_PLIST" popupButton1Contents -array-add "$REG_POPUP_LABEL_1_OPTION"
+          done
+      fi
+
+    # Popup 2
+      if [ "$REG_POPUP_LABEL_2" != "" ]; then
+        defaults write "$DEP_NOTIFY_CONFIG_PLIST" popupButton2Label "$REG_POPUP_LABEL_2"
+        # Code for showing the help box if configured
+          if [ "$REG_POPUP_LABEL_2_HELP_TITLE" != "" ]; then
+            defaults write "$DEP_NOTIFY_CONFIG_PLIST" popupMenu2Bubble "$REG_POPUP_LABEL_2_HELP_TITLE"
+            defaults write "$DEP_NOTIFY_CONFIG_PLIST" popupMenu2Bubble "$REG_POPUP_LABEL_2_HELP_TEXT"
+          fi
+        # Code for adding the items from the array above into the plist
+          for REG_POPUP_LABEL_2_OPTION in "${REG_POPUP_LABEL_2_OPTIONS[@]}"; do
+             defaults write "$DEP_NOTIFY_CONFIG_PLIST" popupButton2Contents -array-add "$REG_POPUP_LABEL_2_OPTION"
+          done
+      fi
+
+    # Popup 3
+      if [ "$REG_POPUP_LABEL_3" != "" ]; then
+        defaults write "$DEP_NOTIFY_CONFIG_PLIST" popupButton3Label "$REG_POPUP_LABEL_3"
+        # Code for showing the help box if configured
+          if [ "$REG_POPUP_LABEL_3_HELP_TITLE" != "" ]; then
+            defaults write "$DEP_NOTIFY_CONFIG_PLIST" popupMenu3Bubble "$REG_POPUP_LABEL_3_HELP_TITLE"
+            defaults write "$DEP_NOTIFY_CONFIG_PLIST" popupMenu3Bubble "$REG_POPUP_LABEL_3_HELP_TEXT"
+          fi
+        # Code for adding the items from the array above into the plist
+          for REG_POPUP_LABEL_3_OPTION in "${REG_POPUP_LABEL_3_OPTIONS[@]}"; do
+             defaults write "$DEP_NOTIFY_CONFIG_PLIST" popupButton3Contents -array-add "$REG_POPUP_LABEL_3_OPTION"
+          done
+      fi
+
+    # Popup 4
+      if [ "$REG_POPUP_LABEL_4" != "" ]; then
+        defaults write "$DEP_NOTIFY_CONFIG_PLIST" popupButton4Label "$REG_POPUP_LABEL_4"
+        # Code for showing the help box if configured
+          if [ "$REG_POPUP_LABEL_4_HELP_TITLE" != "" ]; then
+            defaults write "$DEP_NOTIFY_CONFIG_PLIST" popupMenu4Bubble "$REG_POPUP_LABEL_4_HELP_TITLE"
+            defaults write "$DEP_NOTIFY_CONFIG_PLIST" popupMenu4Bubble "$REG_POPUP_LABEL_4_HELP_TEXT"
+          fi
+        # Code for adding the items from the array above into the plist
+          for REG_POPUP_LABEL_4_OPTION in "${REG_POPUP_LABEL_4_OPTIONS[@]}"; do
+             defaults write "$DEP_NOTIFY_CONFIG_PLIST" popupButton4Contents -array-add "$REG_POPUP_LABEL_4_OPTION"
+          done
+      fi
+
     # Changing Ownership of the plist file
       chown "$CURRENT_USER" "$DEP_NOTIFY_CONFIG_PLIST"
   fi
@@ -577,8 +692,10 @@
     if [ "$REGISTER_ENABLED" = true ]; then ((ADDITIONAL_OPTIONS_COUNTER++))
       if [ "$REG_TEXT_LABEL_1" != "" ]; then ((ADDITIONAL_OPTIONS_COUNTER++)); fi
       if [ "$REG_TEXT_LABEL_2" != "" ]; then ((ADDITIONAL_OPTIONS_COUNTER++)); fi
-      if [ "$PICK_UPPER_DISPLAY" != "" ]; then ((ADDITIONAL_OPTIONS_COUNTER++)); fi
-      if [ "$PICK_LOWER_DISPLAY" != "" ]; then ((ADDITIONAL_OPTIONS_COUNTER++)); fi
+      if [ "$REG_POPUP_LABEL_1" != "" ]; then ((ADDITIONAL_OPTIONS_COUNTER++)); fi
+      if [ "$REG_POPUP_LABEL_2" != "" ]; then ((ADDITIONAL_OPTIONS_COUNTER++)); fi
+      if [ "$REG_POPUP_LABEL_3" != "" ]; then ((ADDITIONAL_OPTIONS_COUNTER++)); fi
+      if [ "$REG_POPUP_LABEL_4" != "" ]; then ((ADDITIONAL_OPTIONS_COUNTER++)); fi
     fi
 
   # Checking policy array and adding the count from the additional options above.
@@ -604,8 +721,10 @@
     # Running Logic For Each Registration Box
       if [ "$REG_TEXT_LABEL_1" != "" ]; then REG_TEXT_LABEL_1_LOGIC; fi
       if [ "$REG_TEXT_LABEL_2" != "" ]; then REG_TEXT_LABEL_2_LOGIC; fi
-      # if [ "$PICK_UPPER_DISPLAY" != "" ]; then PICK_UPPER_LOGIC; fi
-      # if [ "$PICK_LOWER_DISPLAY" != "" ]; then PICK_LOWER_LOGIC; fi
+      if [ "$REG_POPUP_LABEL_1" != "" ]; then REG_POPUP_LABEL_1_LOGIC; fi
+      if [ "$REG_POPUP_LABEL_2" != "" ]; then REG_POPUP_LABEL_2_LOGIC; fi
+      if [ "$REG_POPUP_LABEL_3" != "" ]; then REG_POPUP_LABEL_2_LOGIC; fi
+      if [ "$REG_POPUP_LABEL_4" != "" ]; then REG_POPUP_LABEL_2_LOGIC; fi
   fi
 
 # Loop to run policies
