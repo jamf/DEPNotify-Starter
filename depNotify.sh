@@ -85,7 +85,7 @@
     COMPLETE_ALERT_TEXT="Your Mac is now finished with initial setup and configuration. Press Quit to get started!"
   # Options if not using dropdown alert box
     COMPLETE_MAIN_TEXT='Your Mac is now finished with initial setup and configuration.'
-    COMPLETE_BUTTON_TEXT="Get Started"
+    COMPLETE_BUTTON_TEXT="Get Started!"
 
 #########################################################################################
 # Plist Configuration
@@ -103,12 +103,12 @@
 
 # Status Text Alignment
   # The status text under the progress bar can be configured to be left, right, or center
-    STATUS_TEXT_ALIGN="right"
+    STATUS_TEXT_ALIGN="center"
 
 # Help Button Configuration
   # The help button was changed to a popup. Button will appear if title is populated.
-    HELP_BUBBLE_TITLE="Questions?"
-    HELP_BUBBLE_BODY="We use this tool at Organization to help out with new employee onboarding. If you have issues, please give us a call at 123-456-7890"
+    HELP_BUBBLE_TITLE="Need Help?"
+    HELP_BUBBLE_BODY="This tool at Organization is designed to help with new employee onboarding. If you have issues, please give us a call at 123-456-7890"
 
 #########################################################################################
 # Error Screen Text
@@ -226,7 +226,7 @@
 
     # Help Bubble for Input. If title left blank, this will not appear
       REG_TEXT_LABEL_1_HELP_TITLE="Computer Name Field"
-      REG_TEXT_LABEL_1_HELP_TEXT="This field is used to give an updated computer name to the mac"
+      REG_TEXT_LABEL_1_HELP_TEXT="This field is sets the name of your new Mac to what is in the Computer Name box. This is important for inventory purposes."
 
     # Logic below was put in this section rather than in core code as folks may
     # want to change what the field does. This is a function that gets called
@@ -252,7 +252,7 @@
 
     # Help Bubble for Input. If title left blank, this will not appear
       REG_TEXT_LABEL_2_HELP_TITLE="Asset Tag Field"
-      REG_TEXT_LABEL_2_HELP_TEXT="This field is used to give an updated asset tag to Jamf"
+      REG_TEXT_LABEL_2_HELP_TEXT="This field is used to give an updated asset tag to our asset management system. If you do not know your asset tag number, please skip this field."
 
     # Logic below was put in this section rather than in core code as folks may
     # want to change what the field does. This is a function that gets called
@@ -280,8 +280,8 @@
       )
 
     # Help Bubble for Input. If title left blank, this will not appear
-      REG_POPUP_LABEL_1_HELP_TITLE="Building Dropdown"
-      REG_POPUP_LABEL_1_HELP_TEXT="Pick something from the list!"
+      REG_POPUP_LABEL_1_HELP_TITLE="Building Dropdown Field"
+      REG_POPUP_LABEL_1_HELP_TEXT="Please choose the appropreate building for where you normally work. This is important for inventory purposes."
 
     # Logic below was put in this section rather than in core code as folks may
     # want to change what the field does. This is a function that gets called
@@ -309,8 +309,8 @@
       )
 
     # Help Bubble for Input. If title left blank, this will not appear
-      REG_POPUP_LABEL_2_HELP_TITLE="Department Dropdown"
-      REG_POPUP_LABEL_2_HELP_TEXT="Pick something from the list!"
+      REG_POPUP_LABEL_2_HELP_TITLE="Department Dropdown Field"
+      REG_POPUP_LABEL_2_HELP_TEXT="Please choose the appropreate department for where you normally work. This is important for inventory purposes."
 
     # Logic below was put in this section rather than in core code as folks may
     # want to change what the field does. This is a function that gets called
@@ -328,7 +328,7 @@
   # Popup 3 - Code is here but currently unused
   #######################################################################################
     # Label for the popup
-      REG_POPUP_LABEL_3=""
+      REG_POPUP_LABEL_3="Dropdown 3"
 
     # Array of options for the user to select
       REG_POPUP_LABEL_3_OPTIONS=(
@@ -338,8 +338,8 @@
       )
 
     # Help Bubble for Input. If title left blank, this will not appear
-      REG_POPUP_LABEL_3_HELP_TITLE=""
-      REG_POPUP_LABEL_3_HELP_TEXT=""
+      REG_POPUP_LABEL_3_HELP_TITLE="Dropdown 3 Field"
+      REG_POPUP_LABEL_3_HELP_TEXT="This dropdown is currently not in use. All code is here ready for you to use. It can also be hidden by removing the contents of the REG_POPUP_LABEL_3 variable."
 
     # Logic below was put in this section rather than in core code as folks may
     # want to change what the field does. This is a function that gets called
@@ -357,7 +357,7 @@
   # Popup 4 - Code is here but currently unused
   #######################################################################################
     # Label for the popup
-      REG_POPUP_LABEL_4=""
+      REG_POPUP_LABEL_4="Dropdown 4"
 
     # Array of options for the user to select
       REG_POPUP_LABEL_4_OPTIONS=(
@@ -367,8 +367,8 @@
       )
 
     # Help Bubble for Input. If title left blank, this will not appear
-      REG_POPUP_LABEL_4_HELP_TITLE=""
-      REG_POPUP_LABEL_4_HELP_TEXT=""
+      REG_POPUP_LABEL_4_HELP_TITLE="Dropdown 4 Field"
+      REG_POPUP_LABEL_4_HELP_TEXT="This dropdown is currently not in use. All code is here ready for you to use. It can also be hidden by removing the contents of the REG_POPUP_LABEL_4 variable."
 
     # Logic below was put in this section rather than in core code as folks may
     # want to change what the field does. This is a function that gets called
@@ -723,8 +723,8 @@
       if [ "$REG_TEXT_LABEL_2" != "" ]; then REG_TEXT_LABEL_2_LOGIC; fi
       if [ "$REG_POPUP_LABEL_1" != "" ]; then REG_POPUP_LABEL_1_LOGIC; fi
       if [ "$REG_POPUP_LABEL_2" != "" ]; then REG_POPUP_LABEL_2_LOGIC; fi
-      if [ "$REG_POPUP_LABEL_3" != "" ]; then REG_POPUP_LABEL_2_LOGIC; fi
-      if [ "$REG_POPUP_LABEL_4" != "" ]; then REG_POPUP_LABEL_2_LOGIC; fi
+      if [ "$REG_POPUP_LABEL_3" != "" ]; then REG_POPUP_LABEL_3_LOGIC; fi
+      if [ "$REG_POPUP_LABEL_4" != "" ]; then REG_POPUP_LABEL_4_LOGIC; fi
   fi
 
 # Loop to run policies
