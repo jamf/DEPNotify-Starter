@@ -51,7 +51,7 @@ For this script, verbose comments have been added to assist in configuration and
 
 The following versions were testing prior to being merged into the master branch. Please verify that you are using these versions prior to implementation.
 
-* macOS 10.4.0
+* macOS 10.14.1
 * macOS 10.13.6
 * DEPNotify 1.1.2
 * Jamf Pro 10.8
