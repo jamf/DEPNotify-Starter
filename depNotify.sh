@@ -98,7 +98,7 @@
   # This wrapper allows variables that are created later to be used but also allow for
   # configuration of where the plist is stored
     INFO_PLIST_WRAPPER (){
-      DEP_NOTIFY_USER_INPUT_PLIST_PATH="/Users/$CURRENT_USER/Library/Preferences/"
+      DEP_NOTIFY_USER_INPUT_PLIST="/Users/$CURRENT_USER/Library/Preferences/menu.nomad.DEPNotifyUserInput.plist"
     }
 
 # Status Text Alignment
@@ -221,6 +221,9 @@
     # Text Field Label
       REG_TEXT_LABEL_1="Computer Name"
 
+    # Place Holder Text
+      REG_TEXT_LABEL_1_PLACEHOLDER="macBook0123"
+
     # Optional flag for making the field an optional input for end user
       REG_TEXT_LABEL_1_OPTIONAL="false" # Set variable to true or false
 
@@ -246,6 +249,9 @@
   #######################################################################################
     # Text Field Label
       REG_TEXT_LABEL_2="Asset Tag"
+
+    # Place Holder Text
+      REG_TEXT_LABEL_2_PLACEHOLDER="81926392"
 
     # Optional flag for making the field an optional input for end user
       REG_TEXT_LABEL_2_OPTIONAL="true" # Set variable to true or false
@@ -523,14 +529,13 @@
 
   # The plist information below
     DEP_NOTIFY_CONFIG_PLIST="/Users/$CURRENT_USER/Library/Preferences/menu.nomad.DEPNotify.plist"
-    DEP_NOTIFY_USER_INPUT_PLIST="$DEP_NOTIFY_USER_INPUT_PLIST_PATH/UserInput.plist"
 
   # If testing mode is on, this will remove some old configuration files
     if [ "$TESTING_MODE" = true ] && [ -f "$DEP_NOTIFY_CONFIG_PLIST" ]; then rm "$DEP_NOTIFY_CONFIG_PLIST"; fi
     if [ "$TESTING_MODE" = true ] && [ -f "$DEP_NOTIFY_USER_INPUT_PLIST" ]; then rm "$DEP_NOTIFY_USER_INPUT_PLIST"; fi
 
   # Setting default path to the plist which stores all the user completed info
-    defaults write "$DEP_NOTIFY_CONFIG_PLIST" PathToPlistFile "$DEP_NOTIFY_USER_INPUT_PLIST_PATH"
+    defaults write "$DEP_NOTIFY_CONFIG_PLIST" pathToPlistFile "$DEP_NOTIFY_USER_INPUT_PLIST"
 
   # Setting status text alignment
     defaults write "$DEP_NOTIFY_CONFIG_PLIST" statusTextAlignment "$STATUS_TEXT_ALIGN"
@@ -575,6 +580,7 @@
     # First Text Box Configuration
       if [ "$REG_TEXT_LABEL_1" != "" ]; then
         defaults write "$DEP_NOTIFY_CONFIG_PLIST" textField1Label "$REG_TEXT_LABEL_1"
+        defaults write "$DEP_NOTIFY_CONFIG_PLIST" textField1Placeholder "$REG_TEXT_LABEL_1_PLACEHOLDER"
         defaults write "$DEP_NOTIFY_CONFIG_PLIST" textField1IsOptional "$REG_TEXT_LABEL_1_OPTIONAL"
         # Code for showing the help box if configured
           if [ "$REG_TEXT_LABEL_1_HELP_TITLE" != "" ]; then
@@ -586,6 +592,7 @@
     # Second Text Box Configuration
       if [ "$REG_TEXT_LABEL_2" != "" ]; then
         defaults write "$DEP_NOTIFY_CONFIG_PLIST" textField2Label "$REG_TEXT_LABEL_2"
+        defaults write "$DEP_NOTIFY_CONFIG_PLIST" textField2Placeholder "$REG_TEXT_LABEL_2_PLACEHOLDER"
         defaults write "$DEP_NOTIFY_CONFIG_PLIST" textField2IsOptional "$REG_TEXT_LABEL_2_OPTIONAL"
         # Code for showing the help box if configured
           if [ "$REG_TEXT_LABEL_2_HELP_TITLE" != "" ]; then
@@ -599,8 +606,8 @@
         defaults write "$DEP_NOTIFY_CONFIG_PLIST" popupButton1Label "$REG_POPUP_LABEL_1"
         # Code for showing the help box if configured
           if [ "$REG_POPUP_LABEL_1_HELP_TITLE" != "" ]; then
-            defaults write "$DEP_NOTIFY_CONFIG_PLIST" popupMenu1Bubble "$REG_POPUP_LABEL_1_HELP_TITLE"
-            defaults write "$DEP_NOTIFY_CONFIG_PLIST" popupMenu1Bubble "$REG_POPUP_LABEL_1_HELP_TEXT"
+            defaults write "$DEP_NOTIFY_CONFIG_PLIST" popupMenu1Bubble -array-add "$REG_POPUP_LABEL_1_HELP_TITLE"
+            defaults write "$DEP_NOTIFY_CONFIG_PLIST" popupMenu1Bubble -array-add "$REG_POPUP_LABEL_1_HELP_TEXT"
           fi
         # Code for adding the items from the array above into the plist
           for REG_POPUP_LABEL_1_OPTION in "${REG_POPUP_LABEL_1_OPTIONS[@]}"; do
@@ -613,8 +620,8 @@
         defaults write "$DEP_NOTIFY_CONFIG_PLIST" popupButton2Label "$REG_POPUP_LABEL_2"
         # Code for showing the help box if configured
           if [ "$REG_POPUP_LABEL_2_HELP_TITLE" != "" ]; then
-            defaults write "$DEP_NOTIFY_CONFIG_PLIST" popupMenu2Bubble "$REG_POPUP_LABEL_2_HELP_TITLE"
-            defaults write "$DEP_NOTIFY_CONFIG_PLIST" popupMenu2Bubble "$REG_POPUP_LABEL_2_HELP_TEXT"
+            defaults write "$DEP_NOTIFY_CONFIG_PLIST" popupMenu2Bubble -array-add "$REG_POPUP_LABEL_2_HELP_TITLE"
+            defaults write "$DEP_NOTIFY_CONFIG_PLIST" popupMenu2Bubble -array-add "$REG_POPUP_LABEL_2_HELP_TEXT"
           fi
         # Code for adding the items from the array above into the plist
           for REG_POPUP_LABEL_2_OPTION in "${REG_POPUP_LABEL_2_OPTIONS[@]}"; do
@@ -627,8 +634,8 @@
         defaults write "$DEP_NOTIFY_CONFIG_PLIST" popupButton3Label "$REG_POPUP_LABEL_3"
         # Code for showing the help box if configured
           if [ "$REG_POPUP_LABEL_3_HELP_TITLE" != "" ]; then
-            defaults write "$DEP_NOTIFY_CONFIG_PLIST" popupMenu3Bubble "$REG_POPUP_LABEL_3_HELP_TITLE"
-            defaults write "$DEP_NOTIFY_CONFIG_PLIST" popupMenu3Bubble "$REG_POPUP_LABEL_3_HELP_TEXT"
+            defaults write "$DEP_NOTIFY_CONFIG_PLIST" popupMenu3Bubble -array-add "$REG_POPUP_LABEL_3_HELP_TITLE"
+            defaults write "$DEP_NOTIFY_CONFIG_PLIST" popupMenu3Bubble -array-add "$REG_POPUP_LABEL_3_HELP_TEXT"
           fi
         # Code for adding the items from the array above into the plist
           for REG_POPUP_LABEL_3_OPTION in "${REG_POPUP_LABEL_3_OPTIONS[@]}"; do
@@ -641,8 +648,8 @@
         defaults write "$DEP_NOTIFY_CONFIG_PLIST" popupButton4Label "$REG_POPUP_LABEL_4"
         # Code for showing the help box if configured
           if [ "$REG_POPUP_LABEL_4_HELP_TITLE" != "" ]; then
-            defaults write "$DEP_NOTIFY_CONFIG_PLIST" popupMenu4Bubble "$REG_POPUP_LABEL_4_HELP_TITLE"
-            defaults write "$DEP_NOTIFY_CONFIG_PLIST" popupMenu4Bubble "$REG_POPUP_LABEL_4_HELP_TEXT"
+            defaults write "$DEP_NOTIFY_CONFIG_PLIST" popupMenu4Bubble -array-add "$REG_POPUP_LABEL_4_HELP_TITLE"
+            defaults write "$DEP_NOTIFY_CONFIG_PLIST" popupMenu4Bubble -array-add "$REG_POPUP_LABEL_4_HELP_TEXT"
           fi
         # Code for adding the items from the array above into the plist
           for REG_POPUP_LABEL_4_OPTION in "${REG_POPUP_LABEL_4_OPTIONS[@]}"; do
@@ -707,6 +714,7 @@
     echo "Status: Waiting on EULA Acceptance" >> "$DEP_NOTIFY_LOG"
     echo "Command: ContinueButtonEULA: EULA" >> "$DEP_NOTIFY_LOG"
     while [ ! -f "$DEP_NOTIFY_EULA_DONE" ]; do
+      echo "$(date "+%a %h %d %H:%M:%S"): Waiting for user to accept EULA." >> "$DEP_NOTIFY_DEBUG"
       sleep 1
     done
   fi
@@ -716,6 +724,7 @@
     echo "Status: $REGISTRATION_TITLE" >> "$DEP_NOTIFY_LOG"
     echo "Command: ContinueButtonRegister: Register" >> "$DEP_NOTIFY_LOG"
     while [ ! -f "$DEP_NOTIFY_REGISTER_DONE" ]; do
+      echo "$(date "+%a %h %d %H:%M:%S"): Waiting for user to complete registration." >> "$DEP_NOTIFY_DEBUG"
       sleep 1
     done
     # Running Logic For Each Registration Box
