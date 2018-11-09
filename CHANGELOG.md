@@ -24,7 +24,7 @@ Moved to new version release as this release does not have backwards compatibili
   * `REGISTER_MIDDLE_STATUS` changed to `REGISTRATION_MIDDLE_WORD`
   * First text box
     * `TEXT_UPPER_DISPLAY` changed to `REG_TEXT_LABEL_1`
-    * Removed `TEXT_UPPER_PLACEHOLDER` as newer version does not support
+    * `TEXT_UPPER_PLACEHOLDER` changed to `REG_TEXT_LABEL_1_PLACEHOLDER`
     * Added `REG_TEXT_LABEL_1_OPTIONAL`
     * Added `REG_TEXT_LABEL_1_HELP_TITLE`
     * Added `REG_TEXT_LABEL_1_HELP_TEXT`
@@ -32,7 +32,7 @@ Moved to new version release as this release does not have backwards compatibili
     * `TEXT_UPPER_VALUE` changed to `REG_TEXT_LABEL_1_VALUE`
   * Second text box
     * `TEXT_LOWER_DISPLAY` changed to `REG_TEXT_LABEL_2`
-    * Removed `TEXT_LOWER_PLACEHOLDER` as newer version does not support
+    * `TEXT_LOWER_PLACEHOLDER` changed to `REG_TEXT_LABEL_2_PLACEHOLDER`
     * Added `REG_TEXT_LABEL_2_OPTIONAL`
     * Added `REG_TEXT_LABEL_2_HELP_TITLE`
     * Added `REG_TEXT_LABEL_2_HELP_TEXT`
