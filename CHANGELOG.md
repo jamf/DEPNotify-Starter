@@ -15,9 +15,12 @@ Moved to new version release as this release does not have backwards compatibili
 * `DEP_NOTIFY_INFO_PLIST` changed to `DEP_NOTIFY_USER_INPUT_PLIST` as there is a new plist that stores all user input separate from configuration
 * EULA Enhancements
   * Added `EULA_MAIN_TITLE`
+  * Added `EULA_STATUS`
+  * Added `EULA_BUTTON`
   * Added `EULA_SUBTITLE`
 * Registration Enhancements
   * `REGISTER_ENABLED` changed to `REGISTRATION_ENABLED` to keep registration options similar
+  * Added `REGISTRATION_STATUS`
   * `REGISTER_TITLE` changed to `REGISTRATION_TITLE` to keep registration options similar
   * Added `REGISTRATION_IMAGE_PATH`
   * `REGISTER_BEGIN_STATUS` changed to `REGISTRATION_BEGIN_WORD`
@@ -26,6 +29,7 @@ Moved to new version release as this release does not have backwards compatibili
     * `TEXT_UPPER_DISPLAY` changed to `REG_TEXT_LABEL_1`
     * `TEXT_UPPER_PLACEHOLDER` changed to `REG_TEXT_LABEL_1_PLACEHOLDER`
     * Added `REG_TEXT_LABEL_1_OPTIONAL`
+    * Added code to allow for optional items to be skipped if empty
     * Added `REG_TEXT_LABEL_1_HELP_TITLE`
     * Added `REG_TEXT_LABEL_1_HELP_TEXT`
     * `TEXT_UPPER_LOGIC` changed to `REG_TEXT_LABEL_1_LOGIC`
@@ -34,6 +38,7 @@ Moved to new version release as this release does not have backwards compatibili
     * `TEXT_LOWER_DISPLAY` changed to `REG_TEXT_LABEL_2`
     * `TEXT_LOWER_PLACEHOLDER` changed to `REG_TEXT_LABEL_2_PLACEHOLDER`
     * Added `REG_TEXT_LABEL_2_OPTIONAL`
+    * Added code to allow for optional items to be skipped if empty
     * Added `REG_TEXT_LABEL_2_HELP_TITLE`
     * Added `REG_TEXT_LABEL_2_HELP_TEXT`
     * `TEXT_LOWER_LOGIC` changed to `REG_TEXT_LABEL_2_LOGIC`
@@ -54,6 +59,7 @@ Moved to new version release as this release does not have backwards compatibili
     * `PICK_LOWER_VALUE` changed to `REG_POPUP_LABEL_2_VALUE`
   * Added full code to support popup 3
   * Added full code to support popup 4
+  * Modified code for ownership and permissions on plists within the user's library folder
 
 ## [1.2.0] - 2018/11/01
 

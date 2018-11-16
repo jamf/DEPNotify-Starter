@@ -178,6 +178,12 @@
 # EULA configuration
   EULA_ENABLED=false # Set variable to true or false
 
+  # EULA status bar text
+    EULA_STATUS="Waiting on completion of EULA acceptance"
+
+  # EULA button text on the main screen
+    EULA_BUTTON="Read and Agree to EULA"
+
   # EULA Screen Title
     EULA_MAIN_TITLE="Organization End User License Agreement"
 
@@ -196,10 +202,13 @@
   REGISTRATION_ENABLED=false # Set variable to true or false
 
   # Registration window title
-    REGISTRATION_TITLE="Register Your Mac"
+    REGISTRATION_TITLE="Register Mac at Organization"
+
+  # Registration status bar text
+    REGISTRATION_STATUS="Waiting on completion of computer registration"
 
   # Registration window submit or finish button text
-    REGISTRATION_BUTTON="Register"
+    REGISTRATION_BUTTON="Register Your Mac"
 
   # Registration banner image. If left blank, no image will appear
     REGISTRATION_IMAGE_PATH="/Applications/Self Service.app/Contents/Resources/AppIcon.icns"
@@ -236,12 +245,16 @@
     # when needed later on. BE VERY CAREFUL IN CHANGING THE FUNCTION!
       REG_TEXT_LABEL_1_LOGIC (){
         REG_TEXT_LABEL_1_VALUE=$(defaults read "$DEP_NOTIFY_USER_INPUT_PLIST" "$REG_TEXT_LABEL_1")
-        echo "Status: $REGISTRATION_BEGIN_WORD $REG_TEXT_LABEL_1 $REGISTRATION_MIDDLE_WORD $REG_TEXT_LABEL_1_VALUE" >> "$DEP_NOTIFY_LOG"
-        if [ "$TESTING_MODE" = true ]; then
-           sleep 10
+        if [ "$REG_TEXT_LABEL_1_OPTIONAL" = true ] && [ "$REG_TEXT_LABEL_1_VALUE" = "" ]; then
+          echo "$(date "+%a %h %d %H:%M:%S"): $REG_TEXT_LABEL_1 was set to optional and was not filled in. Skipping logic." >> "$DEP_NOTIFY_DEBUG"
         else
-          "$JAMF_BINARY" setComputerName -name "$REG_TEXT_LABEL_1_VALUE"
-          sleep 5
+          echo "Status: $REGISTRATION_BEGIN_WORD $REG_TEXT_LABEL_1 $REGISTRATION_MIDDLE_WORD $REG_TEXT_LABEL_1_VALUE" >> "$DEP_NOTIFY_LOG"
+          if [ "$TESTING_MODE" = true ]; then
+            sleep 10
+          else
+            "$JAMF_BINARY" setComputerName -name "$REG_TEXT_LABEL_1_VALUE"
+            sleep 5
+          fi
         fi
       }
 
@@ -265,11 +278,15 @@
     # when needed later on. BE VERY CAREFUL IN CHANGING THE FUNCTION!
       REG_TEXT_LABEL_2_LOGIC (){
         REG_TEXT_LABEL_2_VALUE=$(defaults read "$DEP_NOTIFY_USER_INPUT_PLIST" "$REG_TEXT_LABEL_2")
-        echo "Status: $REGISTRATION_BEGIN_WORD $REG_TEXT_LABEL_2 $REGISTRATION_MIDDLE_WORD $REG_TEXT_LABEL_2_VALUE" >> "$DEP_NOTIFY_LOG"
-        if [ "$TESTING_MODE" = true ]; then
-           sleep 10
+        if [ "$REG_TEXT_LABEL_2_OPTIONAL" = true ] && [ "$REG_TEXT_LABEL_2_VALUE" = "" ]; then
+          echo "$(date "+%a %h %d %H:%M:%S"): $REG_TEXT_LABEL_2 was set to optional and was not filled in. Skipping logic." >> "$DEP_NOTIFY_DEBUG"
         else
-          "$JAMF_BINARY" recon -assetTag "$REG_TEXT_LABEL_2_VALUE"
+          echo "Status: $REGISTRATION_BEGIN_WORD $REG_TEXT_LABEL_2 $REGISTRATION_MIDDLE_WORD $REG_TEXT_LABEL_2_VALUE" >> "$DEP_NOTIFY_LOG"
+          if [ "$TESTING_MODE" = true ]; then
+             sleep 10
+          else
+            "$JAMF_BINARY" recon -assetTag "$REG_TEXT_LABEL_2_VALUE"
+          fi
         fi
       }
 
@@ -334,7 +351,7 @@
   # Popup 3 - Code is here but currently unused
   #######################################################################################
     # Label for the popup
-      REG_POPUP_LABEL_3="Dropdown 3"
+      REG_POPUP_LABEL_3=""
 
     # Array of options for the user to select
       REG_POPUP_LABEL_3_OPTIONS=(
@@ -363,7 +380,7 @@
   # Popup 4 - Code is here but currently unused
   #######################################################################################
     # Label for the popup
-      REG_POPUP_LABEL_4="Dropdown 4"
+      REG_POPUP_LABEL_4=""
 
     # Array of options for the user to select
       REG_POPUP_LABEL_4_OPTIONS=(
@@ -553,14 +570,16 @@
     # If testing mode is on, this will remove EULA specific configuration files
       if [ "$TESTING_MODE" = true ] && [ -f "$DEP_NOTIFY_EULA_DONE" ]; then rm "$DEP_NOTIFY_EULA_DONE"; fi
 
-    # Writing title and subtitle to plist
+    # Writing title, subtitle, and EULA txt location to plist
       defaults write "$DEP_NOTIFY_CONFIG_PLIST" EULAMainTitle "$EULA_MAIN_TITLE"
       defaults write "$DEP_NOTIFY_CONFIG_PLIST" EULASubTitle "$EULA_SUBTITLE"
-
-    # Writing the location of the EULA file and changing ownership of the file
       defaults write "$DEP_NOTIFY_CONFIG_PLIST" pathToEULA "$EULA_FILE_PATH"
-      chown "$CURRENT_USER" "$EULA_FILE_PATH"
-      chown "$CURRENT_USER" "$DEP_NOTIFY_CONFIG_PLIST"
+
+    # Setting ownership of files
+      chown "$CURRENT_USER:staff" "$EULA_FILE_PATH"
+      chmod 444 "$EULA_FILE_PATH"
+      chown "$CURRENT_USER:staff" "$DEP_NOTIFY_CONFIG_PLIST"
+      chmod 600 "$DEP_NOTIFY_CONFIG_PLIST"
   fi
 
 # Registration Plist Configuration
@@ -658,7 +677,8 @@
       fi
 
     # Changing Ownership of the plist file
-      chown "$CURRENT_USER" "$DEP_NOTIFY_CONFIG_PLIST"
+      chown "$CURRENT_USER":staff "$DEP_NOTIFY_CONFIG_PLIST"
+      chmod 600 "$DEP_NOTIFY_CONFIG_PLIST"
   fi
 
 # Opening the app after initial configuration
@@ -711,8 +731,8 @@
 
 # EULA Window Display Logic
   if [ "$EULA_ENABLED" = true ]; then
-    echo "Status: Waiting on EULA Acceptance" >> "$DEP_NOTIFY_LOG"
-    echo "Command: ContinueButtonEULA: EULA" >> "$DEP_NOTIFY_LOG"
+    echo "Status: $EULA_STATUS" >> "$DEP_NOTIFY_LOG"
+    echo "Command: ContinueButtonEULA: $EULA_BUTTON" >> "$DEP_NOTIFY_LOG"
     while [ ! -f "$DEP_NOTIFY_EULA_DONE" ]; do
       echo "$(date "+%a %h %d %H:%M:%S"): Waiting for user to accept EULA." >> "$DEP_NOTIFY_DEBUG"
       sleep 1
@@ -721,8 +741,8 @@
 
 # Registration Window Display Logic
   if [ "$REGISTRATION_ENABLED" = true ]; then
-    echo "Status: $REGISTRATION_TITLE" >> "$DEP_NOTIFY_LOG"
-    echo "Command: ContinueButtonRegister: Register" >> "$DEP_NOTIFY_LOG"
+    echo "Status: $REGISTRATION_STATUS" >> "$DEP_NOTIFY_LOG"
+    echo "Command: ContinueButtonRegister: $REGISTRATION_BUTTON" >> "$DEP_NOTIFY_LOG"
     while [ ! -f "$DEP_NOTIFY_REGISTER_DONE" ]; do
       echo "$(date "+%a %h %d %H:%M:%S"): Waiting for user to complete registration." >> "$DEP_NOTIFY_DEBUG"
       sleep 1
