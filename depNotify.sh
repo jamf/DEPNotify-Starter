@@ -630,7 +630,7 @@
           fi
         # Code for adding the items from the array above into the plist
           for REG_POPUP_LABEL_1_OPTION in "${REG_POPUP_LABEL_1_OPTIONS[@]}"; do
-             defaults write "$DEP_NOTIFY_CONFIG_PLIST" popupButton1Contents -array-add "$REG_POPUP_LABEL_1_OPTION"
+             defaults write "$DEP_NOTIFY_CONFIG_PLIST" popupButton1Content -array-add "$REG_POPUP_LABEL_1_OPTION"
           done
       fi
 
@@ -644,7 +644,7 @@
           fi
         # Code for adding the items from the array above into the plist
           for REG_POPUP_LABEL_2_OPTION in "${REG_POPUP_LABEL_2_OPTIONS[@]}"; do
-             defaults write "$DEP_NOTIFY_CONFIG_PLIST" popupButton2Contents -array-add "$REG_POPUP_LABEL_2_OPTION"
+             defaults write "$DEP_NOTIFY_CONFIG_PLIST" popupButton2Content -array-add "$REG_POPUP_LABEL_2_OPTION"
           done
       fi
 
@@ -658,7 +658,7 @@
           fi
         # Code for adding the items from the array above into the plist
           for REG_POPUP_LABEL_3_OPTION in "${REG_POPUP_LABEL_3_OPTIONS[@]}"; do
-             defaults write "$DEP_NOTIFY_CONFIG_PLIST" popupButton3Contents -array-add "$REG_POPUP_LABEL_3_OPTION"
+             defaults write "$DEP_NOTIFY_CONFIG_PLIST" popupButton3Content -array-add "$REG_POPUP_LABEL_3_OPTION"
           done
       fi
 
@@ -672,7 +672,7 @@
           fi
         # Code for adding the items from the array above into the plist
           for REG_POPUP_LABEL_4_OPTION in "${REG_POPUP_LABEL_4_OPTIONS[@]}"; do
-             defaults write "$DEP_NOTIFY_CONFIG_PLIST" popupButton4Contents -array-add "$REG_POPUP_LABEL_4_OPTION"
+             defaults write "$DEP_NOTIFY_CONFIG_PLIST" popupButton4Content -array-add "$REG_POPUP_LABEL_4_OPTION"
           done
       fi
 
