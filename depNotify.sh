@@ -42,7 +42,7 @@
   TESTING_MODE=true # Set variable to true or false
 
 #########################################################################################
-# General Appearence
+# General Appearance
 #########################################################################################
 # Flag the app to open fullscreen or as a window
   FULLSCREEN=true # Set variable to true or false
@@ -210,9 +210,6 @@
   # Registration window submit or finish button text
     REGISTRATION_BUTTON="Register Your Mac"
 
-  # Registration banner image. If left blank, no image will appear
-    REGISTRATION_IMAGE_PATH="/Applications/Self Service.app/Contents/Resources/AppIcon.icns"
-
   # The text and pick list sections below will write the following lines out for
   # end users. Use the variables below to configure what the sentence says
   # Ex: Setting Computer Name to macBook0132
@@ -304,7 +301,7 @@
 
     # Help Bubble for Input. If title left blank, this will not appear
       REG_POPUP_LABEL_1_HELP_TITLE="Building Dropdown Field"
-      REG_POPUP_LABEL_1_HELP_TEXT="Please choose the appropreate building for where you normally work. This is important for inventory purposes."
+      REG_POPUP_LABEL_1_HELP_TEXT="Please choose the appropriate building for where you normally work. This is important for inventory purposes."
 
     # Logic below was put in this section rather than in core code as folks may
     # want to change what the field does. This is a function that gets called
@@ -333,7 +330,7 @@
 
     # Help Bubble for Input. If title left blank, this will not appear
       REG_POPUP_LABEL_2_HELP_TITLE="Department Dropdown Field"
-      REG_POPUP_LABEL_2_HELP_TEXT="Please choose the appropreate department for where you normally work. This is important for inventory purposes."
+      REG_POPUP_LABEL_2_HELP_TEXT="Please choose the appropriate department for where you normally work. This is important for inventory purposes."
 
     # Logic below was put in this section rather than in core code as folks may
     # want to change what the field does. This is a function that gets called
@@ -592,9 +589,7 @@
     # Main Window Text Configuration
       defaults write "$DEP_NOTIFY_CONFIG_PLIST" registrationMainTitle "$REGISTRATION_TITLE"
       defaults write "$DEP_NOTIFY_CONFIG_PLIST" registrationButtonLabel "$REGISTRATION_BUTTON"
-      if [ "$REGISTRATION_IMAGE_PATH" != "" ]; then
-        defaults write "$DEP_NOTIFY_CONFIG_PLIST" registrationPicturePath "$REGISTRATION_IMAGE_PATH"
-      fi
+      defaults write "$DEP_NOTIFY_CONFIG_PLIST" registrationPicturePath "$BANNER_IMAGE_PATH"
 
     # First Text Box Configuration
       if [ "$REG_TEXT_LABEL_1" != "" ]; then

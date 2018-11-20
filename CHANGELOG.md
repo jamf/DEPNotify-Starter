@@ -22,7 +22,6 @@ Moved to new version release as this release does not have backwards compatibili
   * `REGISTER_ENABLED` changed to `REGISTRATION_ENABLED` to keep registration options similar
   * Added `REGISTRATION_STATUS`
   * `REGISTER_TITLE` changed to `REGISTRATION_TITLE` to keep registration options similar
-  * Added `REGISTRATION_IMAGE_PATH`
   * `REGISTER_BEGIN_STATUS` changed to `REGISTRATION_BEGIN_WORD`
   * `REGISTER_MIDDLE_STATUS` changed to `REGISTRATION_MIDDLE_WORD`
   * First text box
