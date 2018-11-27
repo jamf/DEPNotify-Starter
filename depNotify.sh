@@ -563,8 +563,8 @@
 
   # Setting help button
     if [ "$HELP_BUBBLE_TITLE" != "" ]; then
-      defaults write "$DEP_NOTIFY_CONFIG_PLIST" helpBubbleTitle "$HELP_BUBBLE_TITLE"
-      defaults write "$DEP_NOTIFY_CONFIG_PLIST" helpBubbleBody "$HELP_BUBBLE_BODY"
+      defaults write "$DEP_NOTIFY_CONFIG_PLIST" helpBubble -array-add "$HELP_BUBBLE_TITLE"
+      defaults write "$DEP_NOTIFY_CONFIG_PLIST" helpBubble -array-add "$HELP_BUBBLE_BODY"
     fi
 
 # EULA Configuration
