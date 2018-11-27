@@ -166,6 +166,9 @@
 # Flag for using the custom branding icon from Self Service and Jamf Pro
 # This will override the banner image specified above. If you have changed the
 # name of Self Service, make sure to modify the Self Service name below.
+# Please note, custom branding is downloaded from Jamf Pro after Self Service has opened
+# at least one time. The script is designed to wait until the files have been downloaded.
+# This could take a few minutes depending on server and network resources.
   SELF_SERVICE_CUSTOM_BRANDING=false # Set variable to true or false
 
 # If using a name other than Self Service with Custom branding. Change the
