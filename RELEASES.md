@@ -9,7 +9,7 @@ Due to changes with menu.depnotify.plist, it was easier to update the script wit
 * DEPNotify x.x.x
 
 ##### Tested versions of DEPNotify.sh
-* [v2.0.0](https://github.com/jamfprofessionalservices/DEPNotify/releases/tag/v2.0.0)
+* [v2.0.0](https://github.com/jamf/DEPNotify-Starter/releases/tag/v2.0.0)
 
 ##### Tested versions of macOS
 * 10.14.1
@@ -21,7 +21,7 @@ Version 1.1.2 of DEPNotify added some key fixes for EULA and Registration window
 * [DEPNotify 1.1.2 ](https://files.slack.com/files-pri/T04QVKUQG-FDURXEYUS/download/depnotify-1.1.2.zip)
 
 ##### Tested versions of DEPNotify.sh
-* [v1.2.0](https://github.com/jamfprofessionalservices/DEPNotify/releases/tag/v1.2.0)
+* [v1.2.0](https://github.com/jamf/DEPNotify-Starter/releases/tag/v1.2.0)
 
 ##### Tested versions of macOS
 * 10.14.0
@@ -33,10 +33,10 @@ Several updates to the script support version 1.1.0. Technically even 1.2.0 woul
 * [DEPNotify 1.1.0 ](https://gitlab.com/Mactroll/DEPNotify/uploads/bb828a261a0fdce50861031ffda3061d/DEPNotify-1.1.0.pkg)
 
 ##### Tested versions of DEPNotify.sh
-* [v1.1.2](https://github.com/jamfprofessionalservices/DEPNotify/releases/tag/v1.1.2)
-* [v1.1.1](https://github.com/jamfprofessionalservices/DEPNotify/releases/tag/v1.1.1)
-* [v1.1.0](https://github.com/jamfprofessionalservices/DEPNotify/releases/tag/v1.1.0)
-* [v1.0.0](https://github.com/jamfprofessionalservices/DEPNotify/releases/tag/v1.0.0)
+* [v1.1.2](https://github.com/jamf/DEPNotify-Starter/releases/tag/v1.1.2)
+* [v1.1.1](https://github.com/jamf/DEPNotify-Starter/releases/tag/v1.1.1)
+* [v1.1.0](https://github.com/jamf/DEPNotify-Starter/releases/tag/v1.1.0)
+* [v1.0.0](https://github.com/jamf/DEPNotify-Starter/releases/tag/v1.0.0)
 
 ##### Tested versions of macOS
 * 10.14.0
