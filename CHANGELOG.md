@@ -1,6 +1,6 @@
 # Change Log
 
-## [2.0.0] - xxxx/xx/xx
+## [2.0.0] - 2018/12/10
 
 Moved to new version release as this release does not have backwards compatibility for older versions of DEPNotify. Please review the new [RELEASES.md](RELEASES.md) page for more information.
 
