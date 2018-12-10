@@ -63,3 +63,7 @@ The change log was getting a bit long and now has moved to its own page. Please 
 ## Contributors
 
 This project could not have happened without several people's assistance. A special thanks to those individuals can be found on [CONTRIBUTORS.md](CONTRIBUTORS.md)
+
+## Migration
+
+This project was moved from https://github.com/jamfprofessionalservices/DEPNotify
