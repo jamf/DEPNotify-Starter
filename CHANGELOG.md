@@ -6,7 +6,6 @@ Moved to new version release as this release does not have backwards compatibili
 
 * Added [RELEASES.md](RELEASES.md) page to track versions of script app and macOS that have been tested together
 * Made small modifications to the [README.md](README.md) page to alert admins to new page
-* Added resources folder with [plistPreferenceKeys spreadsheet](resources/plistPreferenceKeys.xlsx) for quick reference
 * Separated configurable variables into small chunks by use. Required configurations are closer to the top with more niche options closer to the bottom of the configuration area
 * Removed `SUPPORT_URL` as newer version does not support
 * Added `STATUS_TEXT_ALIGN`
