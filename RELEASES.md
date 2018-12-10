@@ -2,11 +2,11 @@
 
 This page is to document version of the DEPNotify script in relation to the DEPNotify app. Script and app versions are independent of one another and can be confusing as releases continue.
 
-## x.x.x of DEPNotify app
+## 1.1.3 of DEPNotify app
 Due to changes with menu.depnotify.plist, it was easier to update the script without backwards compatibility. As such v.2.0.0 of the script only supports this version of the app
 
 ##### App Download Link
-* DEPNotify x.x.x
+* [DEPNotify 1.1.3](https://macadmins.slack.com/files/U08LW9L4X/FEPH8F4SU/depnotify-1.1.3.pkg)
 
 ##### Tested versions of DEPNotify.sh
 * [v2.0.0](https://github.com/jamf/DEPNotify-Starter/releases/tag/v2.0.0)
