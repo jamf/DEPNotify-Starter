@@ -67,7 +67,7 @@
 # Text that will display in the progress bar
   INSTALL_COMPLETE_TEXT="Configuration Complete!"
 
-# Complete messaging to the end use can ether be a button at the bottom of the
+# Complete messaging to the end user can ether be a button at the bottom of the
 # app with a modification to the main window text or a dropdown alert box. Default
 # value set to false and will use buttons instead of dropdown messages.
   COMPLETE_METHOD_DROPDOWN_ALERT=false # Set variable to true or false
@@ -113,7 +113,7 @@
 #########################################################################################
 # Error Screen Text
 #########################################################################################
-# If testing mode if false and configuration files are present, this text will appear to
+# If testing mode is false and configuration files are present, this text will appear to
 # the end user and asking them to contact IT. Limited window options here as the
 # assumption is that they need to call IT. No continue or exit buttons will show for
 # DEP Notify window and it will not show in fullscreen. IT staff will need to use Terminal
@@ -579,11 +579,9 @@
       defaults write "$DEP_NOTIFY_CONFIG_PLIST" EULASubTitle "$EULA_SUBTITLE"
       defaults write "$DEP_NOTIFY_CONFIG_PLIST" pathToEULA "$EULA_FILE_PATH"
 
-    # Setting ownership of files
+    # Setting ownership of EULA file
       chown "$CURRENT_USER:staff" "$EULA_FILE_PATH"
       chmod 444 "$EULA_FILE_PATH"
-      chown "$CURRENT_USER:staff" "$DEP_NOTIFY_CONFIG_PLIST"
-      chmod 600 "$DEP_NOTIFY_CONFIG_PLIST"
   fi
 
 # Registration Plist Configuration
@@ -677,11 +675,11 @@
              defaults write "$DEP_NOTIFY_CONFIG_PLIST" popupButton4Content -array-add "$REG_POPUP_LABEL_4_OPTION"
           done
       fi
-
-    # Changing Ownership of the plist file
-      chown "$CURRENT_USER":staff "$DEP_NOTIFY_CONFIG_PLIST"
-      chmod 600 "$DEP_NOTIFY_CONFIG_PLIST"
   fi
+
+# Changing Ownership of the plist file
+  chown "$CURRENT_USER":staff "$DEP_NOTIFY_CONFIG_PLIST"
+  chmod 600 "$DEP_NOTIFY_CONFIG_PLIST"
 
 # Opening the app after initial configuration
   if [ "$FULLSCREEN" = true ]; then
