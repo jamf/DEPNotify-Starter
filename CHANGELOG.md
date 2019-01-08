@@ -1,5 +1,8 @@
 # Change Log
 
+## [2.0.1] - 2019/01/08
+Made small change to chmod and chown for the DEPNotify configuration plist. There was an issue if EULA and Registration window were not used that the plist would not have proper permissions.
+
 ## [2.0.0] - 2018/12/10
 
 Moved to new version release as this release does not have backwards compatibility for older versions of DEPNotify. Please review the new [RELEASES.md](RELEASES.md) page for more information.
