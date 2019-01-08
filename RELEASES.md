@@ -9,6 +9,7 @@ Due to changes with menu.depnotify.plist, it was easier to update the script wit
 * [DEPNotify 1.1.3](https://macadmins.slack.com/files/U5BPXF1A9/FEREQGPGD/depnotify.zip)
 
 ##### Tested versions of DEPNotify.sh
+* [v2.0.1](https://github.com/jamf/DEPNotify-Starter/releases/tag/v2.0.1)
 * [v2.0.0](https://github.com/jamf/DEPNotify-Starter/releases/tag/v2.0.0)
 
 ##### Tested versions of macOS
