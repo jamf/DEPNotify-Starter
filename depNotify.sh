@@ -1,5 +1,5 @@
 #!/bin/bash
-# Version 2.0.1
+# Version 2.1.0
 
 #########################################################################################
 # License information
@@ -133,6 +133,16 @@
 #########################################################################################
 # Policy Variable to Modify
 #########################################################################################
+# If installing DEPNotify and this script as an Enrollment Package during DEP enrollment,
+# and have configured the depNotifyPolicySupplement.sh as a policy, then set this flag
+# to true. Otherwise leave as false. For more info on how to configure, see the readme.
+  POLICY_SUPPLEMENT=false
+
+  # THIS ONLY NEEDS TO BE CONFIGURED IF POLICY_SUPPLEMENT IS SET TO TRUE!
+  # To call the POLICY_SUPPLEMENT, there must be a policy with the supplement configured.
+  # Create a custom trigger and add it below.
+    POLICY_SUPPLEMENT_TRIGGER="depNotifyPolicySupplement"
+
 # The policy array must be formatted "Progress Bar text,customTrigger". These will be
 # run in order as they appear below.
   POLICY_ARRAY=(
@@ -709,7 +719,19 @@
 
 # Adding nice text and a brief pause for prettiness
   echo "Status: $INITAL_START_STATUS" >> "$DEP_NOTIFY_LOG"
-  sleep 5
+
+# Added until/wait based on the POLICY_SUPPLEMENT flag
+  if [ "$POLICY_SUPPLEMENT" = false ]; then
+    echo "$(date "+%a %h %d %H:%M:%S"): Sleeping 5 seconds to allow for pretty inital start message to show." >> "$DEP_NOTIFY_DEBUG"
+    sleep 5
+  else
+    until [ -f "$JAMF_BINARY" ]; do
+      echo "$(date "+%a %h %d %H:%M:%S"): Jamf binary has yet to be installed on the client. Waiting..." >> "$DEP_NOTIFY_DEBUG"
+      sleep 1
+    done
+  fi
+
+##### NEEED TO ASSESS AS THE DETERMINATE IS BROKEN WHEN USING THE POLICY_SUPPLEMENT #####
 
 # Setting the status bar
   # Counter is for making the determinate look nice. Starts at one and adds
@@ -728,6 +750,8 @@
   # Checking policy array and adding the count from the additional options above.
     ARRAY_LENGTH="$((${#POLICY_ARRAY[@]}+ADDITIONAL_OPTIONS_COUNTER))"
     echo "Command: Determinate: $ARRAY_LENGTH" >> "$DEP_NOTIFY_LOG"
+
+##### NEEED TO ASSESS AS THE DETERMINATE IS BROKEN WHEN USING THE POLICY_SUPPLEMENT #####
 
 # EULA Window Display Logic
   if [ "$EULA_ENABLED" = true ]; then
@@ -757,14 +781,18 @@
   fi
 
 # Loop to run policies
-  for POLICY in "${POLICY_ARRAY[@]}"; do
-    echo "Status: $(echo "$POLICY" | cut -d ',' -f1)" >> "$DEP_NOTIFY_LOG"
-    if [ "$TESTING_MODE" = true ]; then
-      sleep 10
-    elif [ "$TESTING_MODE" = false ]; then
-      "$JAMF_BINARY" policy -event "$(echo "$POLICY" | cut -d ',' -f2)"
-    fi
-  done
+  if [ "$POLICY_SUPPLEMENT" = false ]; then
+    for POLICY in "${POLICY_ARRAY[@]}"; do
+      echo "Status: $(echo "$POLICY" | cut -d ',' -f1)" >> "$DEP_NOTIFY_LOG"
+      if [ "$TESTING_MODE" = true ]; then
+        sleep 10
+      elif [ "$TESTING_MODE" = false ]; then
+        "$JAMF_BINARY" policy -event "$(echo "$POLICY" | cut -d ',' -f2)"
+      fi
+    done
+  else
+    "$JAMF_BINARY" policy -event "$POLICY_SUPPLEMENT_TRIGGER"
+  fi
 
 # Nice completion text
   echo "Status: $INSTALL_COMPLETE_TEXT" >> "$DEP_NOTIFY_LOG"
