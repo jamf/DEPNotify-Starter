@@ -221,7 +221,7 @@
 
   # Registration window can have up to two text fields. Leaving the text display
   # variable empty will hide the input box. Display text is to the side of the
-  # input and placeholder text is they grey text inside the input box.
+  # input and placeholder text is the gray text inside the input box.
   # Registration window can have up to four dropdown / pick list inputs. Leaving
   # the pick display variable empty will hide the dropdown / pick list.
 
