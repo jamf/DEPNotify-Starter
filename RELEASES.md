@@ -2,6 +2,16 @@
 
 This page is to document version of the DEPNotify script in relation to the DEPNotify app. Script and app versions are independent of one another and can be confusing as releases continue.
 
+## 1.1.4 of DEPNotify appear
+No major changes in 1.1.4 of DEPNotify that would effect the script. Mainly bug fixes that were introduced in 1.1.3.
+
+##### App Download Link
+* [DEPNotify 1.1.14](https://s3.amazonaws.com/nomadbetas/DEPNotify-1.1.4.pkg)
+
+##### Tested versions of DEPNotify.sh
+* [v2.1.0](https://github.com/jamf/DEPNotify-Starter/releases/tag/v2.1.0)
+* [v2.0.1](https://github.com/jamf/DEPNotify-Starter/releases/tag/v2.0.1)
+
 ## 1.1.3 of DEPNotify app
 Due to changes with menu.depnotify.plist, it was easier to update the script without backwards compatibility. As such v.2.0.0 of the script only supports this version of the app
 

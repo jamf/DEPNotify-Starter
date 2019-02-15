@@ -1,5 +1,8 @@
 # Change Log
 
+## [2.1.0] - 2019/02/xx
+Added depNotifyPolicySupplement.sh to assist with deployment with DEP Enrollment Packages. Thanks to @arekdreyer for your hard work and collaboration.
+
 ## [2.0.1] - 2019/01/08
 Made small change to chmod and chown for the DEPNotify configuration plist. There was an issue if EULA and Registration window were not used that the plist would not have proper permissions.
 
