@@ -506,16 +506,17 @@ BANNER_IMAGE_PATH_DARK="/Applications/Self Service.app/Contents/Resources/AppIco
   CURRENT_USER=$(/usr/bin/python -c 'from SystemConfiguration import SCDynamicStoreCopyConsoleUser; import sys; username = (SCDynamicStoreCopyConsoleUser(None, None, None) or [None])[0]; username = [username,""][username in [u"loginwindow", None, u""]]; sys.stdout.write(username + "\n");')
   echo "$(date "+%a %h %d %H:%M:%S"): Current user set to $CURRENT_USER." >> "$DEP_NOTIFY_DEBUG"
 
-# Detect current theme and set banner appropriately 
+# detect current theme and set banner path appropriately 
 DM=$(su -l "$CURRENT_USER" -c "defaults read -g AppleInterfaceStyle")
 if [[ $DM == "Dark" ]];
 then
 echo "current theme is DARK." >> "$DEP_NOTIFY_LOG"
-BANNER_IMAGE_PATH="/var/tmp/CAT_LOGO_REVERSE.png"
+BANNER_IMAGE_PATH=$BANNER_IMAGE_PATH_DARK
 else
 echo "current theme is LIGHT." >> "$DEP_NOTIFY_LOG"
-BANNER_IMAGE_PATH="/var/tmp/CAT_LOGO.png"
+BANNER_IMAGE_PATH=$BANNER_IMAGE_PATH_LIGHT
 fi
+
 # Adding Check and Warning if Testing Mode is off and BOM files exist
   if [[ ( -f "$DEP_NOTIFY_LOG" || -f "$DEP_NOTIFY_DONE" ) && "$TESTING_MODE" = false ]]; then
     echo "$(date "+%a %h %d %H:%M:%S"): TESTING_MODE set to false but config files were found in /var/tmp. Letting user know and exiting." >> "$DEP_NOTIFY_DEBUG"
