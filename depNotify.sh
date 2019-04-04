@@ -50,7 +50,10 @@
 # Banner image can be 600px wide by 100px high. Images will be scaled to fit
 # If this variable is left blank, the generic image will appear. If using custom Self
 # Service branding, please see the Customized Self Service Branding area below
-  BANNER_IMAGE_PATH="/Applications/Self Service.app/Contents/Resources/AppIcon.icns"
+# If you need set a different logo based on OS Dark Theme Set these accordingly
+# other wise set them to the same thing. Default Selection is Light.
+BANNER_IMAGE_PATH_LIGHT="/Applications/Self Service.app/Contents/Resources/AppIcon.icns"
+BANNER_IMAGE_PATH_DARK="/Applications/Self Service.app/Contents/Resources/AppIcon.icns"
 
 # Main heading that will be displayed under the image
 # If this variable is left blank, the generic banner will appear
@@ -503,6 +506,16 @@
   CURRENT_USER=$(/usr/bin/python -c 'from SystemConfiguration import SCDynamicStoreCopyConsoleUser; import sys; username = (SCDynamicStoreCopyConsoleUser(None, None, None) or [None])[0]; username = [username,""][username in [u"loginwindow", None, u""]]; sys.stdout.write(username + "\n");')
   echo "$(date "+%a %h %d %H:%M:%S"): Current user set to $CURRENT_USER." >> "$DEP_NOTIFY_DEBUG"
 
+# Detect current theme and set banner appropriately 
+DM=$(su -l "$CURRENT_USER" -c "defaults read -g AppleInterfaceStyle")
+if [[ $DM == "Dark" ]];
+then
+echo "current theme is DARK." >> "$DEP_NOTIFY_LOG"
+BANNER_IMAGE_PATH="/var/tmp/CAT_LOGO_REVERSE.png"
+else
+echo "current theme is LIGHT." >> "$DEP_NOTIFY_LOG"
+BANNER_IMAGE_PATH="/var/tmp/CAT_LOGO.png"
+fi
 # Adding Check and Warning if Testing Mode is off and BOM files exist
   if [[ ( -f "$DEP_NOTIFY_LOG" || -f "$DEP_NOTIFY_DONE" ) && "$TESTING_MODE" = false ]]; then
     echo "$(date "+%a %h %d %H:%M:%S"): TESTING_MODE set to false but config files were found in /var/tmp. Letting user know and exiting." >> "$DEP_NOTIFY_DEBUG"
