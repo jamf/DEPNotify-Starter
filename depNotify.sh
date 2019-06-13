@@ -1,5 +1,5 @@
 #!/bin/bash
-# Version 2.0.1
+# Version 2.0.2
 
 #########################################################################################
 # License information
@@ -244,7 +244,7 @@
     # want to change what the field does. This is a function that gets called
     # when needed later on. BE VERY CAREFUL IN CHANGING THE FUNCTION!
       REG_TEXT_LABEL_1_LOGIC (){
-        REG_TEXT_LABEL_1_VALUE=$(defaults read "$DEP_NOTIFY_USER_INPUT_PLIST" "$REG_TEXT_LABEL_1")
+        REG_TEXT_LABEL_1_VALUE=$(defaults read "$DEP_NOTIFY_CONFIG_PLIST" "$REG_TEXT_LABEL_1")
         if [ "$REG_TEXT_LABEL_1_OPTIONAL" = true ] && [ "$REG_TEXT_LABEL_1_VALUE" = "" ]; then
           echo "Status: $REG_TEXT_LABEL_1 was left empty. Skipping..." >> "$DEP_NOTIFY_LOG"
           echo "$(date "+%a %h %d %H:%M:%S"): $REG_TEXT_LABEL_1 was set to optional and was left empty. Skipping..." >> "$DEP_NOTIFY_DEBUG"
@@ -279,7 +279,7 @@
     # want to change what the field does. This is a function that gets called
     # when needed later on. BE VERY CAREFUL IN CHANGING THE FUNCTION!
       REG_TEXT_LABEL_2_LOGIC (){
-        REG_TEXT_LABEL_2_VALUE=$(defaults read "$DEP_NOTIFY_USER_INPUT_PLIST" "$REG_TEXT_LABEL_2")
+        REG_TEXT_LABEL_2_VALUE=$(defaults read "$DEP_NOTIFY_CONFIG_PLIST" "$REG_TEXT_LABEL_2")
         if [ "$REG_TEXT_LABEL_2_OPTIONAL" = true ] && [ "$REG_TEXT_LABEL_2_VALUE" = "" ]; then
           echo "Status: $REG_TEXT_LABEL_2 was left empty. Skipping..." >> "$DEP_NOTIFY_LOG"
           echo "$(date "+%a %h %d %H:%M:%S"): $REG_TEXT_LABEL_2 was set to optional and was left empty. Skipping..." >> "$DEP_NOTIFY_DEBUG"
@@ -314,7 +314,7 @@
     # want to change what the field does. This is a function that gets called
     # when needed later on. BE VERY CAREFUL IN CHANGING THE FUNCTION!
       REG_POPUP_LABEL_1_LOGIC (){
-        REG_POPUP_LABEL_1_VALUE=$(defaults read "$DEP_NOTIFY_USER_INPUT_PLIST" "$REG_POPUP_LABEL_1")
+        REG_POPUP_LABEL_1_VALUE=$(defaults read "$DEP_NOTIFY_CONFIG_PLIST" "$REG_POPUP_LABEL_1")
         echo "Status: $REGISTRATION_BEGIN_WORD $REG_POPUP_LABEL_1 $REGISTRATION_MIDDLE_WORD $REG_POPUP_LABEL_1_VALUE" >> "$DEP_NOTIFY_LOG"
         if [ "$TESTING_MODE" = true ]; then
            sleep 10
