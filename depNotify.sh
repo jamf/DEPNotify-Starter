@@ -129,6 +129,15 @@
 
 # Error status message that is displayed under the progress bar
   ERROR_STATUS="Setup Failed"
+  
+#########################################################################################
+# Trigger to be used to call the policy
+#########################################################################################
+# Policies can be called be either a custom trigger or by policy id.
+# Select either event, to call the policy by the custom trigger,
+# or id to call the policy by id.
+TRIGGER="event"
+
 
 #########################################################################################
 # Policy Variable to Modify
@@ -762,7 +771,7 @@
     if [ "$TESTING_MODE" = true ]; then
       sleep 10
     elif [ "$TESTING_MODE" = false ]; then
-      "$JAMF_BINARY" policy -event "$(echo "$POLICY" | cut -d ',' -f2)"
+      "$JAMF_BINARY" policy "-$TRIGGER" "$(echo "$POLICY" | cut -d ',' -f2)"
     fi
   done
 
