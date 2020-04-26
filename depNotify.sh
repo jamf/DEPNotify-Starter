@@ -52,8 +52,9 @@
 # Service branding, please see the Customized Self Service Branding area below
   BANNER_IMAGE_PATH="/Applications/Self Service.app/Contents/Resources/AppIcon.icns"
 
-# Update the variable below replacing "Organization" with the actual name of your organization. Example "ACME Corp Inc."
-YOUR_ORG_NAME_HERE="Organization"
+# Update the variable below replacing "Organization" with the actual name of your
+# organization. Example "ACME Corp Inc."
+  YOUR_ORG_NAME_HERE="Organization"
 
 # Main heading that will be displayed under the image
 # If this variable is left blank, the generic banner will appear
@@ -159,6 +160,32 @@ TRIGGER="event"
     "Installing Webex,webex"
     "Installing Critical Updates,updateSoftware"
   )
+
+
+ #######################################################################################
+ # (OPTIONAL) App icon array variable to modify
+ #######################################################################################
+# The policy array must be formatted "App Name,/path/to/local/image.png". The App name
+# should be contained in both the App Icon Array and the Policy array so that the
+# script can determine which icon needs to be displayed.
+#
+# These icons should coinside with the order of the policy array above so that the
+# right App icon is displayed as the App is being installed. This array is not required.
+#
+# These icon images will need to be deployed in the jamf-depnotify-installer package.
+   APP_ICON_ARRAY=(
+    # "App Name,/tmp/depnotify/icons/icon_name.png"
+ 	"Adobe Creative Cloud,/tmp/depnotify/icons/adobe_creative_cloud_icon.png"
+    "Adobe Reader,/tmp/depnotify/icons/adobe_reader_icon.png"
+    "Chrome,/tmp/depnotify/icons/chrome_icon.png"
+ 	"CrashPlan,/tmp/depnotify/icons/crashplan_icon.png"
+ 	"Firefox,/tmp/depnotify/icons/firefox_icon.png"
+ 	"NoMAD,/tmp/depnotify/icons/nomad_icon.png"
+ 	"Office,/tmp/depnotify/icons/microsoft_office_icon.png"
+ 	"Webex,/tmp/depnotify/icons/webex_icon.png"
+    "Installing Critical Updates,/tmp/depnotify/icons/software_update_icon.png"
+ )
+
 
 #########################################################################################
 # Caffeinate / No Sleep Configuration
