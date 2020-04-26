@@ -53,7 +53,7 @@
   BANNER_IMAGE_PATH="/Applications/Self Service.app/Contents/Resources/AppIcon.icns"
 
 # Update the variable below replacing "Organization" with the actual name of your organization. Example "ACME Corp Inc."
-YOUR_ORG_NAME_HERE="Organization"
+  YOUR_ORG_NAME_HERE="Organization"
 
 # Main heading that will be displayed under the image
 # If this variable is left blank, the generic banner will appear
