@@ -58,7 +58,7 @@
 
 # Main heading that will be displayed under the image
 # If this variable is left blank, the generic banner will appear
-  BANNER_TITLE="Welcome to Organization"
+  BANNER_TITLE="Welcome to $YOUR_ORG_NAME_HERE"
 
 # Paragraph text that will display under the main heading. For a new line, use \n
 # If this variable is left blank, the generic message will appear. Leave single
