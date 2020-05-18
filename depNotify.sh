@@ -52,8 +52,12 @@
 # Service branding, please see the Customized Self Service Branding area below
   BANNER_IMAGE_PATH="/Applications/Self Service.app/Contents/Resources/AppIcon.icns"
 
+<<<<<<< HEAD
 # Update the variable below replacing "Organization" with the actual name of your
 # organization. Example "ACME Corp Inc."
+=======
+# Update the variable below replacing "Organization" with the actual name of your organization. Example "ACME Corp Inc."
+>>>>>>> a175255fbb457e7eb0a00d1625c1fe0fb9006450
   YOUR_ORG_NAME_HERE="Organization"
 
 # Main heading that will be displayed under the image
