@@ -1,5 +1,5 @@
 #!/bin/bash
-# Version 2.0.1
+# Version 2.0.2
 
 #########################################################################################
 # License information
@@ -52,14 +52,17 @@
 # Service branding, please see the Customized Self Service Branding area below
   BANNER_IMAGE_PATH="/Applications/Self Service.app/Contents/Resources/AppIcon.icns"
 
+# Update the variable below replacing "Organization" with the actual name of your organization. Example "ACME Corp Inc."
+  YOUR_ORG_NAME_HERE="Organization"
+
 # Main heading that will be displayed under the image
 # If this variable is left blank, the generic banner will appear
-  BANNER_TITLE="Welcome to Organization"
+  BANNER_TITLE="Welcome to $YOUR_ORG_NAME_HERE"
 
 # Paragraph text that will display under the main heading. For a new line, use \n
 # If this variable is left blank, the generic message will appear. Leave single
 # quotes below as double quotes will break the new lines.
-  MAIN_TEXT='Thanks for choosing a Mac at Organization! We want you to have a few applications and settings configured before you get started with your new Mac. This process should take 10 to 20 minutes to complete. \n \n If you need additional software or help, please visit the Self Service app in your Applications folder or on your Dock.'
+  MAIN_TEXT='Thanks for choosing a Mac at '$YOUR_ORG_NAME_HERE'! We want you to have a few applications and settings configured before you get started with your new Mac. This process should take 10 to 20 minutes to complete. \n \n If you need additional software or help, please visit the Self Service app in your Applications folder or on your Dock.'
 
 # Initial Start Status text that shows as things are firing up
   INITAL_START_STATUS="Initial Configuration Starting..."
@@ -108,7 +111,7 @@
 # Help Button Configuration
   # The help button was changed to a popup. Button will appear if title is populated.
     HELP_BUBBLE_TITLE="Need Help?"
-    HELP_BUBBLE_BODY="This tool at Organization is designed to help with new employee onboarding. If you have issues, please give us a call at 123-456-7890"
+    HELP_BUBBLE_BODY="This tool at $YOUR_ORG_NAME_HERE is designed to help with new employee onboarding. If you have issues, please give us a call at 123-456-7890"
 
 #########################################################################################
 # Error Screen Text
@@ -129,6 +132,15 @@
 
 # Error status message that is displayed under the progress bar
   ERROR_STATUS="Setup Failed"
+
+#########################################################################################
+# Trigger to be used to call the policy
+#########################################################################################
+# Policies can be called be either a custom trigger or by policy id.
+# Select either event, to call the policy by the custom trigger,
+# or id to call the policy by id.
+TRIGGER="event"
+
 
 #########################################################################################
 # Policy Variable to Modify
@@ -503,6 +515,22 @@
   CURRENT_USER=$(/usr/bin/python -c 'from SystemConfiguration import SCDynamicStoreCopyConsoleUser; import sys; username = (SCDynamicStoreCopyConsoleUser(None, None, None) or [None])[0]; username = [username,""][username in [u"loginwindow", None, u""]]; sys.stdout.write(username + "\n");')
   echo "$(date "+%a %h %d %H:%M:%S"): Current user set to $CURRENT_USER." >> "$DEP_NOTIFY_DEBUG"
 
+# Stop DEPNotify if there was already a DEPNotify window running (from a PreStage package postinstall script).
+ PREVIOUS_DEP_NOTIFY_PROCESS=$(pgrep -l "DEPNotify" | cut -d " " -f1)
+  until [ "$PREVIOUS_DEP_NOTIFY_PROCESS" = "" ]; do
+    echo "$(date "+%a %h %d %H:%M:%S"): Stopping the previously-opened instance of DEPNotify." >> "$DEP_NOTIFY_DEBUG"
+    kill $PREVIOUS_DEP_NOTIFY_PROCESS
+    PREVIOUS_DEP_NOTIFY_PROCESS=$(pgrep -l "DEPNotify" | cut -d " " -f1)
+  done
+  
+ # Stop BigHonkingText if it's running (from a PreStage package postinstall script).
+ BIG_HONKING_TEXT_PROCESS=$(pgrep -l "BigHonkingText" | cut -d " " -f1)
+  until [ "$BIG_HONKING_TEXT_PROCESS" = "" ]; do
+    echo "$(date "+%a %h %d %H:%M:%S"): Stopping the previously-opened instance of BigHonkingText." >> "$DEP_NOTIFY_DEBUG"
+    kill $BIG_HONKING_TEXT_PROCESS
+    BIG_HONKING_TEXT_PROCESS=$(pgrep -l "BigHonkingText" | cut -d " " -f1)
+  done
+ 
 # Adding Check and Warning if Testing Mode is off and BOM files exist
   if [[ ( -f "$DEP_NOTIFY_LOG" || -f "$DEP_NOTIFY_DONE" ) && "$TESTING_MODE" = false ]]; then
     echo "$(date "+%a %h %d %H:%M:%S"): TESTING_MODE set to false but config files were found in /var/tmp. Letting user know and exiting." >> "$DEP_NOTIFY_DEBUG"
@@ -762,7 +790,7 @@
     if [ "$TESTING_MODE" = true ]; then
       sleep 10
     elif [ "$TESTING_MODE" = false ]; then
-      "$JAMF_BINARY" policy -event "$(echo "$POLICY" | cut -d ',' -f2)"
+      "$JAMF_BINARY" policy "-$TRIGGER" "$(echo "$POLICY" | cut -d ',' -f2)"
     fi
   done
 
