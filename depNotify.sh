@@ -32,6 +32,7 @@
 
 # More information at: https://github.com/jamfprofessionalservices/DEP-Notify
 
+SYSTEM_VERSION_COMPAT=1
 #########################################################################################
 # API Call Variables
 #########################################################################################
@@ -574,11 +575,10 @@ fi
 # If SELF_SERVICE_CUSTOM_BRANDING is set to true. Loading the updated icon
 if [ "$SELF_SERVICE_CUSTOM_BRANDING" = true ]; then
    if [[ $(sw_vers -productVersion | awk -F '.' '{print $2}') -ge 14 ]]; then
-      /bin/launchctl asuser "$CURRENT_USER_UID" open -a "/Applications/$SELF_SERVICE_APP_NAME" --hide
+      /bin/launchctl asuser "$CURRENT_USER_UID" open -j -a "/Applications/$SELF_SERVICE_APP_NAME"
    else
-      sudo -u "$CURRENT_USER" open -a "/Applications/$SELF_SERVICE_APP_NAME" --hide
+      sudo -u "$CURRENT_USER" open -j -a "/Applications/$SELF_SERVICE_APP_NAME"
    fi
-fi
 
 # Loop waiting on the branding image to properly show in the users library
   CUSTOM_BRANDING_PNG="/Users/$CURRENT_USER/Library/Application Support/com.jamfsoftware.selfservice.mac/Documents/Images/brandingimage.png"
@@ -586,6 +586,7 @@ fi
     echo "$(date "+%a %h %d %H:%M:%S"): Waiting for branding image from Jamf Pro." >> "$DEP_NOTIFY_DEBUG"
     sleep 1
   done
+fi
 
 # Setting Banner Image for DEP Notify to Self Service Custom Branding
   BANNER_IMAGE_PATH="$CUSTOM_BRANDING_PNG"
