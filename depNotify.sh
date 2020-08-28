@@ -33,12 +33,13 @@
 # More information at: https://github.com/jamfprofessionalservices/DEP-Notify
 
 SYSTEM_VERSION_COMPAT=1
+
 #########################################################################################
 # API Call Variables
 #########################################################################################
-JPS_URL="$4"
-API_USER="$5"
-API_PASSWORD="$6"
+JPS_URL=""
+API_USER=""
+API_PASSWORD=""
 DEVICE_SERIAL_NUMBER=$(system_profiler SPHardwareDataType | grep Serial |  awk '{print $NF}')
 
 ######################################################################################
@@ -49,10 +50,10 @@ NETWORK_LINK_MAXRATE=$(/System/Library/PrivateFrameworks/Apple80211.framework/Re
 NETWORK_LINK_CURRENTRATE=$(/System/Library/PrivateFrameworks/Apple80211.framework/Resources/airport --getinfo | grep lastTxRate | awk -F ': ' '{print $2}')
 NETWORK_LINK_SCORE=$(($NETWORK_LINK_MAXRATE / $NETWORK_LINK_CURRENTRATE))
 if [[ "$NETWORK_LINK_CURRENTRATE" -ge "500" ]]; then
-  echo "Network link sufficient for full payload provisioning"
+  echo "Network link sufficient for heavy payload provisioning"
   HEAVY_PROVISIONING="true"
-elif [[ "$NETWORK_LINK_SCORE" -eq "1" ]]; then
-  echo "Network link sufficient for full payload provisioning"
+elif [[ "$NETWORK_LINK_SCORE" -le "1" ]]; then
+  echo "Network link sufficient for heavypayload provisioning"
   HEAVY_PROVISIONING="true"
 else
   echo "Network link not sufficient for full payload provisioning, falling back to minimal provisioning"
@@ -76,7 +77,7 @@ FULLSCREEN=true # Set variable to true or false
 # Banner image can be 600px wide by 100px high. Images will be scaled to fit
 # If this variable is left blank, the generic image will appear. If using custom Self
 # Service branding, please see the Customized Self Service Branding area below
-BANNER_IMAGE_PATH="/Applications/Self Service.app/Contents/Resources/AppIcon.icns"
+BANNER_IMAGE_PATH=""
 
 # Update the variable below replacing "Organization" with the actual name of your organization. Example "ACME Corp Inc."
 YOUR_ORG_NAME_HERE="Organization"
@@ -486,7 +487,7 @@ if [ "$TESTING_MODE" = true ]; then
   if [ -f "$DEP_NOTIFY_LOG" ]; then rm "$DEP_NOTIFY_LOG"; fi
   if [ -f "$DEP_NOTIFY_DONE" ]; then rm "$DEP_NOTIFY_DONE"; fi
   if [ -f "$DEP_NOTIFY_DEBUG" ]; then rm "$DEP_NOTIFY_DEBUG"; fi
-  # Setting Quit Key set to command + control + x (Testing Mode Only)
+# Setting Quit Key set to command + control + x (Testing Mode Only)
   echo "Command: QuitKey: x" >> "$DEP_NOTIFY_LOG"
 fi
 
@@ -574,11 +575,11 @@ fi
 
 # If SELF_SERVICE_CUSTOM_BRANDING is set to true. Loading the updated icon
 if [ "$SELF_SERVICE_CUSTOM_BRANDING" = true ]; then
-   if [[ $(sw_vers -productVersion | awk -F '.' '{print $2}') -ge 14 ]]; then
-      /bin/launchctl asuser "$CURRENT_USER_UID" open -j -a "/Applications/$SELF_SERVICE_APP_NAME"
-   else
-      sudo -u "$CURRENT_USER" open -j -a "/Applications/$SELF_SERVICE_APP_NAME"
-   fi
+  if [[ $(sw_vers -productVersion | awk -F '.' '{print $2}') -ge 14 ]]; then
+    /bin/launchctl asuser "$CURRENT_USER_UID" open -j -a "/Applications/$SELF_SERVICE_APP_NAME"
+  else
+    sudo -u "$CURRENT_USER" open -j -a "/Applications/$SELF_SERVICE_APP_NAME"
+  fi
 
 # Loop waiting on the branding image to properly show in the users library
   CUSTOM_BRANDING_PNG="/Users/$CURRENT_USER/Library/Application Support/com.jamfsoftware.selfservice.mac/Documents/Images/brandingimage.png"
@@ -589,13 +590,12 @@ if [ "$SELF_SERVICE_CUSTOM_BRANDING" = true ]; then
 fi
 
 # Setting Banner Image for DEP Notify to Self Service Custom Branding
-  BANNER_IMAGE_PATH="$CUSTOM_BRANDING_PNG"
+BANNER_IMAGE_PATH="$CUSTOM_BRANDING_PNG"
 
 # Closing Self Service
-  SELF_SERVICE_PID=$(pgrep -l "$(echo "$SELF_SERVICE_APP_NAME" | cut -d "." -f1)" | cut -d " " -f1)
-  echo "$(date "+%a %h %d %H:%M:%S"): Self Service custom branding icon has been loaded. Killing Self Service PID $SELF_SERVICE_PID." >> "$DEP_NOTIFY_DEBUG"
-  kill "$SELF_SERVICE_PID"
-fi
+SELF_SERVICE_PID=$(pgrep -l "$(echo "$SELF_SERVICE_APP_NAME" | cut -d "." -f1)" | cut -d " " -f1)
+echo "$(date "+%a %h %d %H:%M:%S"): Self Service custom branding icon has been loaded. Killing Self Service PID $SELF_SERVICE_PID." >> "$DEP_NOTIFY_DEBUG"
+kill "$SELF_SERVICE_PID"
 
 # Setting custom image if specified
 if [ "$BANNER_IMAGE_PATH" != "" ]; then  echo "Command: Image: $BANNER_IMAGE_PATH" >> "$DEP_NOTIFY_LOG"; fi
@@ -636,12 +636,12 @@ if [ "$EULA_ENABLED" =  true ]; then
   # If testing mode is on, this will remove EULA specific configuration files
   if [ "$TESTING_MODE" = true ] && [ -f "$DEP_NOTIFY_EULA_DONE" ]; then rm "$DEP_NOTIFY_EULA_DONE"; fi
 
-  # Writing title, subtitle, and EULA txt location to plist
+# Writing title, subtitle, and EULA txt location to plist
   defaults write "$DEP_NOTIFY_CONFIG_PLIST" EULAMainTitle "$EULA_MAIN_TITLE"
   defaults write "$DEP_NOTIFY_CONFIG_PLIST" EULASubTitle "$EULA_SUBTITLE"
   defaults write "$DEP_NOTIFY_CONFIG_PLIST" pathToEULA "$EULA_FILE_PATH"
 
-  # Setting ownership of EULA file
+# Setting ownership of EULA file
   chown "$CURRENT_USER:staff" "$EULA_FILE_PATH"
   chmod 444 "$EULA_FILE_PATH"
 fi
@@ -653,12 +653,12 @@ if [ "$REGISTRATION_ENABLED" = true ]; then
   # If testing mode is on, this will remove registration specific configuration files
   if [ "$TESTING_MODE" = true ] && [ -f "$DEP_NOTIFY_REGISTER_DONE" ]; then rm "$DEP_NOTIFY_REGISTER_DONE"; fi
 
-  # Main Window Text Configuration
+# Main Window Text Configuration
   defaults write "$DEP_NOTIFY_CONFIG_PLIST" registrationMainTitle "$REGISTRATION_TITLE"
   defaults write "$DEP_NOTIFY_CONFIG_PLIST" registrationButtonLabel "$REGISTRATION_BUTTON"
   defaults write "$DEP_NOTIFY_CONFIG_PLIST" registrationPicturePath "$BANNER_IMAGE_PATH"
 
-  # First Text Box Configuration
+# First Text Box Configuration
   if [ "$REG_TEXT_LABEL_1" != "" ]; then
     defaults write "$DEP_NOTIFY_CONFIG_PLIST" textField1Label "$REG_TEXT_LABEL_1"
     defaults write "$DEP_NOTIFY_CONFIG_PLIST" textField1Placeholder "$REG_TEXT_LABEL_1_PLACEHOLDER"
