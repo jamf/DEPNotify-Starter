@@ -1,5 +1,5 @@
-#!/bin/bash
-# Version 2.0.2
+#!/usr/bin/env bash
+# Version 2.0.3
 
 #########################################################################################
 # License information
@@ -32,6 +32,17 @@
 
 # More information at: https://github.com/jamfprofessionalservices/DEP-Notify
 
+#########################################################################################
+# Jamf Policy Variables. All variables are true/false
+#########################################################################################
+# Testing Mode $4
+# Fullscreen Mode $5
+# Caffeinate Mode $6
+# Self Custom Branding Mode $7
+# Completion Dialog Mode $8
+# EULA Mode $9
+# Registration MOde $10
+
 SYSTEM_VERSION_COMPAT=1
 
 #########################################################################################
@@ -41,6 +52,7 @@ JPS_URL=""
 API_USER=""
 API_PASSWORD=""
 DEVICE_SERIAL_NUMBER=$(system_profiler SPHardwareDataType | grep Serial |  awk '{print $NF}')
+
 
 ######################################################################################
 # Network Link Evaluation
@@ -128,7 +140,7 @@ COMPLETE_BUTTON_TEXT="Get Started!"
 # This wrapper allows variables that are created later to be used but also allow for
 # configuration of where the plist is stored
 INFO_PLIST_WRAPPER (){
-  DEP_NOTIFY_USER_INPUT_PLIST="/Users/$CURRENT_USER/Library/Preferences/menu.nomad.DEPNotifyUserInput.plist"
+  DEP_NOTIFY_USER_INPUT_PLIST="$CURRENT_USER_HOMEDIRECTORYPATH/Library/Preferences/menu.nomad.DEPNotifyUserInput.plist"
 }
 
 # Status Text Alignment
@@ -175,16 +187,7 @@ TRIGGER="event"
 # The policy array must be formatted "Progress Bar text,customTrigger". These will be
 # run in order as they appear below.
 POLICY_ARRAY=(
-  "Installing Adobe Creative Cloud,adobeCC"
-  "Installing Adobe Reader,adobeReader"
-  "Installing Chrome,chrome"
-  "Installing CrashPlan,crashplan"
-  "Installing Firefox,firefox"
-  "Installing Java,java"
-  "Installing NoMAD,nomad"
-  "Installing Office,msOffice"
-  "Installing Webex,webex"
-  "Installing Critical Updates,updateSoftware"
+  "Policy Friendly Name,jamf_event"
 )
 
 #########################################################################################
@@ -543,6 +546,14 @@ CURRENT_USER=$(/bin/ls -l /dev/console | /usr/bin/awk '{print $3}')
 CURRENT_USER_UID=$(/usr/bin/id -u "$CURRENT_USER")
 CURRENT_USER_HOMEDIRECTORYPATH="$(dscl . -read /Users/$currentUser NFSHomeDirectory | awk -F ': ' '{print $2}')"
 
+# Get the current version of macOS
+
+MACOS_MAJOR_VERSION=$(defaults read /System/Library/CoreServices/SystemVersionCompat.plist ProductVersion | awk -F '.' '{print $2}')
+
+# Enable Self Service Debugging
+
+sudo -u "$CURRENT_USER" defaults write com.jamfsoftware.selfservice debug_mode -bool true
+
 echo "$(date "+%a %h %d %H:%M:%S"): Current user set to $CURRENT_USER." >> "$DEP_NOTIFY_DEBUG"
 
 # Stop DEPNotify if there was already a DEPNotify window running (from a PreStage package postinstall script).
@@ -568,23 +579,28 @@ if [[ ( -f "$DEP_NOTIFY_LOG" || -f "$DEP_NOTIFY_DONE" ) && "$TESTING_MODE" = fal
   echo "Command: MainTitle: $ERROR_BANNER_TITLE" >> "$DEP_NOTIFY_LOG"
   echo "Command: MainText: $ERROR_MAIN_TEXT" >> "$DEP_NOTIFY_LOG"
   echo "Status: $ERROR_STATUS" >> "$DEP_NOTIFY_LOG"
-  sudo -u "$CURRENT_USER" open -a "$DEP_NOTIFY_APP" --args -path "$DEP_NOTIFY_LOG"
+  if [[ "$MACOS_MAJOR_VERSION" -ge 14 ]]; then
+  	/bin/launchctl asuser "$CURRENT_USER_UID" open -a "$DEP_NOTIFY_APP" --args -path "$DEP_NOTIFY_LOG"
+  else
+  	sudo -u "$CURRENT_USER" open -a "$DEP_NOTIFY_APP" --args -path "$DEP_NOTIFY_LOG"
   sleep 5
   exit 1
 fi
 
 # If SELF_SERVICE_CUSTOM_BRANDING is set to true. Loading the updated icon
 if [ "$SELF_SERVICE_CUSTOM_BRANDING" = true ]; then
-  if [[ $(sw_vers -productVersion | awk -F '.' '{print $2}') -ge 14 ]]; then
+  if [[ "$MACOS_MAJOR_VERSION" -ge 14 ]]; then
     /bin/launchctl asuser "$CURRENT_USER_UID" open -j -a "/Applications/$SELF_SERVICE_APP_NAME"
   else
     sudo -u "$CURRENT_USER" open -j -a "/Applications/$SELF_SERVICE_APP_NAME"
   fi
 
 # Loop waiting on the branding image to properly show in the users library
-  CUSTOM_BRANDING_PNG="/Users/$CURRENT_USER/Library/Application Support/com.jamfsoftware.selfservice.mac/Documents/Images/brandingimage.png"
-  until [ -f "$CUSTOM_BRANDING_PNG" ]; do
+  CUSTOM_BRANDING_PNG="$CURRENT_USER_HOMEDIRECTORYPATH/Library/Application Support/com.jamfsoftware.selfservice.mac/Documents/Images/brandingimage.png"
+  BRANDING_ATTEMPTS="0"
+  until [ -f "$CUSTOM_BRANDING_PNG" ] || [ "$BRANDING_ATTEMPTS" = "10" ]; do
     echo "$(date "+%a %h %d %H:%M:%S"): Waiting for branding image from Jamf Pro." >> "$DEP_NOTIFY_DEBUG"
+    ((BRANDING_ATTEMPTS++))
     sleep 1
   done
 fi
@@ -611,7 +627,7 @@ if [ "$MAIN_TEXT" != "" ]; then echo "Command: MainText: $MAIN_TEXT" >> "$DEP_NO
 INFO_PLIST_WRAPPER
 
 # The plist information below
-DEP_NOTIFY_CONFIG_PLIST="/Users/$CURRENT_USER/Library/Preferences/menu.nomad.DEPNotify.plist"
+DEP_NOTIFY_CONFIG_PLIST="$CURRENT_USER_HOMEDIRECTORYPATH/Library/Preferences/menu.nomad.DEPNotify.plist"
 
 # If testing mode is on, this will remove some old configuration files
 if [ "$TESTING_MODE" = true ] && [ -f "$DEP_NOTIFY_CONFIG_PLIST" ]; then rm "$DEP_NOTIFY_CONFIG_PLIST"; fi
