@@ -542,7 +542,7 @@ done
 # After the Apple Setup completed. Now safe to grab the current user.
 CURRENT_USER=$(/bin/ls -l /dev/console | /usr/bin/awk '{print $3}')
 CURRENT_USER_UID=$(/usr/bin/id -u "$CURRENT_USER")
-CURRENT_USER_HOMEDIRECTORYPATH="$(dscl . -read /Users/$currentUser NFSHomeDirectory | awk -F ': ' '{print $2}')"
+CURRENT_USER_HOMEDIRECTORYPATH="$(dscl . -read /Users/$CURRENT_USER NFSHomeDirectory | awk -F ': ' '{print $2}')"
 
 # Get the current version of macOS
 
