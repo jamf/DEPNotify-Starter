@@ -41,9 +41,7 @@
 # Self Custom Branding Mode $7
 # Completion Dialog Mode $8
 # EULA Mode $9
-# Registration MOde $10
-
-SYSTEM_VERSION_COMPAT=1
+# Registration Mode $10
 
 #########################################################################################
 # API Call Variables
@@ -585,6 +583,7 @@ if [[ ( -f "$DEP_NOTIFY_LOG" || -f "$DEP_NOTIFY_DONE" ) && "$TESTING_MODE" = fal
   	sudo -u "$CURRENT_USER" open -a "$DEP_NOTIFY_APP" --args -path "$DEP_NOTIFY_LOG"
   sleep 5
   exit 1
+  fi
 fi
 
 # If SELF_SERVICE_CUSTOM_BRANDING is set to true. Loading the updated icon
@@ -599,7 +598,7 @@ if [ "$SELF_SERVICE_CUSTOM_BRANDING" = true ]; then
   CUSTOM_BRANDING_PNG="$CURRENT_USER_HOMEDIRECTORYPATH/Library/Application Support/com.jamfsoftware.selfservice.mac/Documents/Images/brandingimage.png"
   BRANDING_ATTEMPTS="0"
   until [ -f "$CUSTOM_BRANDING_PNG" ] || [ "$BRANDING_ATTEMPTS" = "10" ]; do
-    echo "$(date "+%a %h %d %H:%M:%S"): Waiting for branding image from Jamf Pro." >> "$DEP_NOTIFY_DEBUG"
+    echo "$(date "+%a %h %d %H:%M:%S"): Waiting for branding image from Jamf Pro, will move on after 10 failed attempts..." >> "$DEP_NOTIFY_DEBUG"
     ((BRANDING_ATTEMPTS++))
     sleep 1
   done
@@ -761,13 +760,13 @@ chmod 600 "$DEP_NOTIFY_CONFIG_PLIST"
 
 # Opening the app after initial configuration
 if [ "$FULLSCREEN" = true ]; then
-  if [[ $(sw_vers -productVersion | awk -F '.' '{print $2}') -ge 14 ]]; then
+  if [[ $MACOS_MAJOR_VERSION -ge 14 ]]; then
     /bin/launchctl asuser "$CURRENT_USER_UID" /usr/bin/open -a "$DEP_NOTIFY_APP" --args -path "$DEP_NOTIFY_LOG" -fullScreen
   else
     sudo -u "$CURRENT_USER" open -a "$DEP_NOTIFY_APP" --args -path "$DEP_NOTIFY_LOG" -fullScreen
   fi
 elif [ "$FULLSCREEN" = false ]; then
-  if [[ $(sw_vers -productVersion | awk -F '.' '{print $2}') -ge 14 ]]; then
+  if [[ $MACOS_MAJOR_VERSION -ge 14 ]]; then
     /bin/launchctl asuser "$CURRENT_USER_UID" /usr/bin/open -a "$DEP_NOTIFY_APP" --args -path "$DEP_NOTIFY_LOG"
   else
     sudo -u "$CURRENT_USER" open -a "$DEP_NOTIFY_APP" --args -path "$DEP_NOTIFY_LOG"
