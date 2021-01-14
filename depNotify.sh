@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
+
 # Version 2.0.3
+# Fork of https://github.com/jamfprofessionalservices/DEP-Notify
+# Prepared by John Hutchison, john.hutchison@floatingorchard.com, john@randm.ltd
 
 #########################################################################################
 # License information
@@ -53,22 +56,37 @@ DEVICE_SERIAL_NUMBER=$(system_profiler SPHardwareDataType | grep Serial |  awk '
 
 
 ######################################################################################
-# Network Link Evaluation
+# Network Link Evaluation Code Eventually Goes Here
 ######################################################################################
 
-NETWORK_LINK_MAXRATE=$(/System/Library/PrivateFrameworks/Apple80211.framework/Resources/airport --getinfo | grep maxRate | awk -F ': ' '{print $2}')
-NETWORK_LINK_CURRENTRATE=$(/System/Library/PrivateFrameworks/Apple80211.framework/Resources/airport --getinfo | grep lastTxRate | awk -F ': ' '{print $2}')
-NETWORK_LINK_SCORE=$(($NETWORK_LINK_MAXRATE / $NETWORK_LINK_CURRENTRATE))
-if [[ "$NETWORK_LINK_CURRENTRATE" -ge "500" ]]; then
-  echo "Network link sufficient for heavy payload provisioning"
-  HEAVY_PROVISIONING="true"
-elif [[ "$NETWORK_LINK_SCORE" -le "1" ]]; then
-  echo "Network link sufficient for heavypayload provisioning"
-  HEAVY_PROVISIONING="true"
+if [[ ! -f /usr/bin/sysdiagnose ]]; then
+	echo "sysdiagnose is not present, skipping network analysis"
 else
-  echo "Network link not sufficient for full payload provisioning, falling back to minimal provisioning"
-  HEAVY_PROVISIONING="false"
+	sysdiagnose -v -A sysdiagnose.Enrollment -n -F -S -u -Q -b -g
+ 	## Gather Network State Details
+	WIFI_SIGNAL_STATE=$(cat /var/tmp/sysdiagnose.Enrollment/WiFi/diagnostics-configuration.txt | grep "Poor Wi-Fi Signal" | grep -c "Yes")
+	LEGACY_WIFI_STATE=$(cat /var/tmp/sysdiagnose.Enrollment/WiFi/diagnostics-configuration.txt | grep "Legacy Wi-Fi Rates (802.11b)" | grep -c "Yes")
+	IOS_HOTSPOT_STATE=$(cat /var/tmp/sysdiagnose.Enrollment/WiFi/diagnostics-configuration.txt | grep "iOS Personal Hotspot" | grep -c "Yes")
+	# Gather Network Reachability Details
+	APPLE_CURL_RESULT=$(cat /var/tmp/sysdiagnose.Enrollment/WiFi/diagnostics-connectivity.txt | grep "Curl Apple" | grep -c "No")
+	APPLE_REACHABILITY_RESULT=$(cat /var/tmp/sysdiagnose.Enrollment/WiFi/diagnostics-connectivity.txt | grep "Reach Apple" | grep -c "No")
+	DNS_RESOLUTION_RESULT=$(cat /var/tmp/sysdiagnose.Enrollment/WiFi/diagnostics-connectivity.txt | grep "Resolve DNS" | grep -c "No")
+	WAN_PING_RESULT=$(cat /var/tmp/sysdiagnose.Enrollment/WiFi/diagnostics-connectivity.txt | grep "Ping WAN" | grep -c "No")
+	LAN_PING_RESULT=$(cat /var/tmp/sysdiagnose.Enrollment/WiFi/diagnostics-connectivity.txt | grep "Ping LAN" | grep -c "No")
+	# Gather Network Congestion Details
+	CONGESTED_NETWORK_RESULT=$(cat /var/tmp/sysdiagnose.Enrollment/WiFi/diagnostics-environment.txt | grep "Congested Wi-Fi Channel" | grep -c "Yes")
+	# Echo all results
+	echo $WIFI_SIGNAL_STATE
+	echo $LEGACY_WIFI_STATE
+	echo $IOS_HOTSPOT_STATE
+	echo $APPLE_CURL_RESULT
+	echo $APPLE_REACHABILITY_RESULT
+	echo $DNS_RESOLUTION_RESULT
+	echo $WAN_PING_RESULT
+	echo $LAN_PING_RESULT
+	echo $CONGESTED_NETWORK_RESULT
 fi
+
 #########################################################################################
 # Testing Mode
 #########################################################################################
@@ -160,7 +178,7 @@ HELP_BUBBLE_BODY="This tool at $YOUR_ORG_NAME_HERE is designed to help with new 
 # or Activity Monitor to kill DEP Notify.
 
 # Main heading that will be displayed under the image
-ERROR_BANNER_TITLE="Uh oh, Something Needs Fixing!"
+ERROR_BANNER_TITLE="Problem Encountered during Provisioning"
 
 # Paragraph text that will display under the main heading. For a new line, use \n
 # If this variable is left blank, the generic message will appear. Leave single
@@ -488,7 +506,7 @@ if [ "$TESTING_MODE" = true ]; then
   if [ -f "$DEP_NOTIFY_LOG" ]; then rm "$DEP_NOTIFY_LOG"; fi
   if [ -f "$DEP_NOTIFY_DONE" ]; then rm "$DEP_NOTIFY_DONE"; fi
   if [ -f "$DEP_NOTIFY_DEBUG" ]; then rm "$DEP_NOTIFY_DEBUG"; fi
-# Setting Quit Key set to command + control + x (Testing Mode Only)
+  # Setting Quit Key set to command + control + x (Testing Mode Only)
   echo "Command: QuitKey: x" >> "$DEP_NOTIFY_LOG"
 fi
 
@@ -546,7 +564,12 @@ CURRENT_USER_HOMEDIRECTORYPATH="$(dscl . -read /Users/$CURRENT_USER NFSHomeDirec
 
 # Get the current version of macOS
 
-MACOS_MAJOR_VERSION=$(defaults read /System/Library/CoreServices/SystemVersionCompat.plist ProductVersion | awk -F '.' '{print $2}')
+if [[ -f "/System/Library/CoreServices/SystemVersionCompat.plist" ]]; then
+	echo "Using SystemVersionCompat to determine OS Version"
+	MACOS_MAJOR_VERSION=$(defaults read /System/Library/CoreServices/SystemVersionCompat.plist ProductVersion | awk -F '.' '{print $2}')
+else
+	MACOS_MAJOR_VERSION=$(sw_vers -productVersion | awk -F '.' '{print $2}')
+fi
 
 # Enable Self Service Debugging
 
@@ -578,11 +601,11 @@ if [[ ( -f "$DEP_NOTIFY_LOG" || -f "$DEP_NOTIFY_DONE" ) && "$TESTING_MODE" = fal
   echo "Command: MainText: $ERROR_MAIN_TEXT" >> "$DEP_NOTIFY_LOG"
   echo "Status: $ERROR_STATUS" >> "$DEP_NOTIFY_LOG"
   if [[ "$MACOS_MAJOR_VERSION" -ge 14 ]]; then
-  	/bin/launchctl asuser "$CURRENT_USER_UID" open -a "$DEP_NOTIFY_APP" --args -path "$DEP_NOTIFY_LOG"
+    /bin/launchctl asuser "$CURRENT_USER_UID" open -a "$DEP_NOTIFY_APP" --args -path "$DEP_NOTIFY_LOG"
   else
-  	sudo -u "$CURRENT_USER" open -a "$DEP_NOTIFY_APP" --args -path "$DEP_NOTIFY_LOG"
-  sleep 5
-  exit 1
+    sudo -u "$CURRENT_USER" open -a "$DEP_NOTIFY_APP" --args -path "$DEP_NOTIFY_LOG"
+    sleep 5
+    exit 1
   fi
 fi
 
@@ -608,7 +631,7 @@ fi
 BANNER_IMAGE_PATH="$CUSTOM_BRANDING_PNG"
 
 # Closing Self Service
-SELF_SERVICE_PID=$(pgrep -l "$(echo "$SELF_SERVICE_APP_NAME" | cut -d "." -f1)" | cut -d " " -f1)
+SELF_SERVICE_PID=$(pgrep -l "$(echo "Self Service" | cut -d "." -f1)" | cut -d " " -f1)
 echo "$(date "+%a %h %d %H:%M:%S"): Self Service custom branding icon has been loaded. Killing Self Service PID $SELF_SERVICE_PID." >> "$DEP_NOTIFY_DEBUG"
 kill "$SELF_SERVICE_PID"
 
@@ -651,12 +674,12 @@ if [ "$EULA_ENABLED" =  true ]; then
   # If testing mode is on, this will remove EULA specific configuration files
   if [ "$TESTING_MODE" = true ] && [ -f "$DEP_NOTIFY_EULA_DONE" ]; then rm "$DEP_NOTIFY_EULA_DONE"; fi
 
-# Writing title, subtitle, and EULA txt location to plist
+  # Writing title, subtitle, and EULA txt location to plist
   defaults write "$DEP_NOTIFY_CONFIG_PLIST" EULAMainTitle "$EULA_MAIN_TITLE"
   defaults write "$DEP_NOTIFY_CONFIG_PLIST" EULASubTitle "$EULA_SUBTITLE"
   defaults write "$DEP_NOTIFY_CONFIG_PLIST" pathToEULA "$EULA_FILE_PATH"
 
-# Setting ownership of EULA file
+  # Setting ownership of EULA file
   chown "$CURRENT_USER:staff" "$EULA_FILE_PATH"
   chmod 444 "$EULA_FILE_PATH"
 fi
@@ -668,12 +691,12 @@ if [ "$REGISTRATION_ENABLED" = true ]; then
   # If testing mode is on, this will remove registration specific configuration files
   if [ "$TESTING_MODE" = true ] && [ -f "$DEP_NOTIFY_REGISTER_DONE" ]; then rm "$DEP_NOTIFY_REGISTER_DONE"; fi
 
-# Main Window Text Configuration
+  # Main Window Text Configuration
   defaults write "$DEP_NOTIFY_CONFIG_PLIST" registrationMainTitle "$REGISTRATION_TITLE"
   defaults write "$DEP_NOTIFY_CONFIG_PLIST" registrationButtonLabel "$REGISTRATION_BUTTON"
   defaults write "$DEP_NOTIFY_CONFIG_PLIST" registrationPicturePath "$BANNER_IMAGE_PATH"
 
-# First Text Box Configuration
+  # First Text Box Configuration
   if [ "$REG_TEXT_LABEL_1" != "" ]; then
     defaults write "$DEP_NOTIFY_CONFIG_PLIST" textField1Label "$REG_TEXT_LABEL_1"
     defaults write "$DEP_NOTIFY_CONFIG_PLIST" textField1Placeholder "$REG_TEXT_LABEL_1_PLACEHOLDER"
@@ -842,6 +865,27 @@ if [ "$REGISTRATION_ENABLED" = true ]; then
 fi
 
 # Loop to run policies
+
+if [[ "$WIFI_SIGNAL_STATE" -eq 1 ]] || [[ "$LEGACY_WIFI_STATE" -eq 1 ]] || [[ "$IOS_HOTSPOT_STATE" -eq 1 ]] || [[ "$CONGESTED_NETWORK_RESULT" -eq 1 ]]; then
+	for POLICY in "${POLICY_ARRAY_LIGHTWEIGHT[@]}"; do
+  		echo "Status: $(echo "$POLICY" | cut -d ',' -f1)" >> "$DEP_NOTIFY_LOG"
+  		if [ "$TESTING_MODE" = true ]; then
+    		sleep 10
+  		elif [ "$TESTING_MODE" = false ]; then
+    		"$JAMF_BINARY" policy "-$TRIGGER" "$(echo "$POLICY" | cut -d ',' -f2)"
+  		fi
+	done
+else
+	for POLICY in "${POLICY_ARRAY_NORMAL[@]}"; do
+  		echo "Status: $(echo "$POLICY" | cut -d ',' -f1)" >> "$DEP_NOTIFY_LOG"
+  		if [ "$TESTING_MODE" = true ]; then
+    		sleep 10
+  		elif [ "$TESTING_MODE" = false ]; then
+    		"$JAMF_BINARY" policy "-$TRIGGER" "$(echo "$POLICY" | cut -d ',' -f2)"
+  		fi
+	done
+fi
+
 for POLICY in "${POLICY_ARRAY[@]}"; do
   echo "Status: $(echo "$POLICY" | cut -d ',' -f1)" >> "$DEP_NOTIFY_LOG"
   if [ "$TESTING_MODE" = true ]; then
