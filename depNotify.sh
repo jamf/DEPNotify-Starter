@@ -633,7 +633,7 @@ if [ "$SELF_SERVICE_CUSTOM_BRANDING" = true ]; then
 fi
 
 # Setting Banner Image for DEP Notify to Self Service Custom Branding
-BANNER_IMAGE_PATH="$CUSTOM_BRANDING_PNG"
+CUSTOM_BRANDING_PNG="$BANNER_IMAGE_PATH"
 
 # Closing Self Service
 SELF_SERVICE_PID=$(pgrep -l "$(echo "Self Service" | cut -d "." -f1)" | cut -d " " -f1)
