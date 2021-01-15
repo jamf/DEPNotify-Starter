@@ -63,21 +63,21 @@ if [[ "$11" = "true" ]] || [[ "$PERFORM_NETWORK_LINK_EVALUATION" = "true" ]]; th
 	if [[ ! -f /usr/bin/sysdiagnose ]]; then
 		echo "sysdiagnose is not present, skipping network analysis"
 	else
-		sysdiagnose -v -A sysdiagnose.Enrollment -n -F -S -u -Q -b -g
+		sysdiagnose -v -A sysdiagnose.Enrollment.$(date "+%m.%d.%y") -n -F -S -u -Q -b -g
 		## Gather Network State Details
-		DIAGNOSTICS_CONFGIGURATION="/var/tmp/sysdiagnose.Enrollment/WiFi/diagnostics-configuration.txt"
+		DIAGNOSTICS_CONFGIGURATION="/var/tmp/sysdiagnose.Enrollment.$(date "+%m.%d.%y")/WiFi/diagnostics-configuration.txt"
 		WIFI_SIGNAL_STATE=$(cat $DIAGNOSTICS_CONFGIGURATION | grep "Poor Wi-Fi Signal" | grep -c "Yes")
 		LEGACY_WIFI_STATE=$(cat $DIAGNOSTICS_CONFGIGURATION | grep "Legacy Wi-Fi Rates (802.11b)" | grep -c "Yes")
 		IOS_HOTSPOT_STATE=$(cat $DIAGNOSTICS_CONFGIGURATION | grep "iOS Personal Hotspot" | grep -c "Yes")
 		# Gather Network Reachability Details
-		DIAGNOSTICS_CONNECTIVITY="/var/tmp/sysdiagnose.Enrollment/WiFi/diagnostics-connectivity.txt"
+		DIAGNOSTICS_CONNECTIVITY="/var/tmp/sysdiagnose.Enrollment.$(date "+%m.%d.%y")/WiFi/diagnostics-connectivity.txt"
 		APPLE_CURL_RESULT=$(cat $DIAGNOSTICS_CONNECTIVITY | grep "Curl Apple" | grep -c "No")
 		APPLE_REACHABILITY_RESULT=$(cat $DIAGNOSTICS_CONNECTIVITY | grep "Reach Apple" | grep -c "No")
 		DNS_RESOLUTION_RESULT=$(cat $DIAGNOSTICS_CONNECTIVITY | grep "Resolve DNS" | grep -c "No")
 		WAN_PING_RESULT=$(cat $DIAGNOSTICS_CONNECTIVITY | head -1 | grep "Ping WAN" | grep -c "No")
 		LAN_PING_RESULT=$(cat $DIAGNOSTICS_CONNECTIVITY | head -1 | grep "Ping LAN" | grep -c "No")
 		# Gather Network Congestion Details
-		DIAGNOSTICS_ENVIRONMENT="/var/tmp/sysdiagnose.Enrollment/WiFi/diagnostics-environment.txt"
+		DIAGNOSTICS_ENVIRONMENT="/var/tmp/sysdiagnose.Enrollment.$(date "+%m.%d.%y")/WiFi/diagnostics-environment.txt"
 		CONGESTED_NETWORK_RESULT=$(cat $DIAGNOSTICS_ENVIRONMENT | grep "Congested Wi-Fi Channel" | grep -c "Yes")
 		# Echo all results
 		echo "Wi-Fi Signal Result=$WIFI_SIGNAL_STATE"
