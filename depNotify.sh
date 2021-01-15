@@ -45,6 +45,7 @@
 # Completion Dialog Mode $8
 # EULA Mode $9
 # Registration Mode $10
+# Perform Initial Network Link Evaluation $11
 
 #########################################################################################
 # API Call Variables
@@ -54,37 +55,41 @@ API_USER=""
 API_PASSWORD=""
 DEVICE_SERIAL_NUMBER=$(system_profiler SPHardwareDataType | grep Serial |  awk '{print $NF}')
 
-
 ######################################################################################
-# Network Link Evaluation Code Eventually Goes Here
+# Network Link Evaluation
 ######################################################################################
-
-if [[ ! -f /usr/bin/sysdiagnose ]]; then
-	echo "sysdiagnose is not present, skipping network analysis"
-else
-	sysdiagnose -v -A sysdiagnose.Enrollment -n -F -S -u -Q -b -g
- 	## Gather Network State Details
-	WIFI_SIGNAL_STATE=$(cat /var/tmp/sysdiagnose.Enrollment/WiFi/diagnostics-configuration.txt | grep "Poor Wi-Fi Signal" | grep -c "Yes")
-	LEGACY_WIFI_STATE=$(cat /var/tmp/sysdiagnose.Enrollment/WiFi/diagnostics-configuration.txt | grep "Legacy Wi-Fi Rates (802.11b)" | grep -c "Yes")
-	IOS_HOTSPOT_STATE=$(cat /var/tmp/sysdiagnose.Enrollment/WiFi/diagnostics-configuration.txt | grep "iOS Personal Hotspot" | grep -c "Yes")
-	# Gather Network Reachability Details
-	APPLE_CURL_RESULT=$(cat /var/tmp/sysdiagnose.Enrollment/WiFi/diagnostics-connectivity.txt | grep "Curl Apple" | grep -c "No")
-	APPLE_REACHABILITY_RESULT=$(cat /var/tmp/sysdiagnose.Enrollment/WiFi/diagnostics-connectivity.txt | grep "Reach Apple" | grep -c "No")
-	DNS_RESOLUTION_RESULT=$(cat /var/tmp/sysdiagnose.Enrollment/WiFi/diagnostics-connectivity.txt | grep "Resolve DNS" | grep -c "No")
-	WAN_PING_RESULT=$(cat /var/tmp/sysdiagnose.Enrollment/WiFi/diagnostics-connectivity.txt | grep "Ping WAN" | grep -c "No")
-	LAN_PING_RESULT=$(cat /var/tmp/sysdiagnose.Enrollment/WiFi/diagnostics-connectivity.txt | grep "Ping LAN" | grep -c "No")
-	# Gather Network Congestion Details
-	CONGESTED_NETWORK_RESULT=$(cat /var/tmp/sysdiagnose.Enrollment/WiFi/diagnostics-environment.txt | grep "Congested Wi-Fi Channel" | grep -c "Yes")
-	# Echo all results
-	echo $WIFI_SIGNAL_STATE
-	echo $LEGACY_WIFI_STATE
-	echo $IOS_HOTSPOT_STATE
-	echo $APPLE_CURL_RESULT
-	echo $APPLE_REACHABILITY_RESULT
-	echo $DNS_RESOLUTION_RESULT
-	echo $WAN_PING_RESULT
-	echo $LAN_PING_RESULT
-	echo $CONGESTED_NETWORK_RESULT
+PERFORM_NETWORK_LINK_EVALUATION=""
+if [[ "$11" = "true" ]] || [[ "$PERFORM_NETWORK_LINK_EVALUATION" = "true" ]]; then
+	if [[ ! -f /usr/bin/sysdiagnose ]]; then
+		echo "sysdiagnose is not present, skipping network analysis"
+	else
+		sysdiagnose -v -A sysdiagnose.Enrollment -n -F -S -u -Q -b -g
+		## Gather Network State Details
+		DIAGNOSTICS_CONFGIGURATION="/var/tmp/sysdiagnose.Enrollment/WiFi/diagnostics-configuration.txt"
+		WIFI_SIGNAL_STATE=$(cat $DIAGNOSTICS_CONFGIGURATION | grep "Poor Wi-Fi Signal" | grep -c "Yes")
+		LEGACY_WIFI_STATE=$(cat $DIAGNOSTICS_CONFGIGURATION | grep "Legacy Wi-Fi Rates (802.11b)" | grep -c "Yes")
+		IOS_HOTSPOT_STATE=$(cat $DIAGNOSTICS_CONFGIGURATION | grep "iOS Personal Hotspot" | grep -c "Yes")
+		# Gather Network Reachability Details
+		DIAGNOSTICS_CONNECTIVITY="/var/tmp/sysdiagnose.Enrollment/WiFi/diagnostics-connectivity.txt"
+		APPLE_CURL_RESULT=$(cat $DIAGNOSTICS_CONNECTIVITY | grep "Curl Apple" | grep -c "No")
+		APPLE_REACHABILITY_RESULT=$(cat $DIAGNOSTICS_CONNECTIVITY | grep "Reach Apple" | grep -c "No")
+		DNS_RESOLUTION_RESULT=$(cat $DIAGNOSTICS_CONNECTIVITY | grep "Resolve DNS" | grep -c "No")
+		WAN_PING_RESULT=$(cat $DIAGNOSTICS_CONNECTIVITY | head -1 | grep "Ping WAN" | grep -c "No")
+		LAN_PING_RESULT=$(cat $DIAGNOSTICS_CONNECTIVITY | head -1 | grep "Ping LAN" | grep -c "No")
+		# Gather Network Congestion Details
+		DIAGNOSTICS_ENVIRONMENT="/var/tmp/sysdiagnose.Enrollment/WiFi/diagnostics-environment.txt"
+		CONGESTED_NETWORK_RESULT=$(cat $DIAGNOSTICS_ENVIRONMENT | grep "Congested Wi-Fi Channel" | grep -c "Yes")
+		# Echo all results
+		echo "Wi-Fi Signal Result=$WIFI_SIGNAL_STATE"
+		echo "Legacy Wi-Fi Result=$LEGACY_WIFI_STATE"
+		echo "iOS Hotspot Result=$IOS_HOTSPOT_STATE"
+		echo "captive.apple.com curl result=$APPLE_CURL_RESULT"
+		echo "apple.com reachability result=$APPLE_REACHABILITY_RESULT"
+		echo "DNS Resolution Result=$DNS_RESOLUTION_RESULT"
+		echo "WAN Ping Result=$WAN_PING_RESULT"
+		echo "LAN Ping Result=$LAN_PING_RESULT"
+		echo "Congested Network Result=$CONGESTED_NETWORK_RESULT"
+	fi
 fi
 
 #########################################################################################
@@ -865,26 +870,6 @@ if [ "$REGISTRATION_ENABLED" = true ]; then
 fi
 
 # Loop to run policies
-
-if [[ "$WIFI_SIGNAL_STATE" -eq 1 ]] || [[ "$LEGACY_WIFI_STATE" -eq 1 ]] || [[ "$IOS_HOTSPOT_STATE" -eq 1 ]] || [[ "$CONGESTED_NETWORK_RESULT" -eq 1 ]]; then
-	for POLICY in "${POLICY_ARRAY_LIGHTWEIGHT[@]}"; do
-  		echo "Status: $(echo "$POLICY" | cut -d ',' -f1)" >> "$DEP_NOTIFY_LOG"
-  		if [ "$TESTING_MODE" = true ]; then
-    		sleep 10
-  		elif [ "$TESTING_MODE" = false ]; then
-    		"$JAMF_BINARY" policy "-$TRIGGER" "$(echo "$POLICY" | cut -d ',' -f2)"
-  		fi
-	done
-else
-	for POLICY in "${POLICY_ARRAY_NORMAL[@]}"; do
-  		echo "Status: $(echo "$POLICY" | cut -d ',' -f1)" >> "$DEP_NOTIFY_LOG"
-  		if [ "$TESTING_MODE" = true ]; then
-    		sleep 10
-  		elif [ "$TESTING_MODE" = false ]; then
-    		"$JAMF_BINARY" policy "-$TRIGGER" "$(echo "$POLICY" | cut -d ',' -f2)"
-  		fi
-	done
-fi
 
 for POLICY in "${POLICY_ARRAY[@]}"; do
   echo "Status: $(echo "$POLICY" | cut -d ',' -f1)" >> "$DEP_NOTIFY_LOG"
