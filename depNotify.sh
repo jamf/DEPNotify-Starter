@@ -60,36 +60,36 @@ DEVICE_SERIAL_NUMBER=$(system_profiler SPHardwareDataType | grep Serial |  awk '
 ######################################################################################
 PERFORM_NETWORK_LINK_EVALUATION=""
 if [[ "$11" = "true" ]] || [[ "$PERFORM_NETWORK_LINK_EVALUATION" = "true" ]]; then
-	if [[ ! -f /usr/bin/sysdiagnose ]]; then
-		echo "sysdiagnose is not present, skipping network analysis"
-	else
-		sysdiagnose -v -A sysdiagnose.Enrollment.$(date "+%m.%d.%y") -n -F -S -u -Q -b -g
-		## Gather Network State Details
-		DIAGNOSTICS_CONFGIGURATION="/var/tmp/sysdiagnose.Enrollment.$(date "+%m.%d.%y")/WiFi/diagnostics-configuration.txt"
-		WIFI_SIGNAL_STATE=$(cat $DIAGNOSTICS_CONFGIGURATION | grep "Poor Wi-Fi Signal" | grep -c "Yes")
-		LEGACY_WIFI_STATE=$(cat $DIAGNOSTICS_CONFGIGURATION | grep "Legacy Wi-Fi Rates (802.11b)" | grep -c "Yes")
-		IOS_HOTSPOT_STATE=$(cat $DIAGNOSTICS_CONFGIGURATION | grep "iOS Personal Hotspot" | grep -c "Yes")
-		# Gather Network Reachability Details
-		DIAGNOSTICS_CONNECTIVITY="/var/tmp/sysdiagnose.Enrollment.$(date "+%m.%d.%y")/WiFi/diagnostics-connectivity.txt"
-		APPLE_CURL_RESULT=$(cat $DIAGNOSTICS_CONNECTIVITY | grep "Curl Apple" | grep -c "No")
-		APPLE_REACHABILITY_RESULT=$(cat $DIAGNOSTICS_CONNECTIVITY | grep "Reach Apple" | grep -c "No")
-		DNS_RESOLUTION_RESULT=$(cat $DIAGNOSTICS_CONNECTIVITY | grep "Resolve DNS" | grep -c "No")
-		WAN_PING_RESULT=$(cat $DIAGNOSTICS_CONNECTIVITY | head -1 | grep "Ping WAN" | grep -c "No")
-		LAN_PING_RESULT=$(cat $DIAGNOSTICS_CONNECTIVITY | head -1 | grep "Ping LAN" | grep -c "No")
-		# Gather Network Congestion Details
-		DIAGNOSTICS_ENVIRONMENT="/var/tmp/sysdiagnose.Enrollment.$(date "+%m.%d.%y")/WiFi/diagnostics-environment.txt"
-		CONGESTED_NETWORK_RESULT=$(cat $DIAGNOSTICS_ENVIRONMENT | grep "Congested Wi-Fi Channel" | grep -c "Yes")
-		# Echo all results
-		echo "Wi-Fi Signal Result=$WIFI_SIGNAL_STATE"
-		echo "Legacy Wi-Fi Result=$LEGACY_WIFI_STATE"
-		echo "iOS Hotspot Result=$IOS_HOTSPOT_STATE"
-		echo "captive.apple.com curl Result=$APPLE_CURL_RESULT"
-		echo "apple.com reachability Result=$APPLE_REACHABILITY_RESULT"
-		echo "DNS Resolution Result=$DNS_RESOLUTION_RESULT"
-		echo "WAN Ping Result=$WAN_PING_RESULT"
-		echo "LAN Ping Result=$LAN_PING_RESULT"
-		echo "Congested Network Result=$CONGESTED_NETWORK_RESULT"
-	fi
+  if [[ ! -f /usr/bin/sysdiagnose ]]; then
+    echo "sysdiagnose is not present, skipping network analysis"
+  else
+    sysdiagnose -v -A sysdiagnose.Enrollment.$(date "+%m.%d.%y") -n -F -S -u -Q -b -g
+    ## Gather Network State Details
+    DIAGNOSTICS_CONFGIGURATION="/var/tmp/sysdiagnose.Enrollment.$(date "+%m.%d.%y")/WiFi/diagnostics-configuration.txt"
+    WIFI_SIGNAL_STATE=$(cat $DIAGNOSTICS_CONFGIGURATION | grep "Poor Wi-Fi Signal" | grep -c "Yes")
+    LEGACY_WIFI_STATE=$(cat $DIAGNOSTICS_CONFGIGURATION | grep "Legacy Wi-Fi Rates (802.11b)" | grep -c "Yes")
+    IOS_HOTSPOT_STATE=$(cat $DIAGNOSTICS_CONFGIGURATION | grep "iOS Personal Hotspot" | grep -c "Yes")
+    # Gather Network Reachability Details
+    DIAGNOSTICS_CONNECTIVITY="/var/tmp/sysdiagnose.Enrollment.$(date "+%m.%d.%y")/WiFi/diagnostics-connectivity.txt"
+    APPLE_CURL_RESULT=$(cat $DIAGNOSTICS_CONNECTIVITY | grep "Curl Apple" | grep -c "No")
+    APPLE_REACHABILITY_RESULT=$(cat $DIAGNOSTICS_CONNECTIVITY | grep "Reach Apple" | grep -c "No")
+    DNS_RESOLUTION_RESULT=$(cat $DIAGNOSTICS_CONNECTIVITY | grep "Resolve DNS" | grep -c "No")
+    WAN_PING_RESULT=$(cat $DIAGNOSTICS_CONNECTIVITY | head -1 | grep "Ping WAN" | grep -c "No")
+    LAN_PING_RESULT=$(cat $DIAGNOSTICS_CONNECTIVITY | head -1 | grep "Ping LAN" | grep -c "No")
+    # Gather Network Congestion Details
+    DIAGNOSTICS_ENVIRONMENT="/var/tmp/sysdiagnose.Enrollment.$(date "+%m.%d.%y")/WiFi/diagnostics-environment.txt"
+    CONGESTED_NETWORK_RESULT=$(cat $DIAGNOSTICS_ENVIRONMENT | grep "Congested Wi-Fi Channel" | grep -c "Yes")
+    # Echo all results
+    echo "Wi-Fi Signal Result=$WIFI_SIGNAL_STATE"
+    echo "Legacy Wi-Fi Result=$LEGACY_WIFI_STATE"
+    echo "iOS Hotspot Result=$IOS_HOTSPOT_STATE"
+    echo "captive.apple.com curl Result=$APPLE_CURL_RESULT"
+    echo "apple.com reachability Result=$APPLE_REACHABILITY_RESULT"
+    echo "DNS Resolution Result=$DNS_RESOLUTION_RESULT"
+    echo "WAN Ping Result=$WAN_PING_RESULT"
+    echo "LAN Ping Result=$LAN_PING_RESULT"
+    echo "Congested Network Result=$CONGESTED_NETWORK_RESULT"
+  fi
 fi
 
 #########################################################################################
@@ -570,10 +570,10 @@ CURRENT_USER_HOMEDIRECTORYPATH="$(dscl . -read /Users/$CURRENT_USER NFSHomeDirec
 # Get the current version of macOS
 
 if [[ -f "/System/Library/CoreServices/SystemVersionCompat.plist" ]]; then
-	echo "Using SystemVersionCompat to determine OS Version"
-	MACOS_MAJOR_VERSION=$(defaults read /System/Library/CoreServices/SystemVersionCompat.plist ProductVersion | awk -F '.' '{print $2}')
+  echo "Using SystemVersionCompat to determine OS Version"
+  MACOS_MAJOR_VERSION=$(defaults read /System/Library/CoreServices/SystemVersionCompat.plist ProductVersion | awk -F '.' '{print $2}')
 else
-	MACOS_MAJOR_VERSION=$(sw_vers -productVersion | awk -F '.' '{print $2}')
+  MACOS_MAJOR_VERSION=$(sw_vers -productVersion | awk -F '.' '{print $2}')
 fi
 
 # Enable Self Service Debugging
