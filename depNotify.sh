@@ -58,7 +58,10 @@
 # Main heading that will be displayed under the image
 # If this variable is left blank, the generic banner will appear
   BANNER_TITLE="Welcome to $YOUR_ORG_NAME_HERE"
-
+	
+# Update the variable below replacing "email helpdesk@company.com" with the actual plaintext instructions for your organization. Example "call 555-1212" or "email helpdesk@company.com"
+  YOUR_ORG_SUPPORT="email helpdesk@company.com"
+  
 # Paragraph text that will display under the main heading. For a new line, use \n
 # If this variable is left blank, the generic message will appear. Leave single
 # quotes below as double quotes will break the new lines.
@@ -111,7 +114,7 @@
 # Help Button Configuration
   # The help button was changed to a popup. Button will appear if title is populated.
     HELP_BUBBLE_TITLE="Need Help?"
-    HELP_BUBBLE_BODY="This tool at $YOUR_ORG_NAME_HERE is designed to help with new employee onboarding. If you have issues, please give us a call at 123-456-7890"
+    HELP_BUBBLE_BODY="This tool at $YOUR_ORG_NAME_HERE is designed to help with new employee onboarding. If you have issues, please $YOUR_ORG_SUPPORT"
 
 #########################################################################################
 # Error Screen Text
@@ -128,8 +131,9 @@
 # Paragraph text that will display under the main heading. For a new line, use \n
 # If this variable is left blank, the generic message will appear. Leave single
 # quotes below as double quotes will break the new lines.
-  ERROR_MAIN_TEXT='We are sorry that you are experiencing this inconvenience with your new Mac. However, we have the nerds to get you back up and running in no time! \n \n Please contact IT right away and we will take a look at your computer ASAP. \n \n Phone: 123-456-7890'
-
+	ERROR_MAIN_TEXT='We are sorry that you are experiencing this inconvenience with your new Mac. However, we have the nerds to get you back up and running in no time! \n \n Please contact IT right away and we will take a look at your computer ASAP. \n \n'	
+	ERROR_MAIN_TEXT="$ERROR_MAIN_TEXT $YOUR_ORG_SUPPORT"	
+	  
 # Error status message that is displayed under the progress bar
   ERROR_STATUS="Setup Failed"
 
