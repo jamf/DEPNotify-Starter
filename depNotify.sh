@@ -217,8 +217,8 @@ TRIGGER="event"
   REGISTRATION_ENABLED=false # Set variable to true or false
 
   # Registration window title
-    REGISTRATION_TITLE="Register Mac at Organization"
-
+    REGISTRATION_TITLE="Register Mac at $YOUR_ORG_NAME_HERE"
+    
   # Registration status bar text
     REGISTRATION_STATUS="Waiting on completion of computer registration"
 
