@@ -1,7 +1,7 @@
 # Change Log
 
 ## [2.0.4] - 2021/02/04
-Merged requests #36 and #37 adding varables for organization and contacting support.
+Merged requests #36 and #37 adding variables for organization and contacting support.
 
 ## [2.0.1] - 2019/01/08
 Made small change to chmod and chown for the DEPNotify configuration plist. There was an issue if EULA and Registration window were not used that the plist would not have proper permissions.
