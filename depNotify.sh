@@ -53,19 +53,19 @@
   BANNER_IMAGE_PATH="/Applications/Self Service.app/Contents/Resources/AppIcon.icns"
 
 # Update the variable below replacing "Organization" with the actual name of your organization. Example "ACME Corp Inc."
-  YOUR_ORG_NAME_HERE="Organization"
+  ORG_NAME="Organization"
 
 # Main heading that will be displayed under the image
 # If this variable is left blank, the generic banner will appear
-  BANNER_TITLE="Welcome to $YOUR_ORG_NAME_HERE"
+  BANNER_TITLE="Welcome to $ORG_NAME"
 	
 # Update the variable below replacing "email helpdesk@company.com" with the actual plaintext instructions for your organization. Example "call 555-1212" or "email helpdesk@company.com"
-  YOUR_ORG_SUPPORT="email helpdesk@company.com"
+  SUPPORT_CONTACT_DETAILS="email helpdesk@company.com"
   
 # Paragraph text that will display under the main heading. For a new line, use \n
 # If this variable is left blank, the generic message will appear. Leave single
 # quotes below as double quotes will break the new lines.
-  MAIN_TEXT='Thanks for choosing a Mac at '$YOUR_ORG_NAME_HERE'! We want you to have a few applications and settings configured before you get started with your new Mac. This process should take 10 to 20 minutes to complete. \n \n If you need additional software or help, please visit the Self Service app in your Applications folder or on your Dock.'
+  MAIN_TEXT='Thanks for choosing a Mac at '$ORG_NAME'! We want you to have a few applications and settings configured before you get started with your new Mac. This process should take 10 to 20 minutes to complete. \n \n If you need additional software or help, please visit the Self Service app in your Applications folder or on your Dock.'
 
 # Initial Start Status text that shows as things are firing up
   INITAL_START_STATUS="Initial Configuration Starting..."
@@ -114,7 +114,7 @@
 # Help Button Configuration
   # The help button was changed to a popup. Button will appear if title is populated.
     HELP_BUBBLE_TITLE="Need Help?"
-    HELP_BUBBLE_BODY="This tool at $YOUR_ORG_NAME_HERE is designed to help with new employee onboarding. If you have issues, please $YOUR_ORG_SUPPORT"
+    HELP_BUBBLE_BODY="This tool at $ORG_NAME is designed to help with new employee onboarding. If you have issues, please $SUPPORT_CONTACT_DETAILS"
 
 #########################################################################################
 # Error Screen Text
@@ -132,7 +132,7 @@
 # If this variable is left blank, the generic message will appear. Leave single
 # quotes below as double quotes will break the new lines.
 	ERROR_MAIN_TEXT='We are sorry that you are experiencing this inconvenience with your new Mac. However, we have the nerds to get you back up and running in no time! \n \n Please contact IT right away and we will take a look at your computer ASAP. \n \n'	
-	ERROR_MAIN_TEXT="$ERROR_MAIN_TEXT $YOUR_ORG_SUPPORT"	
+	ERROR_MAIN_TEXT="$ERROR_MAIN_TEXT $SUPPORT_CONTACT_DETAILS"	
 	  
 # Error status message that is displayed under the progress bar
   ERROR_STATUS="Setup Failed"
@@ -221,7 +221,7 @@ TRIGGER="event"
   REGISTRATION_ENABLED=false # Set variable to true or false
 
   # Registration window title
-    REGISTRATION_TITLE="Register Mac at $YOUR_ORG_NAME_HERE"
+    REGISTRATION_TITLE="Register Mac at $ORG_NAME"
     
   # Registration status bar text
     REGISTRATION_STATUS="Waiting on completion of computer registration"
