@@ -1,5 +1,5 @@
 #!/bin/bash
-# Version 2.0.4
+# Version 2.0.5
 
 #########################################################################################
 # License information
@@ -551,11 +551,17 @@ TRIGGER="event"
   if [ "$SELF_SERVICE_CUSTOM_BRANDING" = true ]; then
     open -a "/Applications/$SELF_SERVICE_APP_NAME" --hide
 
-  # Loop waiting on the branding image to properly show in the users library
+  # Loop waiting on the branding image to properly show in the users library - wait up to 20 seconds
+  SELF_SERVICE_COUNTER=0
   CUSTOM_BRANDING_PNG="/Users/$CURRENT_USER/Library/Application Support/com.jamfsoftware.selfservice.mac/Documents/Images/brandingimage.png"
     until [ -f "$CUSTOM_BRANDING_PNG" ]; do
       echo "$(date "+%a %h %d %H:%M:%S"): Waiting for branding image from Jamf Pro." >> "$DEP_NOTIFY_DEBUG"
        sleep 1
+       (( SELF_SERVICE_COUNTER++ ))
+       if [ $SELF_SERVICE_COUNTER -gt 20 ];then
+	       CUSTOM_BRANDING_PNG="/Applications/Self Service.app/Contents/Resources/AppIcon.icns
+	       break
+	   fi
     done
 
   # Setting Banner Image for DEP Notify to Self Service Custom Branding
