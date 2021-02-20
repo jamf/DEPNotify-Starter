@@ -190,7 +190,7 @@ TRIGGER="event"
 # name with the SELF_SERVICE_APP_NAME variable below. Keep .app on the end
   SELF_SERVICE_APP_NAME="Self Service.app"
   
-# Number of seconds to wait (seconds) for the Self Service custon icon
+# Number of seconds to wait (seconds) for the Self Service custon icon.
   SELF_SERVICE_CUSTOM_WAIT=20
 
 
