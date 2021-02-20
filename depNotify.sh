@@ -155,9 +155,8 @@ TRIGGER="event"
     "Installing Adobe Creative Cloud,adobeCC"
     "Installing Adobe Reader,adobeReader"
     "Installing Chrome,chrome"
-    "Installing CrashPlan,crashplan"
     "Installing Firefox,firefox"
-    "Installing Java,java"
+    "Installing Zoom,zoom"
     "Installing NoMAD,nomad"
     "Installing Office,msOffice"
     "Installing Webex,webex"
@@ -190,6 +189,10 @@ TRIGGER="event"
 # If using a name other than Self Service with Custom branding. Change the
 # name with the SELF_SERVICE_APP_NAME variable below. Keep .app on the end
   SELF_SERVICE_APP_NAME="Self Service.app"
+  
+# Number of seconds to wait (seconds) for the Self Service custon icon
+  SELF_SERVICE_CUSTOM_WAIT=20
+
 
 #########################################################################################
 # EULA Variables to Modify
@@ -260,7 +263,7 @@ TRIGGER="event"
     # want to change what the field does. This is a function that gets called
     # when needed later on. BE VERY CAREFUL IN CHANGING THE FUNCTION!
       REG_TEXT_LABEL_1_LOGIC (){
-        REG_TEXT_LABEL_1_VALUE=$(defaults read "$DEP_NOTIFY_USER_INPUT_PLIST" "$REG_TEXT_LABEL_1")
+        REG_TEXT_LABEL_1_VALUE=$(/usr/bin/defaults read "$DEP_NOTIFY_USER_INPUT_PLIST" "$REG_TEXT_LABEL_1")
         if [ "$REG_TEXT_LABEL_1_OPTIONAL" = true ] && [ "$REG_TEXT_LABEL_1_VALUE" = "" ]; then
           echo "Status: $REG_TEXT_LABEL_1 was left empty. Skipping..." >> "$DEP_NOTIFY_LOG"
           echo "$(date "+%a %h %d %H:%M:%S"): $REG_TEXT_LABEL_1 was set to optional and was left empty. Skipping..." >> "$DEP_NOTIFY_DEBUG"
@@ -295,7 +298,7 @@ TRIGGER="event"
     # want to change what the field does. This is a function that gets called
     # when needed later on. BE VERY CAREFUL IN CHANGING THE FUNCTION!
       REG_TEXT_LABEL_2_LOGIC (){
-        REG_TEXT_LABEL_2_VALUE=$(defaults read "$DEP_NOTIFY_USER_INPUT_PLIST" "$REG_TEXT_LABEL_2")
+        REG_TEXT_LABEL_2_VALUE=$(/usr/bin/defaults read "$DEP_NOTIFY_USER_INPUT_PLIST" "$REG_TEXT_LABEL_2")
         if [ "$REG_TEXT_LABEL_2_OPTIONAL" = true ] && [ "$REG_TEXT_LABEL_2_VALUE" = "" ]; then
           echo "Status: $REG_TEXT_LABEL_2 was left empty. Skipping..." >> "$DEP_NOTIFY_LOG"
           echo "$(date "+%a %h %d %H:%M:%S"): $REG_TEXT_LABEL_2 was set to optional and was left empty. Skipping..." >> "$DEP_NOTIFY_DEBUG"
@@ -318,6 +321,7 @@ TRIGGER="event"
     # Array of options for the user to select
       REG_POPUP_LABEL_1_OPTIONS=(
         "Amsterdam"
+        "Katowice"
         "Eau Claire"
         "Minneapolis"
       )
@@ -330,7 +334,7 @@ TRIGGER="event"
     # want to change what the field does. This is a function that gets called
     # when needed later on. BE VERY CAREFUL IN CHANGING THE FUNCTION!
       REG_POPUP_LABEL_1_LOGIC (){
-        REG_POPUP_LABEL_1_VALUE=$(defaults read "$DEP_NOTIFY_USER_INPUT_PLIST" "$REG_POPUP_LABEL_1")
+        REG_POPUP_LABEL_1_VALUE=$(/usr/bin/defaults read "$DEP_NOTIFY_USER_INPUT_PLIST" "$REG_POPUP_LABEL_1")
         echo "Status: $REGISTRATION_BEGIN_WORD $REG_POPUP_LABEL_1 $REGISTRATION_MIDDLE_WORD $REG_POPUP_LABEL_1_VALUE" >> "$DEP_NOTIFY_LOG"
         if [ "$TESTING_MODE" = true ]; then
            sleep 10
@@ -359,7 +363,7 @@ TRIGGER="event"
     # want to change what the field does. This is a function that gets called
     # when needed later on. BE VERY CAREFUL IN CHANGING THE FUNCTION!
       REG_POPUP_LABEL_2_LOGIC (){
-        REG_POPUP_LABEL_2_VALUE=$(defaults read "$DEP_NOTIFY_USER_INPUT_PLIST" "$REG_POPUP_LABEL_2")
+        REG_POPUP_LABEL_2_VALUE=$(/usr/bin/defaults read "$DEP_NOTIFY_USER_INPUT_PLIST" "$REG_POPUP_LABEL_2")
         echo "Status: $REGISTRATION_BEGIN_WORD $REG_POPUP_LABEL_2 $REGISTRATION_MIDDLE_WORD $REG_POPUP_LABEL_2_VALUE" >> "$DEP_NOTIFY_LOG"
         if [ "$TESTING_MODE" = true ]; then
            sleep 10
@@ -388,7 +392,7 @@ TRIGGER="event"
     # want to change what the field does. This is a function that gets called
     # when needed later on. BE VERY CAREFUL IN CHANGING THE FUNCTION!
       REG_POPUP_LABEL_3_LOGIC (){
-        REG_POPUP_LABEL_3_VALUE=$(defaults read "$DEP_NOTIFY_USER_INPUT_PLIST" "$REG_POPUP_LABEL_3")
+        REG_POPUP_LABEL_3_VALUE=$(/usr/bin/defaults read "$DEP_NOTIFY_USER_INPUT_PLIST" "$REG_POPUP_LABEL_3")
         echo "Status: $REGISTRATION_BEGIN_WORD $REG_POPUP_LABEL_3 $REGISTRATION_MIDDLE_WORD $REG_POPUP_LABEL_3_VALUE" >> "$DEP_NOTIFY_LOG"
         if [ "$TESTING_MODE" = true ]; then
           sleep 10
@@ -417,7 +421,7 @@ TRIGGER="event"
     # want to change what the field does. This is a function that gets called
     # when needed later on. BE VERY CAREFUL IN CHANGING THE FUNCTION!
       REG_POPUP_LABEL_4_LOGIC (){
-        REG_POPUP_LABEL_4_VALUE=$(defaults read "$DEP_NOTIFY_USER_INPUT_PLIST" "$REG_POPUP_LABEL_4")
+        REG_POPUP_LABEL_4_VALUE=$(/usr/bin/defaults read "$DEP_NOTIFY_USER_INPUT_PLIST" "$REG_POPUP_LABEL_4")
         echo "Status: $REGISTRATION_BEGIN_WORD $REG_POPUP_LABEL_4 $REGISTRATION_MIDDLE_WORD $REG_POPUP_LABEL_4_VALUE" >> "$DEP_NOTIFY_LOG"
         if [ "$TESTING_MODE" = true ]; then
           sleep 10
@@ -551,24 +555,24 @@ TRIGGER="event"
   if [ "$SELF_SERVICE_CUSTOM_BRANDING" = true ]; then
     open -a "/Applications/$SELF_SERVICE_APP_NAME" --hide
 
-  # Loop waiting on the branding image to properly show in the users library - wait up to 20 seconds
-  SELF_SERVICE_COUNTER=0
-  CUSTOM_BRANDING_PNG="/Users/$CURRENT_USER/Library/Application Support/com.jamfsoftware.selfservice.mac/Documents/Images/brandingimage.png"
-    until [ -f "$CUSTOM_BRANDING_PNG" ]; do
-      echo "$(date "+%a %h %d %H:%M:%S"): Waiting for branding image from Jamf Pro." >> "$DEP_NOTIFY_DEBUG"
-       sleep 1
-       (( SELF_SERVICE_COUNTER++ ))
-       if [ $SELF_SERVICE_COUNTER -gt 20 ];then
-	       CUSTOM_BRANDING_PNG="/Applications/Self Service.app/Contents/Resources/AppIcon.icns
-	       break
-	   fi
-    done
+  # Loop waiting on the branding image to properly show in the users library
+	SELF_SERVICE_COUNTER=0
+	CUSTOM_BRANDING_PNG="/Users/$CURRENT_USER/Library/Application Support/com.jamfsoftware.selfservice.mac/Documents/Images/brandingimage.png"
+	until [ -f "$CUSTOM_BRANDING_PNG" ]; do
+		echo "$(date "+%a %h %d %H:%M:%S"): Waiting for branding image from Jamf Pro." >> "$DEP_NOTIFY_DEBUG"
+		sleep 1
+		(( SELF_SERVICE_COUNTER++ ))
+		if [ $SELF_SERVICE_COUNTER -gt $SELF_SERVICE_CUSTOM_WAIT ];then
+		   CUSTOM_BRANDING_PNG="/Applications/Self Service.app/Contents/Resources/AppIcon.icns"
+		   break
+		fi
+	done
 
   # Setting Banner Image for DEP Notify to Self Service Custom Branding
     BANNER_IMAGE_PATH="$CUSTOM_BRANDING_PNG"
 
   # Closing Self Service
-    SELF_SERVICE_PID=$(pgrep -l "$(echo "$SELF_SERVICE_APP_NAME" | cut -d "." -f1)" | cut -d " " -f1)
+    SELF_SERVICE_PID=$(pgrep -l "Self Service" | cut -d' ' -f1)
     echo "$(date "+%a %h %d %H:%M:%S"): Self Service custom branding icon has been loaded. Killing Self Service PID $SELF_SERVICE_PID." >> "$DEP_NOTIFY_DEBUG"
     kill "$SELF_SERVICE_PID"
   fi
@@ -594,15 +598,15 @@ TRIGGER="event"
     if [ "$TESTING_MODE" = true ] && [ -f "$DEP_NOTIFY_USER_INPUT_PLIST" ]; then rm "$DEP_NOTIFY_USER_INPUT_PLIST"; fi
 
   # Setting default path to the plist which stores all the user completed info
-    defaults write "$DEP_NOTIFY_CONFIG_PLIST" pathToPlistFile "$DEP_NOTIFY_USER_INPUT_PLIST"
+    /usr/bin/defaults write "$DEP_NOTIFY_CONFIG_PLIST" pathToPlistFile "$DEP_NOTIFY_USER_INPUT_PLIST"
 
   # Setting status text alignment
-    defaults write "$DEP_NOTIFY_CONFIG_PLIST" statusTextAlignment "$STATUS_TEXT_ALIGN"
+    /usr/bin/defaults write "$DEP_NOTIFY_CONFIG_PLIST" statusTextAlignment "$STATUS_TEXT_ALIGN"
 
   # Setting help button
     if [ "$HELP_BUBBLE_TITLE" != "" ]; then
-      defaults write "$DEP_NOTIFY_CONFIG_PLIST" helpBubble -array-add "$HELP_BUBBLE_TITLE"
-      defaults write "$DEP_NOTIFY_CONFIG_PLIST" helpBubble -array-add "$HELP_BUBBLE_BODY"
+      /usr/bin/defaults write "$DEP_NOTIFY_CONFIG_PLIST" helpBubble -array-add "$HELP_BUBBLE_TITLE"
+      /usr/bin/defaults write "$DEP_NOTIFY_CONFIG_PLIST" helpBubble -array-add "$HELP_BUBBLE_BODY"
     fi
 
 # EULA Configuration
@@ -613,9 +617,9 @@ TRIGGER="event"
       if [ "$TESTING_MODE" = true ] && [ -f "$DEP_NOTIFY_EULA_DONE" ]; then rm "$DEP_NOTIFY_EULA_DONE"; fi
 
     # Writing title, subtitle, and EULA txt location to plist
-      defaults write "$DEP_NOTIFY_CONFIG_PLIST" EULAMainTitle "$EULA_MAIN_TITLE"
-      defaults write "$DEP_NOTIFY_CONFIG_PLIST" EULASubTitle "$EULA_SUBTITLE"
-      defaults write "$DEP_NOTIFY_CONFIG_PLIST" pathToEULA "$EULA_FILE_PATH"
+      /usr/bin/defaults write "$DEP_NOTIFY_CONFIG_PLIST" EULAMainTitle "$EULA_MAIN_TITLE"
+      /usr/bin/defaults write "$DEP_NOTIFY_CONFIG_PLIST" EULASubTitle "$EULA_SUBTITLE"
+      /usr/bin/defaults write "$DEP_NOTIFY_CONFIG_PLIST" pathToEULA "$EULA_FILE_PATH"
 
     # Setting ownership of EULA file
       chown "$CURRENT_USER:staff" "$EULA_FILE_PATH"
@@ -630,87 +634,87 @@ TRIGGER="event"
       if [ "$TESTING_MODE" = true ] && [ -f "$DEP_NOTIFY_REGISTER_DONE" ]; then rm "$DEP_NOTIFY_REGISTER_DONE"; fi
 
     # Main Window Text Configuration
-      defaults write "$DEP_NOTIFY_CONFIG_PLIST" registrationMainTitle "$REGISTRATION_TITLE"
-      defaults write "$DEP_NOTIFY_CONFIG_PLIST" registrationButtonLabel "$REGISTRATION_BUTTON"
-      defaults write "$DEP_NOTIFY_CONFIG_PLIST" registrationPicturePath "$BANNER_IMAGE_PATH"
+      /usr/bin/defaults write "$DEP_NOTIFY_CONFIG_PLIST" registrationMainTitle "$REGISTRATION_TITLE"
+      /usr/bin/defaults write "$DEP_NOTIFY_CONFIG_PLIST" registrationButtonLabel "$REGISTRATION_BUTTON"
+      /usr/bin/defaults write "$DEP_NOTIFY_CONFIG_PLIST" registrationPicturePath "$BANNER_IMAGE_PATH"
 
     # First Text Box Configuration
       if [ "$REG_TEXT_LABEL_1" != "" ]; then
-        defaults write "$DEP_NOTIFY_CONFIG_PLIST" textField1Label "$REG_TEXT_LABEL_1"
-        defaults write "$DEP_NOTIFY_CONFIG_PLIST" textField1Placeholder "$REG_TEXT_LABEL_1_PLACEHOLDER"
-        defaults write "$DEP_NOTIFY_CONFIG_PLIST" textField1IsOptional "$REG_TEXT_LABEL_1_OPTIONAL"
+        /usr/bin/defaults write "$DEP_NOTIFY_CONFIG_PLIST" textField1Label "$REG_TEXT_LABEL_1"
+        /usr/bin/defaults write "$DEP_NOTIFY_CONFIG_PLIST" textField1Placeholder "$REG_TEXT_LABEL_1_PLACEHOLDER"
+        /usr/bin/defaults write "$DEP_NOTIFY_CONFIG_PLIST" textField1IsOptional "$REG_TEXT_LABEL_1_OPTIONAL"
         # Code for showing the help box if configured
           if [ "$REG_TEXT_LABEL_1_HELP_TITLE" != "" ]; then
-              defaults write "$DEP_NOTIFY_CONFIG_PLIST" textField1Bubble -array-add "$REG_TEXT_LABEL_1_HELP_TITLE"
-              defaults write "$DEP_NOTIFY_CONFIG_PLIST" textField1Bubble -array-add "$REG_TEXT_LABEL_1_HELP_TEXT"
+              /usr/bin/defaults write "$DEP_NOTIFY_CONFIG_PLIST" textField1Bubble -array-add "$REG_TEXT_LABEL_1_HELP_TITLE"
+              /usr/bin/defaults write "$DEP_NOTIFY_CONFIG_PLIST" textField1Bubble -array-add "$REG_TEXT_LABEL_1_HELP_TEXT"
           fi
       fi
 
     # Second Text Box Configuration
       if [ "$REG_TEXT_LABEL_2" != "" ]; then
-        defaults write "$DEP_NOTIFY_CONFIG_PLIST" textField2Label "$REG_TEXT_LABEL_2"
-        defaults write "$DEP_NOTIFY_CONFIG_PLIST" textField2Placeholder "$REG_TEXT_LABEL_2_PLACEHOLDER"
-        defaults write "$DEP_NOTIFY_CONFIG_PLIST" textField2IsOptional "$REG_TEXT_LABEL_2_OPTIONAL"
+        /usr/bin/defaults write "$DEP_NOTIFY_CONFIG_PLIST" textField2Label "$REG_TEXT_LABEL_2"
+        /usr/bin/defaults write "$DEP_NOTIFY_CONFIG_PLIST" textField2Placeholder "$REG_TEXT_LABEL_2_PLACEHOLDER"
+        /usr/bin/defaults write "$DEP_NOTIFY_CONFIG_PLIST" textField2IsOptional "$REG_TEXT_LABEL_2_OPTIONAL"
         # Code for showing the help box if configured
           if [ "$REG_TEXT_LABEL_2_HELP_TITLE" != "" ]; then
-              defaults write "$DEP_NOTIFY_CONFIG_PLIST" textField2Bubble -array-add "$REG_TEXT_LABEL_2_HELP_TITLE"
-              defaults write "$DEP_NOTIFY_CONFIG_PLIST" textField2Bubble -array-add "$REG_TEXT_LABEL_2_HELP_TEXT"
+              /usr/bin/defaults write "$DEP_NOTIFY_CONFIG_PLIST" textField2Bubble -array-add "$REG_TEXT_LABEL_2_HELP_TITLE"
+              /usr/bin/defaults write "$DEP_NOTIFY_CONFIG_PLIST" textField2Bubble -array-add "$REG_TEXT_LABEL_2_HELP_TEXT"
           fi
       fi
 
     # Popup 1
       if [ "$REG_POPUP_LABEL_1" != "" ]; then
-        defaults write "$DEP_NOTIFY_CONFIG_PLIST" popupButton1Label "$REG_POPUP_LABEL_1"
+        /usr/bin/defaults write "$DEP_NOTIFY_CONFIG_PLIST" popupButton1Label "$REG_POPUP_LABEL_1"
         # Code for showing the help box if configured
           if [ "$REG_POPUP_LABEL_1_HELP_TITLE" != "" ]; then
-            defaults write "$DEP_NOTIFY_CONFIG_PLIST" popupMenu1Bubble -array-add "$REG_POPUP_LABEL_1_HELP_TITLE"
-            defaults write "$DEP_NOTIFY_CONFIG_PLIST" popupMenu1Bubble -array-add "$REG_POPUP_LABEL_1_HELP_TEXT"
+            /usr/bin/defaults write "$DEP_NOTIFY_CONFIG_PLIST" popupMenu1Bubble -array-add "$REG_POPUP_LABEL_1_HELP_TITLE"
+            /usr/bin/defaults write "$DEP_NOTIFY_CONFIG_PLIST" popupMenu1Bubble -array-add "$REG_POPUP_LABEL_1_HELP_TEXT"
           fi
         # Code for adding the items from the array above into the plist
           for REG_POPUP_LABEL_1_OPTION in "${REG_POPUP_LABEL_1_OPTIONS[@]}"; do
-             defaults write "$DEP_NOTIFY_CONFIG_PLIST" popupButton1Content -array-add "$REG_POPUP_LABEL_1_OPTION"
+             /usr/bin/defaults write "$DEP_NOTIFY_CONFIG_PLIST" popupButton1Content -array-add "$REG_POPUP_LABEL_1_OPTION"
           done
       fi
 
     # Popup 2
       if [ "$REG_POPUP_LABEL_2" != "" ]; then
-        defaults write "$DEP_NOTIFY_CONFIG_PLIST" popupButton2Label "$REG_POPUP_LABEL_2"
+        /usr/bin/defaults write "$DEP_NOTIFY_CONFIG_PLIST" popupButton2Label "$REG_POPUP_LABEL_2"
         # Code for showing the help box if configured
           if [ "$REG_POPUP_LABEL_2_HELP_TITLE" != "" ]; then
-            defaults write "$DEP_NOTIFY_CONFIG_PLIST" popupMenu2Bubble -array-add "$REG_POPUP_LABEL_2_HELP_TITLE"
-            defaults write "$DEP_NOTIFY_CONFIG_PLIST" popupMenu2Bubble -array-add "$REG_POPUP_LABEL_2_HELP_TEXT"
+            /usr/bin/defaults write "$DEP_NOTIFY_CONFIG_PLIST" popupMenu2Bubble -array-add "$REG_POPUP_LABEL_2_HELP_TITLE"
+            /usr/bin/defaults write "$DEP_NOTIFY_CONFIG_PLIST" popupMenu2Bubble -array-add "$REG_POPUP_LABEL_2_HELP_TEXT"
           fi
         # Code for adding the items from the array above into the plist
           for REG_POPUP_LABEL_2_OPTION in "${REG_POPUP_LABEL_2_OPTIONS[@]}"; do
-             defaults write "$DEP_NOTIFY_CONFIG_PLIST" popupButton2Content -array-add "$REG_POPUP_LABEL_2_OPTION"
+             /usr/bin/defaults write "$DEP_NOTIFY_CONFIG_PLIST" popupButton2Content -array-add "$REG_POPUP_LABEL_2_OPTION"
           done
       fi
 
     # Popup 3
       if [ "$REG_POPUP_LABEL_3" != "" ]; then
-        defaults write "$DEP_NOTIFY_CONFIG_PLIST" popupButton3Label "$REG_POPUP_LABEL_3"
+        /usr/bin/defaults write "$DEP_NOTIFY_CONFIG_PLIST" popupButton3Label "$REG_POPUP_LABEL_3"
         # Code for showing the help box if configured
           if [ "$REG_POPUP_LABEL_3_HELP_TITLE" != "" ]; then
-            defaults write "$DEP_NOTIFY_CONFIG_PLIST" popupMenu3Bubble -array-add "$REG_POPUP_LABEL_3_HELP_TITLE"
-            defaults write "$DEP_NOTIFY_CONFIG_PLIST" popupMenu3Bubble -array-add "$REG_POPUP_LABEL_3_HELP_TEXT"
+            /usr/bin/defaults write "$DEP_NOTIFY_CONFIG_PLIST" popupMenu3Bubble -array-add "$REG_POPUP_LABEL_3_HELP_TITLE"
+            /usr/bin/defaults write "$DEP_NOTIFY_CONFIG_PLIST" popupMenu3Bubble -array-add "$REG_POPUP_LABEL_3_HELP_TEXT"
           fi
         # Code for adding the items from the array above into the plist
           for REG_POPUP_LABEL_3_OPTION in "${REG_POPUP_LABEL_3_OPTIONS[@]}"; do
-             defaults write "$DEP_NOTIFY_CONFIG_PLIST" popupButton3Content -array-add "$REG_POPUP_LABEL_3_OPTION"
+             /usr/bin/defaults write "$DEP_NOTIFY_CONFIG_PLIST" popupButton3Content -array-add "$REG_POPUP_LABEL_3_OPTION"
           done
       fi
 
     # Popup 4
       if [ "$REG_POPUP_LABEL_4" != "" ]; then
-        defaults write "$DEP_NOTIFY_CONFIG_PLIST" popupButton4Label "$REG_POPUP_LABEL_4"
+        /usr/bin/defaults write "$DEP_NOTIFY_CONFIG_PLIST" popupButton4Label "$REG_POPUP_LABEL_4"
         # Code for showing the help box if configured
           if [ "$REG_POPUP_LABEL_4_HELP_TITLE" != "" ]; then
-            defaults write "$DEP_NOTIFY_CONFIG_PLIST" popupMenu4Bubble -array-add "$REG_POPUP_LABEL_4_HELP_TITLE"
-            defaults write "$DEP_NOTIFY_CONFIG_PLIST" popupMenu4Bubble -array-add "$REG_POPUP_LABEL_4_HELP_TEXT"
+            /usr/bin/defaults write "$DEP_NOTIFY_CONFIG_PLIST" popupMenu4Bubble -array-add "$REG_POPUP_LABEL_4_HELP_TITLE"
+            /usr/bin/defaults write "$DEP_NOTIFY_CONFIG_PLIST" popupMenu4Bubble -array-add "$REG_POPUP_LABEL_4_HELP_TEXT"
           fi
         # Code for adding the items from the array above into the plist
           for REG_POPUP_LABEL_4_OPTION in "${REG_POPUP_LABEL_4_OPTIONS[@]}"; do
-             defaults write "$DEP_NOTIFY_CONFIG_PLIST" popupButton4Content -array-add "$REG_POPUP_LABEL_4_OPTION"
+             /usr/bin/defaults write "$DEP_NOTIFY_CONFIG_PLIST" popupButton4Content -array-add "$REG_POPUP_LABEL_4_OPTION"
           done
       fi
   fi
