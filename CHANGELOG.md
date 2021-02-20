@@ -1,5 +1,8 @@
 # Change Log
 
+## [2.0.5] - 2021/02/20
+Address issue #39. You can define the amount of time to wait for the custom branding, if the icon does not appear in the specified time it defaults to the standard Self Service icon. To-do, add ability to define a custom icon path.
+
 ## [2.0.4] - 2021/02/04
 Merged requests #36 and #37 adding variables for organization and contacting support.
 
