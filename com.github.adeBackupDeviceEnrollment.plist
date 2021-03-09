@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>AbandonProcessGroup</key>
+	<true/>
+	<key>Label</key>
+	<string>com.github.adeBackupDeviceEnrollment</string>
+	<key>LaunchOnlyOnce</key>
+	<false/>
+	<key>ProcessType</key>
+	<string>Adaptive</string>
+	<key>ProgramArguments</key>
+	<array>
+		<string>/usr/local/jamf/bin/jamf</string>
+		<string>policy</string>
+		<string>-event</string>
+		<string>adeBackupDeviceEnrollment</string>
+		<string>-verbose</string>
+	</array>
+	<key>StartInterval</key>
+	<integer>1600</integer>
+	<key>UserName</key>
+	<string>root</string>
+</dict>
+</plist>
