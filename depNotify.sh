@@ -48,22 +48,32 @@
 # Perform Initial Network Link Evaluation $11
 
 #########################################################################################
-# API Call Variables
+# API Call Variables (Optional)
 #########################################################################################
 JPS_URL=""
 API_USER=""
 API_PASSWORD=""
 DEVICE_SERIAL_NUMBER=$(system_profiler SPHardwareDataType | grep Serial |  awk '{print $NF}')
 
+# Setting lockfile so that the backup enrollment policy knows we're running and doesn't start another provisioning run
+
+if [[ ! -f /var/tmp/provisioningInProgress.lock ]]; then
+	echo "starting provisioning as no other provisioning process owns the lock"
+	shlock -f /var/tmp/provisioningInProgress.lock -p "$(echo $PPID)"
+else
+	echo "provisioning has already started and is owned by process $(cat /var/tmp/provisioningInProgress.lock)"
+	exit 0
+fi
+
 ######################################################################################
 # Network Link Evaluation
 ######################################################################################
 PERFORM_NETWORK_LINK_EVALUATION=""
-if [[ "$11" = "true" ]] || [[ "$PERFORM_NETWORK_LINK_EVALUATION" = "true" ]]; then
+if [[ "${11}" = "true" ]] || [[ "$PERFORM_NETWORK_LINK_EVALUATION" = "true" ]]; then
   if [[ ! -f /usr/bin/sysdiagnose ]]; then
     echo "sysdiagnose is not present, skipping network analysis"
   else
-    sysdiagnose -v -A sysdiagnose.Enrollment.$(date "+%m.%d.%y") -n -F -S -u -Q -b -g
+    sysdiagnose -v -A sysdiagnose.Enrollment.$(date "+%m.%d.%y") -n -F -S -u -Q -b -g -R
     ## Gather Network State Details
     DIAGNOSTICS_CONFGIGURATION="/var/tmp/sysdiagnose.Enrollment.$(date "+%m.%d.%y")/WiFi/diagnostics-configuration.txt"
     WIFI_SIGNAL_STATE=$(cat $DIAGNOSTICS_CONFGIGURATION | grep "Poor Wi-Fi Signal" | grep -c "Yes")
@@ -89,8 +99,11 @@ if [[ "$11" = "true" ]] || [[ "$PERFORM_NETWORK_LINK_EVALUATION" = "true" ]]; th
     echo "WAN Ping Result=$WAN_PING_RESULT"
     echo "LAN Ping Result=$LAN_PING_RESULT"
     echo "Congested Network Result=$CONGESTED_NETWORK_RESULT"
+    chown -R root:admin /var/tmp/sysdiagnose.Enrollment.$(date "+%m.%d.%y")
+    chmod -R 700 /var/tmp/sysdiagnose.Enrollment.$(date "+%m.%d.%y")
   fi
 fi
+
 
 #########################################################################################
 # Testing Mode
@@ -122,13 +135,13 @@ BANNER_TITLE="Welcome to $YOUR_ORG_NAME_HERE"
 # Paragraph text that will display under the main heading. For a new line, use \n
 # If this variable is left blank, the generic message will appear. Leave single
 # quotes below as double quotes will break the new lines.
-MAIN_TEXT='Thanks for choosing a Mac at '$YOUR_ORG_NAME_HERE'! We want you to have a few applications and settings configured before you get started with your new Mac. This process should take 10 to 20 minutes to complete. \n \n If you need additional software or help, please visit the Self Service app in your Applications folder or on your Dock.'
+MAIN_TEXT='Welcome to '$YOUR_ORG_NAME_HERE' We want you to have a few applications and settings configured before you get started with your new Mac. This process should take 10 to 20 minutes to complete. \n \n If you need additional software or help, please visit the Self Service app in your Applications folder or on your Dock.'
 
 # Initial Start Status text that shows as things are firing up
 INITAL_START_STATUS="Initial Configuration Starting..."
 
 # Text that will display in the progress bar
-INSTALL_COMPLETE_TEXT="Configuration Complete!"
+INSTALL_COMPLETE_TEXT="Configuration Complete"
 
 # Complete messaging to the end user can ether be a button at the bottom of the
 # app with a modification to the main window text or a dropdown alert box. Default
@@ -504,6 +517,8 @@ if [ "$8" != "" ]; then COMPLETE_METHOD_DROPDOWN_ALERT="$8"; fi
 if [ "$9" != "" ]; then EULA_ENABLED="$9"; fi
 # Registration Mode
 if [ "${10}" != "" ]; then REGISTRATION_ENABLED="${10}"; fi
+# Network Link Evaluation
+if [ "${11}" != "" ]; then PERFORM_NETWORK_LINK_EVALUATION="${11}"; fi
 
 # Standard Testing Mode Enhancements
 if [ "$TESTING_MODE" = true ]; then
@@ -636,9 +651,11 @@ fi
 CUSTOM_BRANDING_PNG="$BANNER_IMAGE_PATH"
 
 # Closing Self Service
-SELF_SERVICE_PID=$(pgrep -l "$(echo "Self Service" | cut -d "." -f1)" | cut -d " " -f1)
-echo "$(date "+%a %h %d %H:%M:%S"): Self Service custom branding icon has been loaded. Killing Self Service PID $SELF_SERVICE_PID." >> "$DEP_NOTIFY_DEBUG"
-kill "$SELF_SERVICE_PID"
+if [ "$SELF_SERVICE_CUSTOM_BRANDING" = true ]; then
+	SELF_SERVICE_PID=$(pgrep -l "$(echo "Self Service" | cut -d "." -f1)" | cut -d " " -f1)
+	echo "$(date "+%a %h %d %H:%M:%S"): Self Service custom branding icon has been loaded. Killing Self Service PID $SELF_SERVICE_PID." >> "$DEP_NOTIFY_DEBUG"
+	kill "$SELF_SERVICE_PID"
+fi
 
 # Setting custom image if specified
 if [ "$BANNER_IMAGE_PATH" != "" ]; then  echo "Command: Image: $BANNER_IMAGE_PATH" >> "$DEP_NOTIFY_LOG"; fi
