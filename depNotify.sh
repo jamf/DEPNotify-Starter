@@ -246,7 +246,7 @@ NO_SLEEP=false
 # Please note, custom branding is downloaded from Jamf Pro after Self Service has opened
 # at least one time. The script is designed to wait until the files have been downloaded.
 # This could take a few minutes depending on server and network resources.
-SELF_SERVICE_CUSTOM_BRANDING=false # Set variable to true or false
+# SELF_SERVICE_CUSTOM_BRANDING=false # Set variable to true or false
 
 # If using a name other than Self Service with Custom branding. Change the
 # name with the SELF_SERVICE_APP_NAME variable below. Keep .app on the end
@@ -527,7 +527,7 @@ if [ "$TESTING_MODE" = true ]; then
   if [ -f "$DEP_NOTIFY_LOG" ]; then rm "$DEP_NOTIFY_LOG"; fi
   if [ -f "$DEP_NOTIFY_DONE" ]; then rm "$DEP_NOTIFY_DONE"; fi
   if [ -f "$DEP_NOTIFY_DEBUG" ]; then rm "$DEP_NOTIFY_DEBUG"; fi
-  # Setting Quit Key set to command + control + x (Testing Mode Only)
+# Setting Quit Key set to command + control + x (Testing Mode Only)
   echo "Command: QuitKey: x" >> "$DEP_NOTIFY_LOG"
 fi
 
@@ -542,10 +542,6 @@ if [ "$FULLSCREEN" != true ] && [ "$FULLSCREEN" != false ]; then
 fi
 if [ "$NO_SLEEP" != true ] && [ "$NO_SLEEP" != false ]; then
   echo "$(date "+%a %h %d %H:%M:%S"): Sleep configuration not set properly. Currently set to $NO_SLEEP. Please update to true or false." >> "$DEP_NOTIFY_DEBUG"
-  exit 1
-fi
-if [ "$SELF_SERVICE_CUSTOM_BRANDING" != true ] && [ "$SELF_SERVICE_CUSTOM_BRANDING" != false ]; then
-  echo "$(date "+%a %h %d %H:%M:%S"): Self Service Custom Branding configuration not set properly. Currently set to $SELF_SERVICE_CUSTOM_BRANDING. Please update to true or false." >> "$DEP_NOTIFY_DEBUG"
   exit 1
 fi
 if [ "$COMPLETE_METHOD_DROPDOWN_ALERT" != true ] && [ "$COMPLETE_METHOD_DROPDOWN_ALERT" != false ]; then
@@ -630,20 +626,6 @@ if [[ ( -f "$DEP_NOTIFY_LOG" || -f "$DEP_NOTIFY_DONE" ) && "$TESTING_MODE" = fal
   exit 1
 fi
 
-# If SELF_SERVICE_CUSTOM_BRANDING is set to true. Loading the updated icon
-if [ "$SELF_SERVICE_CUSTOM_BRANDING" = true ]; then
-  /bin/launchctl asuser "$CURRENT_USER_UID" open -j -a "/Applications/$SELF_SERVICE_APP_NAME"
-fi
-
-# Loop waiting on the branding image to properly show in the users library
-CUSTOM_BRANDING_PNG="$CURRENT_USER_HOMEDIRECTORYPATH/Library/Application Support/com.jamfsoftware.selfservice.mac/Documents/Images/brandingimage.png"
-BRANDING_ATTEMPTS="0"
-until [ -f "$CUSTOM_BRANDING_PNG" ] || [ "$BRANDING_ATTEMPTS" = "10" ]; do
-  echo "$(date "+%a %h %d %H:%M:%S"): Waiting for branding image from Jamf Pro, will move on after 10 failed attempts..." >> "$DEP_NOTIFY_DEBUG"
-  ((BRANDING_ATTEMPTS++))
-  sleep 1
-done
-
 # Setting Banner Image for DEP Notify to Self Service Custom Branding
 CUSTOM_BRANDING_PNG="$BANNER_IMAGE_PATH"
 
@@ -660,12 +642,6 @@ else
   JAMF_HELPER_ICON="$CUSTOM_BRANDING_PNG"
 fi
 
-# Closing Self Service
-if [ "$SELF_SERVICE_CUSTOM_BRANDING" = true ]; then
-  SELF_SERVICE_PID=$(pgrep -l "$(echo "Self Service" | cut -d "." -f1)" | cut -d " " -f1)
-  echo "$(date "+%a %h %d %H:%M:%S"): Self Service custom branding icon has been loaded. Killing Self Service PID $SELF_SERVICE_PID." >> "$DEP_NOTIFY_DEBUG"
-  kill "$SELF_SERVICE_PID"
-fi
 
 # Setting custom image if specified
 if [ "$BANNER_IMAGE_PATH" != "" ]; then  echo "Command: Image: $BANNER_IMAGE_PATH" >> "$DEP_NOTIFY_LOG"; fi
@@ -706,12 +682,12 @@ if [ "$EULA_ENABLED" =  true ]; then
   # If testing mode is on, this will remove EULA specific configuration files
   if [ "$TESTING_MODE" = true ] && [ -f "$DEP_NOTIFY_EULA_DONE" ]; then rm "$DEP_NOTIFY_EULA_DONE"; fi
 
-  # Writing title, subtitle, and EULA txt location to plist
+# Writing title, subtitle, and EULA txt location to plist
   defaults write "$DEP_NOTIFY_CONFIG_PLIST" EULAMainTitle "$EULA_MAIN_TITLE"
   defaults write "$DEP_NOTIFY_CONFIG_PLIST" EULASubTitle "$EULA_SUBTITLE"
   defaults write "$DEP_NOTIFY_CONFIG_PLIST" pathToEULA "$EULA_FILE_PATH"
 
-  # Setting ownership of EULA file
+# Setting ownership of EULA file
   chown "$CURRENT_USER:staff" "$EULA_FILE_PATH"
   chmod 444 "$EULA_FILE_PATH"
 fi
@@ -723,12 +699,12 @@ if [ "$REGISTRATION_ENABLED" = true ]; then
   # If testing mode is on, this will remove registration specific configuration files
   if [ "$TESTING_MODE" = true ] && [ -f "$DEP_NOTIFY_REGISTER_DONE" ]; then rm "$DEP_NOTIFY_REGISTER_DONE"; fi
 
-  # Main Window Text Configuration
+# Main Window Text Configuration
   defaults write "$DEP_NOTIFY_CONFIG_PLIST" registrationMainTitle "$REGISTRATION_TITLE"
   defaults write "$DEP_NOTIFY_CONFIG_PLIST" registrationButtonLabel "$REGISTRATION_BUTTON"
   defaults write "$DEP_NOTIFY_CONFIG_PLIST" registrationPicturePath "$BANNER_IMAGE_PATH"
 
-  # First Text Box Configuration
+# First Text Box Configuration
   if [ "$REG_TEXT_LABEL_1" != "" ]; then
     defaults write "$DEP_NOTIFY_CONFIG_PLIST" textField1Label "$REG_TEXT_LABEL_1"
     defaults write "$DEP_NOTIFY_CONFIG_PLIST" textField1Placeholder "$REG_TEXT_LABEL_1_PLACEHOLDER"
