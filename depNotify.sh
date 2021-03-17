@@ -50,19 +50,20 @@
 #########################################################################################
 # API Call Variables (Optional)
 #########################################################################################
-JPS_URL=""
+JPS_URL=$(defaults read /Library/Preferences/com.jamfsoftware.jamf jss_url)
 API_USER=""
 API_PASSWORD=""
 DEVICE_SERIAL_NUMBER=$(system_profiler SPHardwareDataType | grep Serial |  awk '{print $NF}')
+JAMF_HELPER="/Library/Application Support/JAMF/bin/jamfHelper.app/Contents/MacOS/jamfHelper"
 
 # Setting lockfile so that the backup enrollment policy knows we're running and doesn't start another provisioning run
 
 if [[ ! -f /var/tmp/provisioningInProgress.lock ]]; then
-	echo "starting provisioning as no other provisioning process owns the lock"
-	shlock -f /var/tmp/provisioningInProgress.lock -p "$(echo $PPID)"
+  echo "starting provisioning as no other provisioning process owns the lock"
+  shlock -f /var/tmp/provisioningInProgress.lock -p "$(echo $PPID)"
 else
-	echo "provisioning has already started and is owned by process $(cat /var/tmp/provisioningInProgress.lock)"
-	exit 0
+  echo "provisioning has already started and is owned by process $(cat /var/tmp/provisioningInProgress.lock)"
+  exit 0
 fi
 
 ######################################################################################
@@ -631,27 +632,39 @@ fi
 
 # If SELF_SERVICE_CUSTOM_BRANDING is set to true. Loading the updated icon
 if [ "$SELF_SERVICE_CUSTOM_BRANDING" = true ]; then
-	/bin/launchctl asuser "$CURRENT_USER_UID" open -j -a "/Applications/$SELF_SERVICE_APP_NAME"
+  /bin/launchctl asuser "$CURRENT_USER_UID" open -j -a "/Applications/$SELF_SERVICE_APP_NAME"
 fi
 
 # Loop waiting on the branding image to properly show in the users library
-  CUSTOM_BRANDING_PNG="$CURRENT_USER_HOMEDIRECTORYPATH/Library/Application Support/com.jamfsoftware.selfservice.mac/Documents/Images/brandingimage.png"
-  BRANDING_ATTEMPTS="0"
-  until [ -f "$CUSTOM_BRANDING_PNG" ] || [ "$BRANDING_ATTEMPTS" = "10" ]; do
-    echo "$(date "+%a %h %d %H:%M:%S"): Waiting for branding image from Jamf Pro, will move on after 10 failed attempts..." >> "$DEP_NOTIFY_DEBUG"
-    ((BRANDING_ATTEMPTS++))
-    sleep 1
-  done
-fi
+CUSTOM_BRANDING_PNG="$CURRENT_USER_HOMEDIRECTORYPATH/Library/Application Support/com.jamfsoftware.selfservice.mac/Documents/Images/brandingimage.png"
+BRANDING_ATTEMPTS="0"
+until [ -f "$CUSTOM_BRANDING_PNG" ] || [ "$BRANDING_ATTEMPTS" = "10" ]; do
+  echo "$(date "+%a %h %d %H:%M:%S"): Waiting for branding image from Jamf Pro, will move on after 10 failed attempts..." >> "$DEP_NOTIFY_DEBUG"
+  ((BRANDING_ATTEMPTS++))
+  sleep 1
+done
 
 # Setting Banner Image for DEP Notify to Self Service Custom Branding
 CUSTOM_BRANDING_PNG="$BANNER_IMAGE_PATH"
 
+# Setting Banner Image for Jamf Helper notifications to match custom branding or use native icons in the absence of one
+
+if [[ -z "$CUSTOM_BRANDING_PNG" ]] || [[ ! -f "$CUSTOM_BRANDING_PNG" ]]; then
+  /bin/echo "No logo path provided or no logo exists at specified path, using standard application icon"
+  if [[ -f "/System/Library/PreferencePanes/SoftwareUpdate.prefPane/Contents/Resources/SoftwareUpdate.icns" ]]; then
+    JAMF_HELPER_ICON="/System/Library/PreferencePanes/SoftwareUpdate.prefPane/Contents/Resources/SoftwareUpdate.icns"
+  else
+    JAMF_HELPER_ICON="/Applications/App Store.app/Contents/Resources/AppIcon.icns"
+  fi
+else
+  JAMF_HELPER_ICON="$CUSTOM_BRANDING_PNG"
+fi
+
 # Closing Self Service
 if [ "$SELF_SERVICE_CUSTOM_BRANDING" = true ]; then
-	SELF_SERVICE_PID=$(pgrep -l "$(echo "Self Service" | cut -d "." -f1)" | cut -d " " -f1)
-	echo "$(date "+%a %h %d %H:%M:%S"): Self Service custom branding icon has been loaded. Killing Self Service PID $SELF_SERVICE_PID." >> "$DEP_NOTIFY_DEBUG"
-	kill "$SELF_SERVICE_PID"
+  SELF_SERVICE_PID=$(pgrep -l "$(echo "Self Service" | cut -d "." -f1)" | cut -d " " -f1)
+  echo "$(date "+%a %h %d %H:%M:%S"): Self Service custom branding icon has been loaded. Killing Self Service PID $SELF_SERVICE_PID." >> "$DEP_NOTIFY_DEBUG"
+  kill "$SELF_SERVICE_PID"
 fi
 
 # Setting custom image if specified
@@ -800,11 +813,57 @@ fi
 chown "$CURRENT_USER":staff "$DEP_NOTIFY_CONFIG_PLIST"
 chmod 600 "$DEP_NOTIFY_CONFIG_PLIST"
 
-# Opening the app after initial configuration
+# Communicate to the user any failed results from the network link evaluation and make recommendations
+
+if [[ "$CONGESTED_NETWORK_RESULT" -eq 1 ]]; then
+  echo "Network link is congested, suggest to the user they try again on the backup trigger"
+  /bin/launchctl asuser "$CURRENT_USER_UID" "$JAMF_HELPER" -windowType "utility" \
+      -icon "$JAMF_HELPER_ICON" \
+      -title "Network" \
+      -description "Your current Wi-Fi network appears to be running slowly. We'll automatically try again in about 30 minutes. In the meantime, move to another network or move as close as you can to your Wi-Fi router..." \
+      -button1 "Stop" \
+      -defaultButton 1 \
+      -startlaunchd &>/dev/null
+  exit 0
+fi
+if [[ "$WIFI_SIGNAL_STATE" -eq 1 ]]; then
+  echo "Network link is weak, suggest to the user that they move as close as possible to the Wi-Fi source"
+  /bin/launchctl asuser "$CURRENT_USER_UID" "$JAMF_HELPER" -windowType "utility" \
+      -icon "$JAMF_HELPER_ICON" \
+      -title "Network" \
+      -description "Your current Wi-Fi signal appears to be weaker than normal. Please move as close as possible to your Wi-Fi router for the duration of the upgrade" \
+      -button1 "OK" \
+      -defaultButton 1 \
+      -startlaunchd &>/dev/null
+fi
+if [[ "$IOS_HOTSPOT_STATE" -eq 1 ]]; then
+  echo "Network link is a hotspot, warning the user to try again later"
+  /bin/launchctl asuser "$CURRENT_USER_UID" "$JAMF_HELPER" -windowType "utility" \
+      -icon "$JAMF_HELPER_ICON" \
+      -title "Network" \
+      -description "OS Upgrades are not supported on personal hotspot networks. Please try again later on another Wi-Fi network" \
+      -button1 "Stop" \
+      -defaultButton 1 \
+      -startlaunchd &>/dev/null
+  exit 2
+fi
+if [[ "$APPLE_CURL_RESULT" -eq 1 ]] || [[ "$APPLE_REACHABILITY_RESULT" -eq 1 ]] || [[ "$DNS_RESOLUTION_RESULT" -eq 1 ]]; then
+  echo "Connectivity to Apple's servers and/or DNS resolution tests failed on this network, suggesting to the user they try again later on a different network"
+  /bin/launchctl asuser "$CURRENT_USER_UID" "$JAMF_HELPER" -windowType "utility" \
+      -icon "$JAMF_HELPER_ICON" \
+      -title "Network" \
+      -description "This network doesn't appear to support Apple software updates, please try another Wi-Fi network" \
+      -button1 "Stop" \
+      -defaultButton 1 \
+      -startlaunchd &>/dev/null
+  exit 2
+fi
+
+# Opening the app after initial configuration and after the network link evaluation results have been communicated
 if [ "$FULLSCREEN" = true ]; then
   /bin/launchctl asuser "$CURRENT_USER_UID" /usr/bin/open -a "$DEP_NOTIFY_APP" --args -path "$DEP_NOTIFY_LOG" -fullScreen
 elif [ "$FULLSCREEN" = false ]; then
-	/bin/launchctl asuser "$CURRENT_USER_UID" /usr/bin/open -a "$DEP_NOTIFY_APP" --args -path "$DEP_NOTIFY_LOG"
+  /bin/launchctl asuser "$CURRENT_USER_UID" /usr/bin/open -a "$DEP_NOTIFY_APP" --args -path "$DEP_NOTIFY_LOG"
 fi
 
 # Grabbing the DEP Notify Process ID for use later
@@ -915,5 +974,9 @@ else
     echo "Command: ContinueButton: $COMPLETE_BUTTON_TEXT" >> "$DEP_NOTIFY_LOG"
   fi
 fi
+
+# Removing Lock File
+
+rm /var/tmp/provisioningInProgress.lock
 
 exit 0
