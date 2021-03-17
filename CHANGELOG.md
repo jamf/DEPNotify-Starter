@@ -1,5 +1,12 @@
 # Change Log
 
+## 2.0.3] - 2021/02/17
+Added Network Link Evaluation option to analyze the networking before enrollment. Each test will return 0 for pass, 1 for fail.
+Added LaunchDaemon that can call the enrollment policy in the event that provisioning is not correctly kicked off by the enrollment complete Jamf event.
+
+## [2.0.2] - 2020/8/20
+Changed how Self Service and DEPNotify are launched from sudo open to launchctl asuser
+
 ## [2.0.1] - 2019/01/08
 Made small change to chmod and chown for the DEPNotify configuration plist. There was an issue if EULA and Registration window were not used that the plist would not have proper permissions.
 
