@@ -69,7 +69,7 @@ fi
 # Network Link Evaluation
 ######################################################################################
 PERFORM_NETWORK_LINK_EVALUATION=""
-if [[ "${11}" = "true" ]] || [[ "$PERFORM_NETWORK_LINK_EVALUATION" = "true" ]]; then
+if [[ ${11} = "true" ]] || [[ "$PERFORM_NETWORK_LINK_EVALUATION" = "true" ]]; then
   if [[ ! -f /usr/bin/sysdiagnose ]]; then
     echo "sysdiagnose is not present, skipping network analysis"
   else
@@ -582,14 +582,18 @@ CURRENT_USER=$(/bin/ls -l /dev/console | /usr/bin/awk '{print $3}')
 CURRENT_USER_UID=$(/usr/bin/id -u "$CURRENT_USER")
 CURRENT_USER_HOMEDIRECTORYPATH="$(dscl . -read /Users/$CURRENT_USER NFSHomeDirectory | awk -F ': ' '{print $2}')"
 
-# Get the current version of macOS
 
-if [[ -f "/System/Library/CoreServices/SystemVersionCompat.plist" ]]; then
-  echo "Using SystemVersionCompat to determine OS Version"
-  MACOS_MAJOR_VERSION=$(defaults read /System/Library/CoreServices/SystemVersionCompat.plist ProductVersion | awk -F '.' '{print $2}')
-else
-  MACOS_MAJOR_VERSION=$(sw_vers -productVersion | awk -F '.' '{print $2}')
-fi
+# Collect the OS version in various formats
+# macOSVersionScriptCompatible is available in Big Sur and on and shows the 10.x version of macOS
+# macOSVersionMarketingCompatible is the commerical version number of macOS (10.x, 11.x)
+# macOSVersionEpoch is the major version number and is meant to draw a line between Big Sur and all prior versions of macOS
+# macOSVersionMajor is the current dot releaes of macOS (15 in 10.15)
+
+macOSVersionScriptCompatible="$(sysctl -a | grep "kern.osproductversioncompat:" | awk -F ': ' '{print $2}')"
+macOSVersionMarketingCompatible="$(sysctl -a | grep "kern.osproductversion:" | awk -F ': ' '{print $2}')"
+macOSVersionEpoch="$(echo "$macOSVersionMarketingCompatible" | awk -F '.' '{print $1}')"
+macOSVersionMajor="$(echo "$macOSVersionMarketingCompatible" | awk -F '.' '{print $2}')"
+
 
 # Enable Self Service Debugging
 
@@ -620,22 +624,15 @@ if [[ ( -f "$DEP_NOTIFY_LOG" || -f "$DEP_NOTIFY_DONE" ) && "$TESTING_MODE" = fal
   echo "Command: MainTitle: $ERROR_BANNER_TITLE" >> "$DEP_NOTIFY_LOG"
   echo "Command: MainText: $ERROR_MAIN_TEXT" >> "$DEP_NOTIFY_LOG"
   echo "Status: $ERROR_STATUS" >> "$DEP_NOTIFY_LOG"
-  if [[ "$MACOS_MAJOR_VERSION" -ge 14 ]]; then
-    /bin/launchctl asuser "$CURRENT_USER_UID" open -a "$DEP_NOTIFY_APP" --args -path "$DEP_NOTIFY_LOG"
-  else
-    sudo -u "$CURRENT_USER" open -a "$DEP_NOTIFY_APP" --args -path "$DEP_NOTIFY_LOG"
-    sleep 5
-    exit 1
-  fi
+  /bin/launchctl asuser "$CURRENT_USER_UID" open -a "$DEP_NOTIFY_APP" --args -path "$DEP_NOTIFY_LOG"
+  sleep 5
+  exit 1
 fi
 
 # If SELF_SERVICE_CUSTOM_BRANDING is set to true. Loading the updated icon
 if [ "$SELF_SERVICE_CUSTOM_BRANDING" = true ]; then
-  if [[ "$MACOS_MAJOR_VERSION" -ge 14 ]]; then
-    /bin/launchctl asuser "$CURRENT_USER_UID" open -j -a "/Applications/$SELF_SERVICE_APP_NAME"
-  else
-    sudo -u "$CURRENT_USER" open -j -a "/Applications/$SELF_SERVICE_APP_NAME"
-  fi
+	/bin/launchctl asuser "$CURRENT_USER_UID" open -j -a "/Applications/$SELF_SERVICE_APP_NAME"
+fi
 
 # Loop waiting on the branding image to properly show in the users library
   CUSTOM_BRANDING_PNG="$CURRENT_USER_HOMEDIRECTORYPATH/Library/Application Support/com.jamfsoftware.selfservice.mac/Documents/Images/brandingimage.png"
@@ -805,17 +802,9 @@ chmod 600 "$DEP_NOTIFY_CONFIG_PLIST"
 
 # Opening the app after initial configuration
 if [ "$FULLSCREEN" = true ]; then
-  if [[ $MACOS_MAJOR_VERSION -ge 14 ]]; then
-    /bin/launchctl asuser "$CURRENT_USER_UID" /usr/bin/open -a "$DEP_NOTIFY_APP" --args -path "$DEP_NOTIFY_LOG" -fullScreen
-  else
-    sudo -u "$CURRENT_USER" open -a "$DEP_NOTIFY_APP" --args -path "$DEP_NOTIFY_LOG" -fullScreen
-  fi
+  /bin/launchctl asuser "$CURRENT_USER_UID" /usr/bin/open -a "$DEP_NOTIFY_APP" --args -path "$DEP_NOTIFY_LOG" -fullScreen
 elif [ "$FULLSCREEN" = false ]; then
-  if [[ $MACOS_MAJOR_VERSION -ge 14 ]]; then
-    /bin/launchctl asuser "$CURRENT_USER_UID" /usr/bin/open -a "$DEP_NOTIFY_APP" --args -path "$DEP_NOTIFY_LOG"
-  else
-    sudo -u "$CURRENT_USER" open -a "$DEP_NOTIFY_APP" --args -path "$DEP_NOTIFY_LOG"
-  fi
+	/bin/launchctl asuser "$CURRENT_USER_UID" /usr/bin/open -a "$DEP_NOTIFY_APP" --args -path "$DEP_NOTIFY_LOG"
 fi
 
 # Grabbing the DEP Notify Process ID for use later
