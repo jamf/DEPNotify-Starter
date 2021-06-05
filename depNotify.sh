@@ -1,5 +1,5 @@
 #!/bin/bash
-# Version 2.0.5
+# Version 2.0.6
 
 #########################################################################################
 # License information
@@ -519,9 +519,10 @@ TRIGGER="event"
     FINDER_PROCESS=$(pgrep -l "Finder")
   done
 
-# After the Apple Setup completed. Now safe to grab the current user.
+# After the Apple Setup completed. Now safe to grab the current user and user ID
   CURRENT_USER=$(/usr/bin/python -c 'from SystemConfiguration import SCDynamicStoreCopyConsoleUser; import sys; username = (SCDynamicStoreCopyConsoleUser(None, None, None) or [None])[0]; username = [username,""][username in [u"loginwindow", None, u""]]; sys.stdout.write(username + "\n");')
-  echo "$(date "+%a %h %d %H:%M:%S"): Current user set to $CURRENT_USER." >> "$DEP_NOTIFY_DEBUG"
+  CURRENT_USER_ID=$(id -u $CURRENT_USER)
+  echo "$(date "+%a %h %d %H:%M:%S"): Current user set to $CURRENT_USER (id: $CURRENT_USER_ID)." >> "$DEP_NOTIFY_DEBUG"
 
 # Stop DEPNotify if there was already a DEPNotify window running (from a PreStage package postinstall script).
  PREVIOUS_DEP_NOTIFY_PROCESS=$(pgrep -l "DEPNotify" | cut -d " " -f1)
@@ -546,7 +547,8 @@ TRIGGER="event"
     echo "Command: MainTitle: $ERROR_BANNER_TITLE" >> "$DEP_NOTIFY_LOG"
     echo "Command: MainText: $ERROR_MAIN_TEXT" >> "$DEP_NOTIFY_LOG"
     echo "Status: $ERROR_STATUS" >> "$DEP_NOTIFY_LOG"
-    sudo -u "$CURRENT_USER" open -a "$DEP_NOTIFY_APP" --args -path "$DEP_NOTIFY_LOG"
+##    sudo -u "$CURRENT_USER" open -a "$DEP_NOTIFY_APP" --args -path "$DEP_NOTIFY_LOG"
+    launchctl asuser $CURRENT_USER_ID open -a "$DEP_NOTIFY_APP" --args -path "$DEP_NOTIFY_LOG"
     sleep 5
     exit 1
   fi
@@ -558,6 +560,7 @@ TRIGGER="event"
   # Loop waiting on the branding image to properly show in the users library
 	SELF_SERVICE_COUNTER=0
 	CUSTOM_BRANDING_PNG="/Users/$CURRENT_USER/Library/Application Support/com.jamfsoftware.selfservice.mac/Documents/Images/brandingimage.png"
+	
 	until [ -f "$CUSTOM_BRANDING_PNG" ]; do
 		echo "$(date "+%a %h %d %H:%M:%S"): Waiting for branding image from Jamf Pro." >> "$DEP_NOTIFY_DEBUG"
 		sleep 1
@@ -575,6 +578,8 @@ TRIGGER="event"
     SELF_SERVICE_PID=$(pgrep -l "Self Service" | cut -d' ' -f1)
     echo "$(date "+%a %h %d %H:%M:%S"): Self Service custom branding icon has been loaded. Killing Self Service PID $SELF_SERVICE_PID." >> "$DEP_NOTIFY_DEBUG"
     kill "$SELF_SERVICE_PID"
+  elif [ -f "$BANNER_IMAGE_PATH" ];then
+    BANNER_IMAGE_PATH="/Applications/Self Service.app/Contents/Resources/AppIcon.icns"
   fi
 
 # Setting custom image if specified
@@ -725,9 +730,11 @@ TRIGGER="event"
 
 # Opening the app after initial configuration
   if [ "$FULLSCREEN" = true ]; then
-    sudo -u "$CURRENT_USER" open -a "$DEP_NOTIFY_APP" --args -path "$DEP_NOTIFY_LOG" -fullScreen
+##    sudo -u "$CURRENT_USER" open -a "$DEP_NOTIFY_APP" --args -path "$DEP_NOTIFY_LOG" -fullScreen
+    launchctl asuser $CURRENT_USER_ID open -a "$DEP_NOTIFY_APP" --args -path "$DEP_NOTIFY_LOG" -fullScreen
   elif [ "$FULLSCREEN" = false ]; then
-    sudo -u "$CURRENT_USER" open -a "$DEP_NOTIFY_APP" --args -path "$DEP_NOTIFY_LOG"
+##    sudo -u "$CURRENT_USER" open -a "$DEP_NOTIFY_APP" --args -path "$DEP_NOTIFY_LOG"
+    launchctl asuser $CURRENT_USER_ID open -a "$DEP_NOTIFY_APP" --args -path "$DEP_NOTIFY_LOG"
   fi
 
 # Grabbing the DEP Notify Process ID for use later
