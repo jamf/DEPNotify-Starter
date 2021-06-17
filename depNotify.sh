@@ -578,7 +578,7 @@ TRIGGER="event"
     SELF_SERVICE_PID=$(pgrep -l "Self Service" | cut -d' ' -f1)
     echo "$(date "+%a %h %d %H:%M:%S"): Self Service custom branding icon has been loaded. Killing Self Service PID $SELF_SERVICE_PID." >> "$DEP_NOTIFY_DEBUG"
     kill "$SELF_SERVICE_PID"
-  elif [ -f "$BANNER_IMAGE_PATH" ];then
+  elif [ ! -f "$BANNER_IMAGE_PATH" ];then
     BANNER_IMAGE_PATH="/Applications/Self Service.app/Contents/Resources/AppIcon.icns"
   fi
 
