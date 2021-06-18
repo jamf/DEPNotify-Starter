@@ -1,6 +1,8 @@
 # DEPNotify Starter for Jamf Pro
 Template bash script to start DEPNotify and run Policies during enrollment with Jamf. App installer, source code, and full product documentation can be found at: https://gitlab.com/Mactroll/DEPNotify
 
+Script configuration can also be achived using the following app: [DEPNotify Set-up Helper](https://github.com/BIG-RAT/DEPNotify-Set-up-Helper/releases/download/current/DEPNotify.Set-up.Helper.zip)
+
 ![](example-img/fullscreen_setup.png)
 
 ## General Information
