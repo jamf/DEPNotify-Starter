@@ -54,7 +54,6 @@ JPS_URL=$(defaults read /Library/Preferences/com.jamfsoftware.jamf jss_url)
 API_USER=""
 API_PASSWORD=""
 DEVICE_SERIAL_NUMBER=$(system_profiler SPHardwareDataType | grep Serial |  awk '{print $NF}')
-JAMF_HELPER="/Library/Application Support/JAMF/bin/jamfHelper.app/Contents/MacOS/jamfHelper"
 
 # Setting lockfile so that the backup enrollment policy knows we're running and doesn't start another provisioning run
 
@@ -69,8 +68,8 @@ fi
 ######################################################################################
 # Network Link Evaluation
 ######################################################################################
-PERFORM_NETWORK_LINK_EVALUATION=""
-if [[ ${11} = "true" ]] || [[ "$PERFORM_NETWORK_LINK_EVALUATION" = "true" ]]; then
+PERFORM_NETWORK_LINK_EVALUATION=${11}
+if [[ "$PERFORM_NETWORK_LINK_EVALUATION" = "true" ]]; then
   if [[ ! -f /usr/bin/sysdiagnose ]]; then
     echo "sysdiagnose is not present, skipping network analysis"
   else
@@ -236,21 +235,6 @@ POLICY_ARRAY=(
 # allowed to sleep again once the DEPNotify app is quit as caffeinate is looking
 # at DEPNotify's process ID.
 NO_SLEEP=false
-
-#########################################################################################
-# Customized Self Service Branding
-#########################################################################################
-# Flag for using the custom branding icon from Self Service and Jamf Pro
-# This will override the banner image specified above. If you have changed the
-# name of Self Service, make sure to modify the Self Service name below.
-# Please note, custom branding is downloaded from Jamf Pro after Self Service has opened
-# at least one time. The script is designed to wait until the files have been downloaded.
-# This could take a few minutes depending on server and network resources.
-# SELF_SERVICE_CUSTOM_BRANDING=false # Set variable to true or false
-
-# If using a name other than Self Service with Custom branding. Change the
-# name with the SELF_SERVICE_APP_NAME variable below. Keep .app on the end
-SELF_SERVICE_APP_NAME="Self Service.app"
 
 #########################################################################################
 # EULA Variables to Modify
@@ -495,6 +479,7 @@ REG_POPUP_LABEL_4_LOGIC (){
 
 # Variables for File Paths
 JAMF_BINARY="/usr/local/bin/jamf"
+JAMF_HELPER="/Library/Application Support/JAMF/bin/jamfHelper.app/Contents/MacOS/jamfHelper"
 FDE_SETUP_BINARY="/usr/bin/fdesetup"
 DEP_NOTIFY_APP="/Applications/Utilities/DEPNotify.app"
 DEP_NOTIFY_LOG="/var/tmp/depnotify.log"
@@ -598,14 +583,6 @@ sudo -u "$CURRENT_USER" defaults write com.jamfsoftware.selfservice debug_mode -
 
 echo "$(date "+%a %h %d %H:%M:%S"): Current user set to $CURRENT_USER." >> "$DEP_NOTIFY_DEBUG"
 
-# Stop DEPNotify if there was already a DEPNotify window running (from a PreStage package postinstall script).
-PREVIOUS_DEP_NOTIFY_PROCESS=$(pgrep -l "DEPNotify" | cut -d " " -f1)
-until [ "$PREVIOUS_DEP_NOTIFY_PROCESS" = "" ]; do
-  echo "$(date "+%a %h %d %H:%M:%S"): Stopping the previously-opened instance of DEPNotify." >> "$DEP_NOTIFY_DEBUG"
-  kill $PREVIOUS_DEP_NOTIFY_PROCESS
-  PREVIOUS_DEP_NOTIFY_PROCESS=$(pgrep -l "DEPNotify" | cut -d " " -f1)
-done
-
 # Stop BigHonkingText if it's running (from a PreStage package postinstall script).
 BIG_HONKING_TEXT_PROCESS=$(pgrep -l "BigHonkingText" | cut -d " " -f1)
 until [ "$BIG_HONKING_TEXT_PROCESS" = "" ]; do
@@ -641,7 +618,6 @@ if [[ -z "$CUSTOM_BRANDING_PNG" ]] || [[ ! -f "$CUSTOM_BRANDING_PNG" ]]; then
 else
   JAMF_HELPER_ICON="$CUSTOM_BRANDING_PNG"
 fi
-
 
 # Setting custom image if specified
 if [ "$BANNER_IMAGE_PATH" != "" ]; then  echo "Command: Image: $BANNER_IMAGE_PATH" >> "$DEP_NOTIFY_LOG"; fi
