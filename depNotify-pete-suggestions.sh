@@ -1,6 +1,43 @@
 #!/bin/bash
 # Version 2.0.7
 
+#####
+#
+#
+# Thank you jamf for this excellent resource. It's so easy to set for clients. 
+# i'd like to add some logic from my old script, that is common in most DepNotify use cases. 
+#
+# I first started to get DepNotify with 
+#
+# https://github.com/jmahlman/DEPNotify-automated
+#
+# His script includes a lot of logic most mac admins would love for Zero Touch Deployments 
+# including: 
+# wait for the dock to the start the script with something like this
+
+dockStatus=$(pgrep -x Dock)
+while [[ "$dockStatus" == "" ]]; do
+	sleep 5
+	dockStatus=$(pgrep -x Dock)
+done
+
+# then installing a launch daemon for depnotify, and skipping if the Mac is already in Jamf
+#
+# It worked great, would love that logic in this! Handy when re-imaging test devices 
+#
+# and finally, his script ended by removing DepNotify, dropping a receipt and running a recon: 
+#
+# # Remove DEPNotify and the logs
+rm -Rf /Applications/Utilities/DEPNotify.app
+
+#Drop an Enrolment Complete Receipt into Shared User Folder
+touch /Users/Shared/.Enrolled
+
+jamf recon
+
+#
+# the great part about that, is you can wait to change the dock and desktop stuff until after all the apps are installed, so its a final visual cue that the mac is done. 
+#
 #########################################################################################
 # License information
 #########################################################################################
