@@ -1,5 +1,5 @@
 #!/bin/bash
-# Version 2.0.7
+# Version 2.0.8
 
 #########################################################################################
 # License information
@@ -104,7 +104,8 @@
   # This wrapper allows variables that are created later to be used but also allow for
   # configuration of where the plist is stored
     INFO_PLIST_WRAPPER (){
-      DEP_NOTIFY_USER_INPUT_PLIST="/Users/$CURRENT_USER/Library/Preferences/menu.nomad.DEPNotifyUserInput.plist"
+      USER_HOME=$(/usr/bin/dscl . -read /Users/$CURRENT_USER NFSHomeDirectory | cut -d' ' -f2)
+      DEP_NOTIFY_USER_INPUT_PLIST="$USER_HOME/Library/Preferences/menu.nomad.DEPNotifyUserInput.plist"
     }
 
 # Status Text Alignment
@@ -559,8 +560,8 @@ TRIGGER="event"
 
   # Loop waiting on the branding image to properly show in the users library
 	SELF_SERVICE_COUNTER=0
-	CUSTOM_BRANDING_PNG="/Users/$CURRENT_USER/Library/Application Support/com.jamfsoftware.selfservice.mac/Documents/Images/brandingimage.png"
-	
+	CUSTOM_BRANDING_PNG="$USER_HOME/Library/Application Support/com.jamfsoftware.selfservice.mac/Documents/Images/brandingimage.png"
+
 	until [ -f "$CUSTOM_BRANDING_PNG" ]; do
 		echo "$(date "+%a %h %d %H:%M:%S"): Waiting for branding image from Jamf Pro." >> "$DEP_NOTIFY_DEBUG"
 		sleep 1
@@ -596,7 +597,7 @@ TRIGGER="event"
     INFO_PLIST_WRAPPER
 
   # The plist information below
-    DEP_NOTIFY_CONFIG_PLIST="/Users/$CURRENT_USER/Library/Preferences/menu.nomad.DEPNotify.plist"
+    DEP_NOTIFY_CONFIG_PLIST="$USER_HOME/Library/Preferences/menu.nomad.DEPNotify.plist"
 
   # If testing mode is on, this will remove some old configuration files
     if [ "$TESTING_MODE" = true ] && [ -f "$DEP_NOTIFY_CONFIG_PLIST" ]; then rm "$DEP_NOTIFY_CONFIG_PLIST"; fi

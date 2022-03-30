@@ -10,7 +10,8 @@
 
 # Removing plists in local user folder
   CURRENT_USER=$(/usr/bin/stat -f "%Su" /dev/console)
-  rm /Users/"$CURRENT_USER"/Library/Preferences/menu.nomad.DEPNotify*
+  USER_HOME=$(dscl . -read /Users/$CURRENT_USER NFSHomeDirectory | cut -d' ' -f2)
+  rm "$USER_HOME"/Library/Preferences/menu.nomad.DEPNotify*
 
 # Restarting cfprefsd due to plist changes
   killall cfprefsd
