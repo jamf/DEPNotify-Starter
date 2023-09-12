@@ -1,5 +1,8 @@
 # Change Log
 
+## [2.0.8] - 2022/03/30
+Account for users who do not have home directories under /Users
+
 ## [2.0.5] - 2021/02/20
 Address issue #39. You can define the amount of time to wait for the custom branding, if the icon does not appear in the specified time it defaults to the standard Self Service icon. To-do, add ability to define a custom icon path.
 
