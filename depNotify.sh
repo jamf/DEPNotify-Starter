@@ -602,6 +602,12 @@ TRIGGER="event"
     if [ "$TESTING_MODE" = true ] && [ -f "$DEP_NOTIFY_CONFIG_PLIST" ]; then rm "$DEP_NOTIFY_CONFIG_PLIST"; fi
     if [ "$TESTING_MODE" = true ] && [ -f "$DEP_NOTIFY_USER_INPUT_PLIST" ]; then rm "$DEP_NOTIFY_USER_INPUT_PLIST"; fi
 
+  # If you are frequently testing changes to the enrollment flow,
+  # it may be necessary to flush the preferences out of the cache
+  # to see your changes reflected more immediately (or correctly).
+    /usr/bin/killall cfprefsd
+    sleep 1
+
   # Setting default path to the plist which stores all the user completed info
     /usr/bin/defaults write "$DEP_NOTIFY_CONFIG_PLIST" pathToPlistFile "$DEP_NOTIFY_USER_INPUT_PLIST"
 
